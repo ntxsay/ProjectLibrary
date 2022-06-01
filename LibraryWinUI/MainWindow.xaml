@@ -26,7 +26,9 @@
             </MUIXC:NavigationView.FooterMenuItems>
             <MUIXC:NavigationView.Content>
                 <Frame x:Name="MainFrameContainer" x:FieldModifier="Public">
-
+                    <Button Click="Button_Click">
+                        
+                    </Button>
                 </Frame>
             </MUIXC:NavigationView.Content>
         </MUIXC:NavigationView>

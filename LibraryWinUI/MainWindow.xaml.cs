@@ -16,6 +16,7 @@ using System.Runtime.InteropServices.WindowsRuntime;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.Storage;
+using Windows.Storage.Pickers;
 using WinRT.Interop;
 
 // To learn more about WinUI, the WinUI project structure,
@@ -55,10 +56,7 @@ namespace LibraryWinUI
                 // the title bar, such as search.
             }
 
-            StorageFolder localFolder = ApplicationData.Current.LocalFolder;
-            var result = localFolder.CreateFolderAsync("HHH").GetAwaiter().GetResult();
-            var path = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + System.IO.Path.DirectorySeparatorChar + "G2H";
-            System.IO.Directory.CreateDirectory(path);
+            
         }
 
         #region TitleBar
@@ -161,5 +159,41 @@ namespace LibraryWinUI
 
         }
         #endregion
+
+        private async void Button_Click(object sender, RoutedEventArgs e)
+        {
+            //StorageFolder localFolder = ApplicationData.Current.LocalFolder;
+            //var result = localFolder.CreateFolderAsync("HHH").GetAwaiter().GetResult();
+            //var path = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + System.IO.Path.DirectorySeparatorChar + "G2H";
+            //System.IO.Directory.CreateDirectory(path);
+
+            //FileSavePicker savePicker = new FileSavePicker();
+            FileOpenPicker openPicker = new FileOpenPicker();
+
+            // Retrieve the window handle (HWND) of the current WinUI 3 window.
+            IntPtr hWnd = WindowNative.GetWindowHandle(this);
+
+            // Initialize the folder picker with the window handle (HWND).
+            WinRT.Interop.InitializeWithWindow.Initialize(openPicker, hWnd);
+
+            openPicker.ViewMode = PickerViewMode.Thumbnail;
+            openPicker.SuggestedStartLocation = PickerLocationId.PicturesLibrary;
+            openPicker.FileTypeFilter.Add(".jpg");
+            openPicker.FileTypeFilter.Add(".jpeg");
+            openPicker.FileTypeFilter.Add(".png");
+
+            var files = await openPicker.PickMultipleFilesAsync();
+            if (files != null)
+            {
+                foreach (var file in files)
+                {
+
+                }
+            }
+            else
+            {
+                //OutputTextBlock.Text = "Operation cancelled.";
+            }
+        }
     }
 }
