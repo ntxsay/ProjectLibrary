@@ -6,7 +6,7 @@ namespace AppHelpers.Strings;
 
 public static class StringHelpersExtension
 {
-    public static bool IsStringNullOrEmptyOrWhiteSpace(this string source)
+    public static bool IsStringNullOrEmptyOrWhiteSpace(this string? source)
     {
         return StringHelpers.IsStringNullOrEmptyOrWhiteSpace(source);
     }
@@ -34,7 +34,7 @@ public partial class StringHelpers
     /// </summary>
     /// <param name="ChainedeCaractere"></param>
     /// <returns></returns>
-    public static bool IsStringNullOrEmptyOrWhiteSpace(string ChainedeCaractere) => string.IsNullOrEmpty(ChainedeCaractere) || string.IsNullOrWhiteSpace(ChainedeCaractere);
+    public static bool IsStringNullOrEmptyOrWhiteSpace(string? ChainedeCaractere) => string.IsNullOrEmpty(ChainedeCaractere) || string.IsNullOrWhiteSpace(ChainedeCaractere);
 
     public static IEnumerable<string> RemoveNullOrEmptyOrWhiteSpaceValues(IEnumerable<string> values)
     {

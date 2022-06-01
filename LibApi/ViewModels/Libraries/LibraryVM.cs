@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using AppHelpers;
+using AppHelpers.Serialization;
 using AppHelpers.Strings;
 using LibApi.Models.Local.SQLite;
 using Microsoft.EntityFrameworkCore;
@@ -13,145 +14,199 @@ namespace LibApi.ViewModels.Libraries
 		{
 		}
 
-		public override async Task<bool> CreateAsync()
-		{
+        //public override string? GetJsonDataStringAsync()
+        //{
+        //	return JsonSerialization.SerializeClassToString(this);
+        //}
+
+        #region CRUD
+        /// <summary>
+        /// Ajoute la bibliothèque dans la base de données puis crée 
+        /// </summary>
+        /// <returns></returns>
+        public override async Task<bool> CreateAsync()
+        {
             try
             {
-				if (Name.IsStringNullOrEmptyOrWhiteSpace())
+                if (Name.IsStringNullOrEmptyOrWhiteSpace())
                 {
-					throw new ArgumentNullException(nameof(Name), "Le nom de la bibliothèque ne peut pas être nulle, vide ou ne contenir que des espaces blancs.");
-				}
+                    throw new ArgumentNullException(nameof(Name), "Le nom de la bibliothèque ne peut pas être nulle, vide ou ne contenir que des espaces blancs.");
+                }
 
-				using LibrarySqLiteDbContext context = new ();
+                using LibrarySqLiteDbContext context = new();
 
-				bool isExist = await context.Tlibraries.AnyAsync(c => c.Name.ToLower() == Name.ToLower());
-				if (isExist)
+                bool isExist = await context.Tlibraries.AnyAsync(c => c.Name.ToLower() == Name.ToLower());
+                if (isExist)
                 {
-					Logs.Log(nameof(LibraryVM), nameof(CreateAsync), "Cette bibliothèque existe déjà");
-					return true;
-				}
+                    Logs.Log(nameof(LibraryVM), nameof(CreateAsync), "Cette bibliothèque existe déjà");
+                    return true;
+                }
 
-				Tlibrary tlibrary = new()
-				{
-					DateAjout = DateAjout.ToString(),
-					Guid = Guid.ToString(),
-					Name = Name,
-					Description = Description,
-				};
+                Tlibrary tlibrary = new()
+                {
+                    DateAjout = DateAjout.ToString(),
+                    Guid = Guid.ToString(),
+                    Name = Name,
+                    Description = Description,
+                };
 
-				await context.Tlibraries.AddAsync(tlibrary);
+                await context.Tlibraries.AddAsync(tlibrary);
                 await context.SaveChangesAsync();
 
-				Id = tlibrary.Id;
+                Id = tlibrary.Id;
 
-				return true;
-			}
-			catch (ArgumentNullException ex)
-            {
-				Logs.Log(nameof(LibraryVM), nameof(CreateAsync), ex);
-				return false;
-			}
-			catch (OperationCanceledException ex)
-			{
-				Logs.Log(nameof(LibraryVM), nameof(CreateAsync), ex);
-				return false;
-			}
-			catch (Exception ex)
-            {
-				Logs.Log(nameof(LibraryVM), nameof(CreateAsync), ex);
-				return false;
+                return true;
             }
-		}
+            catch (ArgumentNullException ex)
+            {
+                Logs.Log(nameof(LibraryVM), nameof(CreateAsync), ex);
+                return false;
+            }
+            catch (OperationCanceledException ex)
+            {
+                Logs.Log(nameof(LibraryVM), nameof(CreateAsync), ex);
+                return false;
+            }
+            catch (Exception ex)
+            {
+                Logs.Log(nameof(LibraryVM), nameof(CreateAsync), ex);
+                return false;
+            }
+        }
 
-		public override async Task<bool> UpdateAsync()
-		{
-			try
-			{
-				if (Name.IsStringNullOrEmptyOrWhiteSpace())
-				{
-					throw new ArgumentNullException(nameof(Name), "Le nom de la bibliothèque ne peut pas être nulle, vide ou ne contenir que des espaces blancs.");
-				}
-
-				using LibrarySqLiteDbContext context = new();
-
-				Tlibrary? tlibrary = await context.Tlibraries.SingleOrDefaultAsync(s => s.Id == Id);
-				if (tlibrary == null)
+        public override async Task<bool> UpdateAsync()
+        {
+            try
+            {
+                if (Name.IsStringNullOrEmptyOrWhiteSpace())
                 {
-					throw new ArgumentNullException(nameof(Tlibrary), $"La bibliothèque n'existe pas avec l'id \"{Id}\".");
-				}
+                    throw new ArgumentNullException(nameof(Name), "Le nom de la bibliothèque ne peut pas être nulle, vide ou ne contenir que des espaces blancs.");
+                }
 
-				bool isExist = await context.Tlibraries.AnyAsync(c => c.Id != Id &&  c.Name.ToLower() == Name.ToLower());
-				if (isExist)
-				{
-					Logs.Log(nameof(LibraryVM), nameof(UpdateAsync), "Cette bibliothèque existe déjà");
-					return false;
-				}
+                using LibrarySqLiteDbContext context = new();
 
-				DateTime dateEdition = DateTime.Now;
+                Tlibrary? tlibrary = await context.Tlibraries.SingleOrDefaultAsync(s => s.Id == Id);
+                if (tlibrary == null)
+                {
+                    throw new ArgumentNullException(nameof(Tlibrary), $"La bibliothèque n'existe pas avec l'id \"{Id}\".");
+                }
 
-				tlibrary.Name = this.Name;
-				tlibrary.Description = this.Description;
-				tlibrary.DateEdition = dateEdition.ToString();
+                bool isExist = await context.Tlibraries.AnyAsync(c => c.Id != Id && c.Name.ToLower() == Name.ToLower());
+                if (isExist)
+                {
+                    Logs.Log(nameof(LibraryVM), nameof(UpdateAsync), "Cette bibliothèque existe déjà");
+                    return false;
+                }
 
-				context.Tlibraries.Update(tlibrary);
-				_ = await context.SaveChangesAsync();
+                DateTime dateEdition = DateTime.Now;
 
-				DateEdition = dateEdition;
+                tlibrary.Name = this.Name;
+                tlibrary.Description = this.Description;
+                tlibrary.DateEdition = dateEdition.ToString();
 
-				return true;
-			}
-			catch (ArgumentNullException ex)
-			{
-				Logs.Log(nameof(LibraryVM), nameof(UpdateAsync), ex);
-				return false;
-			}
-			catch (OperationCanceledException ex)
-			{
-				Logs.Log(nameof(LibraryVM), nameof(UpdateAsync), ex);
-				return false;
-			}
-			catch (Exception ex)
-			{
-				Logs.Log(nameof(LibraryVM), nameof(UpdateAsync), ex);
-				return false;
-			}
-		}
+                context.Tlibraries.Update(tlibrary);
+                _ = await context.SaveChangesAsync();
 
-		public override async Task<bool> DeleteAsync()
-		{
-			try
-			{
-				using LibrarySqLiteDbContext context = new();
+                DateEdition = dateEdition;
 
-				Tlibrary? tlibrary = await context.Tlibraries.SingleOrDefaultAsync(s => s.Id == Id);
-				if (tlibrary == null)
-				{
-					throw new ArgumentNullException(nameof(Tlibrary), $"La bibliothèque n'existe pas avec l'id \"{Id}\".");
-				}
-				
-				context.Tlibraries.Remove(tlibrary);
-				_ = await context.SaveChangesAsync();
+                return true;
+            }
+            catch (ArgumentNullException ex)
+            {
+                Logs.Log(nameof(LibraryVM), nameof(UpdateAsync), ex);
+                return false;
+            }
+            catch (OperationCanceledException ex)
+            {
+                Logs.Log(nameof(LibraryVM), nameof(UpdateAsync), ex);
+                return false;
+            }
+            catch (Exception ex)
+            {
+                Logs.Log(nameof(LibraryVM), nameof(UpdateAsync), ex);
+                return false;
+            }
+        }
 
-				return true;
-			}
-			catch (ArgumentNullException ex)
-			{
-				Logs.Log(nameof(LibraryVM), nameof(UpdateAsync), ex);
-				return false;
-			}
-			catch (OperationCanceledException ex)
-			{
-				Logs.Log(nameof(LibraryVM), nameof(UpdateAsync), ex);
-				return false;
-			}
-			catch (Exception ex)
-			{
-				Logs.Log(nameof(LibraryVM), nameof(UpdateAsync), ex);
-				return false;
-			}
-		}
+        public override async Task<bool> DeleteAsync()
+        {
+            try
+            {
+                using LibrarySqLiteDbContext context = new();
+
+                Tlibrary? tlibrary = await context.Tlibraries.SingleOrDefaultAsync(s => s.Id == Id);
+                if (tlibrary == null)
+                {
+                    throw new ArgumentNullException(nameof(Tlibrary), $"La bibliothèque n'existe pas avec l'id \"{Id}\".");
+                }
+
+                context.Tlibraries.Remove(tlibrary);
+                _ = await context.SaveChangesAsync();
+
+                return true;
+            }
+            catch (ArgumentNullException ex)
+            {
+                Logs.Log(nameof(LibraryVM), nameof(UpdateAsync), ex);
+                return false;
+            }
+            catch (OperationCanceledException ex)
+            {
+                Logs.Log(nameof(LibraryVM), nameof(UpdateAsync), ex);
+                return false;
+            }
+            catch (Exception ex)
+            {
+                Logs.Log(nameof(LibraryVM), nameof(UpdateAsync), ex);
+                return false;
+            }
+        }
+
+        #endregion
+
+        public async Task<int> CountBooksAsync(CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                using LibrarySqLiteDbContext context = new();
+                return await context.Tbooks.CountAsync(w => w.IdLibrary == Id, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                Logs.Log(nameof(LibraryVM), nameof(CountBooksAsync), ex);
+                return 0;
+            }
+        }
+
+        public static LibraryVM? Convert(Tlibrary model)
+        {
+            try
+            {
+                if (model == null) return null;
+
+                var isGuidCorrect = Guid.TryParse(model.Guid, out Guid guid);
+                if (isGuidCorrect == false) return null;
+
+                var viewModel = new LibraryVM()
+                {
+                    Id = model.Id,
+                    //DateAjout = DatesHelpers.Converter.GetDateFromString(model.DateAjout),
+                    //DateEdition = DatesHelpers.Converter.GetNullableDateFromString(model.DateEdition),
+                    Description = model.Description ?? "",
+                    Name = model.Name,
+                    Guid = isGuidCorrect ? guid : Guid.Empty,
+                };
+
+                return viewModel;
+            }
+            catch (Exception ex)
+            {
+                Logs.Log(nameof(LibraryVM), nameof(CountBooksAsync), ex);
+                return null;
+            }
+        }
 
 
-	}
+    }
 }
 

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AppHelpers.Serialization;
+using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
@@ -32,7 +33,7 @@ namespace LibApi.ViewModels
         public string Description
         {
             get => _Description;
-            protected set
+            set
             {
                 if (_Description != value)
                 {
@@ -41,7 +42,6 @@ namespace LibApi.ViewModels
                 }
             }
         }
-
 
         public virtual async Task<bool> CreateAsync()
         {
@@ -56,6 +56,11 @@ namespace LibApi.ViewModels
         public virtual async Task<bool> DeleteAsync()
         {
             return await Task.FromResult<bool>(true);
+        }
+
+        public virtual string? GetJsonDataStringAsync()
+        {
+            return JsonSerialization.SerializeClassToString(this);
         }
 
         public void OnPropertyChanged([CallerMemberName] string? propertyName = null)
