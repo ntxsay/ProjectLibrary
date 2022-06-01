@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 25.0.1700.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibApi", "LibApi\LibApi.csproj", "{A78678BA-B876-48CE-8E8A-17951034D228}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A78678BA-B876-48CE-8E8A-17951034D228}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A78678BA-B876-48CE-8E8A-17951034D228}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A78678BA-B876-48CE-8E8A-17951034D228}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A78678BA-B876-48CE-8E8A-17951034D228}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {5D3C1FB0-1CE4-4AB0-A3E3-C3BFD82489BC}
+	EndGlobalSection
+EndGlobal
