@@ -9,7 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibraryConsole", "LibraryCo
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AppHelpers", "AppHelpers\AppHelpers.csproj", "{4C113A25-4998-453E-B3AA-69004B9239BB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibraryWinUI", "LibraryWinUI\LibraryWinUI.csproj", "{925C713E-36AF-46E4-A799-F0CE8D1E2810}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibraryWinUI", "LibraryWinUI\LibraryWinUI.csproj", "{925C713E-36AF-46E4-A799-F0CE8D1E2810}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

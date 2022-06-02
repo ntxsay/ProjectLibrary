@@ -10,7 +10,21 @@ namespace LibApi.ViewModels.Libraries
 {
 	public class LibraryVM : GenericItemVM
 	{
-		public LibraryVM()
+        private int _MaxItemsPerPage = 100;
+        public int MaxItemsPerPage
+        {
+            get => this._MaxItemsPerPage;
+            set
+            {
+                if (_MaxItemsPerPage != value)
+                {
+                    this._MaxItemsPerPage = value;
+                    this.OnPropertyChanged();
+                }
+            }
+        }
+
+        public LibraryVM()
 		{
 		}
 
@@ -164,6 +178,9 @@ namespace LibApi.ViewModels.Libraries
 
         #endregion
 
+        public async Task<IEnumerable<Tlibrary>> OrderByNameAsync() => await OrderAsync<Tlibrary>(SortBy.Name, OrderBy.Croissant);
+
+
         public async Task<int> CountBooksAsync(CancellationToken cancellationToken = default)
         {
             try
@@ -175,6 +192,21 @@ namespace LibApi.ViewModels.Libraries
             {
                 Logs.Log(nameof(LibraryVM), nameof(CountBooksAsync), ex);
                 return 0;
+            }
+        }
+
+        public IEnumerable<LibraryVM> GetPaginatedItemsVm(IEnumerable<Tlibrary> modelList, int goToPage = 1)
+        {
+            try
+            {
+                var selectedItems = GetPaginatedItems(modelList, MaxItemsPerPage, goToPage);
+                List<LibraryVM>? viewModelList = selectedItems?.Select(s => Convert(s))?.Where(w => w != null)?.ToList();
+                return viewModelList ?? Enumerable.Empty<LibraryVM>();
+            }
+            catch (Exception ex)
+            {
+                Logs.Log(nameof(LibraryVM), nameof(GetPaginatedItemsVm), ex);
+                return Enumerable.Empty<LibraryVM>();
             }
         }
 
