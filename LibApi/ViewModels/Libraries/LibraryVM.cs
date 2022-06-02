@@ -3,6 +3,7 @@ using System.Diagnostics;
 using AppHelpers;
 using AppHelpers.Serialization;
 using AppHelpers.Strings;
+using LibApi.Helpers;
 using LibApi.Models.Local.SQLite;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,8 +11,9 @@ namespace LibApi.ViewModels.Libraries
 {
 	public class LibraryVM : GenericItemVM
 	{
-        private int _MaxItemsPerPage = 100;
-        public int MaxItemsPerPage
+        public static short MaxLibrariesDisplayedPerPage { get; set; } = 20;
+        private short _MaxItemsPerPage = 100;
+        public short MaxItemsPerPage
         {
             get => this._MaxItemsPerPage;
             set
@@ -178,7 +180,8 @@ namespace LibApi.ViewModels.Libraries
 
         #endregion
 
-        public async Task<IEnumerable<Tlibrary>> OrderByNameAsync() => await OrderAsync<Tlibrary>(SortBy.Name, OrderBy.Croissant);
+        public static async Task<Tlibrary[]> OrderByNameAsync() => (await new LibraryHelpers().OrderAsync<Tlibrary>(SortBy.Name, OrderBy.Croissant))?.ToArray() ?? Array.Empty<Tlibrary>();
+        public async Task<IEnumerable<Tbook>> OrderBooksByNameAsync() => await OrderAsync<Tbook>(SortBy.Name, OrderBy.Croissant);
 
 
         public async Task<int> CountBooksAsync(CancellationToken cancellationToken = default)
@@ -195,22 +198,22 @@ namespace LibApi.ViewModels.Libraries
             }
         }
 
-        public IEnumerable<LibraryVM> GetPaginatedItemsVm(IEnumerable<Tlibrary> modelList, int goToPage = 1)
-        {
-            try
-            {
-                var selectedItems = GetPaginatedItems(modelList, MaxItemsPerPage, goToPage);
-                List<LibraryVM>? viewModelList = selectedItems?.Select(s => Convert(s))?.Where(w => w != null)?.ToList();
-                return viewModelList ?? Enumerable.Empty<LibraryVM>();
-            }
-            catch (Exception ex)
-            {
-                Logs.Log(nameof(LibraryVM), nameof(GetPaginatedItemsVm), ex);
-                return Enumerable.Empty<LibraryVM>();
-            }
-        }
+        //public IEnumerable<LibraryVM> GetPaginatedItemsVm(IEnumerable<Tlibrary> modelList, int goToPage = 1)
+        //{
+        //    try
+        //    {
+        //        var selectedItems = GetPaginatedItems(modelList, MaxItemsPerPage, goToPage);
+        //        List<LibraryVM>? viewModelList = selectedItems?.Select(s => Convert(s))?.Where(w => w != null)?.ToList();
+        //        return viewModelList ?? Enumerable.Empty<LibraryVM>();
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Logs.Log(nameof(LibraryVM), nameof(GetPaginatedItemsVm), ex);
+        //        return Enumerable.Empty<LibraryVM>();
+        //    }
+        //}
 
-        public static LibraryVM? Convert(Tlibrary model)
+        public static LibraryVM? ConvertToViewModel(Tlibrary model)
         {
             try
             {
