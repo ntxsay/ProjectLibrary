@@ -1,0 +1,9 @@
+﻿#warning A ne pas oublier Tlibrary
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
+
+                entity.Property(e => e.DateAjout).IsRequired();
+
+                entity.Property(e => e.Guid).IsRequired();
+
+                entity.Property(e => e.Name).IsRequired();
+

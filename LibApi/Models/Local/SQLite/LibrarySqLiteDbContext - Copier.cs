@@ -5,34 +5,38 @@ using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace LibApi.Models.Local.SQLite
 {
-    public partial class LibrarySqLiteDbContext : DbContext
+    public partial class LibrarySqLiteDbContextBak : DbContext
     {
-        public LibrarySqLiteDbContext()
+        public LibrarySqLiteDbContextBak()
         {
+            Database.EnsureCreated();
         }
 
-        public LibrarySqLiteDbContext(DbContextOptions<LibrarySqLiteDbContext> options)
+        public LibrarySqLiteDbContextBak(DbContextOptions<LibrarySqLiteDbContextBak> options)
             : base(options)
         {
         }
 
         public virtual DbSet<Tbook> Tbooks { get; set; } = null!;
+        public virtual DbSet<TbookAuthorConnector> TbookAuthorConnectors { get; set; } = null!;
         public virtual DbSet<TbookClassification> TbookClassifications { get; set; } = null!;
         public virtual DbSet<TbookCollection> TbookCollections { get; set; } = null!;
-        public virtual DbSet<TbookContactRoleConnector> TbookContactRoleConnectors { get; set; } = null!;
+        public virtual DbSet<TbookEditeurConnector> TbookEditeurConnectors { get; set; } = null!;
         public virtual DbSet<TbookEtat> TbookEtats { get; set; } = null!;
         public virtual DbSet<TbookExemplary> TbookExemplaries { get; set; } = null!;
         public virtual DbSet<TbookFormat> TbookFormats { get; set; } = null!;
         public virtual DbSet<TbookIdentification> TbookIdentifications { get; set; } = null!;
+        public virtual DbSet<TbookIllustratorConnector> TbookIllustratorConnectors { get; set; } = null!;
         public virtual DbSet<TbookOtherTitle> TbookOtherTitles { get; set; } = null!;
         public virtual DbSet<TbookPret> TbookPrets { get; set; } = null!;
         public virtual DbSet<TbookReading> TbookReadings { get; set; } = null!;
+        public virtual DbSet<TbookTranslatorConnector> TbookTranslatorConnectors { get; set; } = null!;
         public virtual DbSet<Tcollection> Tcollections { get; set; } = null!;
         public virtual DbSet<Tcontact> Tcontacts { get; set; } = null!;
         public virtual DbSet<TcontactRole> TcontactRoles { get; set; } = null!;
-        public virtual DbSet<TcontactType> TcontactTypes { get; set; } = null!;
         public virtual DbSet<Tlibrary> Tlibraries { get; set; } = null!;
         public virtual DbSet<TlibraryCategorie> TlibraryCategories { get; set; } = null!;
+        public virtual DbSet<TlibrarySubCategorie> TlibrarySubCategories { get; set; } = null!;
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -63,6 +67,27 @@ namespace LibApi.Models.Local.SQLite
                 entity.HasOne(d => d.IdLibraryNavigation)
                     .WithMany(p => p.Tbooks)
                     .HasForeignKey(d => d.IdLibrary);
+
+                entity.HasOne(d => d.IdSubCategorieNavigation)
+                    .WithMany(p => p.Tbooks)
+                    .HasForeignKey(d => d.IdSubCategorie)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<TbookAuthorConnector>(entity =>
+            {
+                entity.ToTable("TBookAuthorConnector");
+
+                entity.HasIndex(e => e.Id, "IX_TBookAuthorConnector_Id")
+                    .IsUnique();
+
+                entity.HasOne(d => d.IdBookNavigation)
+                    .WithMany(p => p.TbookAuthorConnectors)
+                    .HasForeignKey(d => d.IdBook);
+
+                entity.HasOne(d => d.IdContactNavigation)
+                    .WithMany(p => p.TbookAuthorConnectors)
+                    .HasForeignKey(d => d.IdContact);
             });
 
             modelBuilder.Entity<TbookClassification>(entity =>
@@ -97,24 +122,20 @@ namespace LibApi.Models.Local.SQLite
                     .HasForeignKey(d => d.IdCollection);
             });
 
-            modelBuilder.Entity<TbookContactRoleConnector>(entity =>
+            modelBuilder.Entity<TbookEditeurConnector>(entity =>
             {
-                entity.ToTable("TBookContactRoleConnector");
+                entity.ToTable("TBookEditeurConnector");
 
-                entity.HasIndex(e => e.Id, "IX_TBookContactRoleConnector_Id")
+                entity.HasIndex(e => e.Id, "IX_TBookEditeurConnector_Id")
                     .IsUnique();
 
                 entity.HasOne(d => d.IdBookNavigation)
-                    .WithMany(p => p.TbookContactRoleConnectors)
+                    .WithMany(p => p.TbookEditeurConnectors)
                     .HasForeignKey(d => d.IdBook);
 
                 entity.HasOne(d => d.IdContactNavigation)
-                    .WithMany(p => p.TbookContactRoleConnectors)
+                    .WithMany(p => p.TbookEditeurConnectors)
                     .HasForeignKey(d => d.IdContact);
-
-                entity.HasOne(d => d.IdRoleNavigation)
-                    .WithMany(p => p.TbookContactRoleConnectors)
-                    .HasForeignKey(d => d.IdRole);
             });
 
             modelBuilder.Entity<TbookEtat>(entity =>
@@ -186,6 +207,22 @@ namespace LibApi.Models.Local.SQLite
                     .HasForeignKey<TbookIdentification>(d => d.Id);
             });
 
+            modelBuilder.Entity<TbookIllustratorConnector>(entity =>
+            {
+                entity.ToTable("TBookIllustratorConnector");
+
+                entity.HasIndex(e => e.Id, "IX_TBookIllustratorConnector_Id")
+                    .IsUnique();
+
+                entity.HasOne(d => d.IdBookNavigation)
+                    .WithMany(p => p.TbookIllustratorConnectors)
+                    .HasForeignKey(d => d.IdBook);
+
+                entity.HasOne(d => d.IdContactNavigation)
+                    .WithMany(p => p.TbookIllustratorConnectors)
+                    .HasForeignKey(d => d.IdContact);
+            });
+
             modelBuilder.Entity<TbookOtherTitle>(entity =>
             {
                 entity.ToTable("TBookOtherTitle");
@@ -240,6 +277,22 @@ namespace LibApi.Models.Local.SQLite
                     .HasForeignKey<TbookReading>(d => d.Id);
             });
 
+            modelBuilder.Entity<TbookTranslatorConnector>(entity =>
+            {
+                entity.ToTable("TBookTranslatorConnector");
+
+                entity.HasIndex(e => e.Id, "IX_TBookTranslatorConnector_Id")
+                    .IsUnique();
+
+                entity.HasOne(d => d.IdBookNavigation)
+                    .WithMany(p => p.TbookTranslatorConnectors)
+                    .HasForeignKey(d => d.IdBook);
+
+                entity.HasOne(d => d.IdContactNavigation)
+                    .WithMany(p => p.TbookTranslatorConnectors)
+                    .HasForeignKey(d => d.IdContact);
+            });
+
             modelBuilder.Entity<Tcollection>(entity =>
             {
                 entity.ToTable("TCollection");
@@ -264,10 +317,6 @@ namespace LibApi.Models.Local.SQLite
 
                 entity.HasIndex(e => e.Id, "IX_TContact_Id")
                     .IsUnique();
-
-                entity.HasOne(d => d.IdContactTypeNavigation)
-                    .WithMany(p => p.Tcontacts)
-                    .HasForeignKey(d => d.IdContactType);
             });
 
             modelBuilder.Entity<TcontactRole>(entity =>
@@ -276,14 +325,10 @@ namespace LibApi.Models.Local.SQLite
 
                 entity.HasIndex(e => e.Id, "IX_TContactRole_Id")
                     .IsUnique();
-            });
 
-            modelBuilder.Entity<TcontactType>(entity =>
-            {
-                entity.ToTable("TContactType");
-
-                entity.HasIndex(e => e.Id, "IX_TContactType_Id")
-                    .IsUnique();
+                entity.HasOne(d => d.IdContactNavigation)
+                    .WithMany(p => p.TcontactRoles)
+                    .HasForeignKey(d => d.IdContact);
             });
 
             modelBuilder.Entity<Tlibrary>(entity =>
@@ -320,11 +365,18 @@ namespace LibApi.Models.Local.SQLite
                 entity.HasOne(d => d.IdLibraryNavigation)
                     .WithMany(p => p.TlibraryCategories)
                     .HasForeignKey(d => d.IdLibrary);
+            });
 
-                entity.HasOne(d => d.IdParentCategorieNavigation)
-                    .WithMany(p => p.InverseIdParentCategorieNavigation)
-                    .HasForeignKey(d => d.IdParentCategorie)
-                    .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<TlibrarySubCategorie>(entity =>
+            {
+                entity.ToTable("TLibrarySubCategorie");
+
+                entity.HasIndex(e => e.Id, "IX_TLibrarySubCategorie_Id")
+                    .IsUnique();
+
+                entity.HasOne(d => d.IdCategorieNavigation)
+                    .WithMany(p => p.TlibrarySubCategories)
+                    .HasForeignKey(d => d.IdCategorie);
             });
 
             OnModelCreatingPartial(modelBuilder);

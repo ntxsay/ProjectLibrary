@@ -1,1 +1,0 @@
-﻿dotnet ef dbcontext scaffold "Data Source=LibraryDB.db" Microsoft.EntityFrameworkCore.Sqlite -o Models/Local/SQLite -f -c LibrarySqLiteDbContext

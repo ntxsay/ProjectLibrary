@@ -5,42 +5,62 @@ using AppHelpers.Serialization;
 using AppHelpers.Strings;
 using LibApi.Helpers;
 using LibApi.Models.Local.SQLite;
+using LibShared.ViewModels.Libraries;
 using Microsoft.EntityFrameworkCore;
 
-namespace LibApi.ViewModels.Libraries
+namespace LibApi.Services.Libraries
 {
-	public class LibraryVM : GenericItemVM
+	public class Library : LibraryVM
 	{
-        public static short MaxLibrariesDisplayedPerPage { get; set; } = 20;
-        private short _MaxItemsPerPage = 100;
-        public short MaxItemsPerPage
-        {
-            get => this._MaxItemsPerPage;
-            set
-            {
-                if (_MaxItemsPerPage != value)
-                {
-                    this._MaxItemsPerPage = value;
-                    this.OnPropertyChanged();
-                }
-            }
-        }
+        readonly LibraryHelpers libraryHelpers = new ();
 
-        public LibraryVM()
+        /// <summary>
+        /// Obtient toutes bibliothèques trié par nom et par ordre croissant
+        /// </summary>
+        /// <returns></returns>
+        public static async Task<Tlibrary[]> OrderByAscendingNameAsync() => (await new LibraryHelpers().OrderAsync<Tlibrary>(SortBy.Name, OrderBy.Croissant))?.ToArray() ?? Array.Empty<Tlibrary>();
+
+        /// <summary>
+        /// Obtient toutes bibliothèques trié par nom et par ordre décroissant
+        /// </summary>
+        /// <returns></returns>
+        public static async Task<Tlibrary[]> OrderByDescendingNameAsync() => (await new LibraryHelpers().OrderAsync<Tlibrary>(SortBy.Name, OrderBy.DCroissant))?.ToArray() ?? Array.Empty<Tlibrary>();
+
+        /// <summary>
+        /// Obtient toutes bibliothèques trié par date d'ajout et par ordre croissant
+        /// </summary>
+        /// <returns></returns>
+        public static async Task<Tlibrary[]> OrderByAscendingDateCreationAsync() => (await new LibraryHelpers().OrderAsync<Tlibrary>(SortBy.DateCreation, OrderBy.Croissant))?.ToArray() ?? Array.Empty<Tlibrary>();
+
+        /// <summary>
+        /// Obtient toutes bibliothèques trié par date d'ajout et par ordre décroissant
+        /// </summary>
+        /// <returns></returns>
+        public static async Task<Tlibrary[]> OrderByDescendingDateCreationAsync() => (await new LibraryHelpers().OrderAsync<Tlibrary>(SortBy.DateCreation, OrderBy.DCroissant))?.ToArray() ?? Array.Empty<Tlibrary>();
+
+
+        /// <summary>
+        /// Obtient tous les livres de la bibliothèque trié par nom et par ordre croissant
+        /// </summary>
+        /// <returns></returns>
+        public async Task<IEnumerable<Tbook>> OrderBooksByAscendingNameAsync() => await libraryHelpers.OrderAsync<Tbook>(SortBy.Name, OrderBy.Croissant);
+
+        /// <summary>
+        /// Obtient tous les livres de la bibliothèque trié par nom et par ordre décroissant
+        /// </summary>
+        /// <returns></returns>
+        public async Task<IEnumerable<Tbook>> OrderBooksByDescendingNameAsync() => await libraryHelpers.OrderAsync<Tbook>(SortBy.Name, OrderBy.DCroissant);
+
+        public Library()
 		{
 		}
 
-        //public override string? GetJsonDataStringAsync()
-        //{
-        //	return JsonSerialization.SerializeClassToString(this);
-        //}
-
         #region CRUD
         /// <summary>
-        /// Ajoute la bibliothèque dans la base de données puis crée 
+        /// Ajoute la bibliothèque dans la base de données
         /// </summary>
         /// <returns></returns>
-        public override async Task<bool> CreateAsync()
+        public async Task<bool> CreateAsync()
         {
             try
             {
@@ -54,7 +74,7 @@ namespace LibApi.ViewModels.Libraries
                 bool isExist = await context.Tlibraries.AnyAsync(c => c.Name.ToLower() == Name.ToLower());
                 if (isExist)
                 {
-                    Logs.Log(nameof(LibraryVM), nameof(CreateAsync), "Cette bibliothèque existe déjà");
+                    Logs.Log(nameof(Library), nameof(CreateAsync), "Cette bibliothèque existe déjà");
                     return true;
                 }
 
@@ -75,22 +95,26 @@ namespace LibApi.ViewModels.Libraries
             }
             catch (ArgumentNullException ex)
             {
-                Logs.Log(nameof(LibraryVM), nameof(CreateAsync), ex);
+                Logs.Log(nameof(Library), nameof(CreateAsync), ex);
                 return false;
             }
             catch (OperationCanceledException ex)
             {
-                Logs.Log(nameof(LibraryVM), nameof(CreateAsync), ex);
+                Logs.Log(nameof(Library), nameof(CreateAsync), ex);
                 return false;
             }
             catch (Exception ex)
             {
-                Logs.Log(nameof(LibraryVM), nameof(CreateAsync), ex);
+                Logs.Log(nameof(Library), nameof(CreateAsync), ex);
                 return false;
             }
         }
 
-        public override async Task<bool> UpdateAsync()
+        /// <summary>
+        /// Met à jour la bibliothèque dans la base de données
+        /// </summary>
+        /// <returns></returns>
+        public async Task<bool> UpdateAsync()
         {
             try
             {
@@ -110,7 +134,7 @@ namespace LibApi.ViewModels.Libraries
                 bool isExist = await context.Tlibraries.AnyAsync(c => c.Id != Id && c.Name.ToLower() == Name.ToLower());
                 if (isExist)
                 {
-                    Logs.Log(nameof(LibraryVM), nameof(UpdateAsync), "Cette bibliothèque existe déjà");
+                    Logs.Log(nameof(Library), nameof(UpdateAsync), "Cette bibliothèque existe déjà");
                     return false;
                 }
 
@@ -129,22 +153,26 @@ namespace LibApi.ViewModels.Libraries
             }
             catch (ArgumentNullException ex)
             {
-                Logs.Log(nameof(LibraryVM), nameof(UpdateAsync), ex);
+                Logs.Log(nameof(Library), nameof(UpdateAsync), ex);
                 return false;
             }
             catch (OperationCanceledException ex)
             {
-                Logs.Log(nameof(LibraryVM), nameof(UpdateAsync), ex);
+                Logs.Log(nameof(Library), nameof(UpdateAsync), ex);
                 return false;
             }
             catch (Exception ex)
             {
-                Logs.Log(nameof(LibraryVM), nameof(UpdateAsync), ex);
+                Logs.Log(nameof(Library), nameof(UpdateAsync), ex);
                 return false;
             }
         }
 
-        public override async Task<bool> DeleteAsync()
+        /// <summary>
+        /// Supprime la bibliothèque de la base de données
+        /// </summary>
+        /// <returns></returns>
+        public async Task<bool> DeleteAsync()
         {
             try
             {
@@ -163,27 +191,48 @@ namespace LibApi.ViewModels.Libraries
             }
             catch (ArgumentNullException ex)
             {
-                Logs.Log(nameof(LibraryVM), nameof(UpdateAsync), ex);
+                Logs.Log(nameof(Library), nameof(UpdateAsync), ex);
                 return false;
             }
             catch (OperationCanceledException ex)
             {
-                Logs.Log(nameof(LibraryVM), nameof(UpdateAsync), ex);
+                Logs.Log(nameof(Library), nameof(UpdateAsync), ex);
                 return false;
             }
             catch (Exception ex)
             {
-                Logs.Log(nameof(LibraryVM), nameof(UpdateAsync), ex);
+                Logs.Log(nameof(Library), nameof(UpdateAsync), ex);
                 return false;
             }
         }
 
         #endregion
 
-        public static async Task<Tlibrary[]> OrderByNameAsync() => (await new LibraryHelpers().OrderAsync<Tlibrary>(SortBy.Name, OrderBy.Croissant))?.ToArray() ?? Array.Empty<Tlibrary>();
-        public async Task<IEnumerable<Tbook>> OrderBooksByNameAsync() => await OrderAsync<Tbook>(SortBy.Name, OrderBy.Croissant);
 
+        /// <summary>
+        /// Compte le nombre de bibliothèque dans la base de données
+        /// </summary>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        public static async Task<int> CountAsync(CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                using LibrarySqLiteDbContext context = new();
+                return await context.Tlibraries.CountAsync(cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                Logs.Log(nameof(Library), nameof(CountAsync), ex);
+                return 0;
+            }
+        }
 
+        /// <summary>
+        /// Compte le nombre de livres dans cette bibliothèque
+        /// </summary>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
         public async Task<int> CountBooksAsync(CancellationToken cancellationToken = default)
         {
             try
@@ -193,27 +242,17 @@ namespace LibApi.ViewModels.Libraries
             }
             catch (Exception ex)
             {
-                Logs.Log(nameof(LibraryVM), nameof(CountBooksAsync), ex);
+                Logs.Log(nameof(Library), nameof(CountBooksAsync), ex);
                 return 0;
             }
         }
 
-        //public IEnumerable<LibraryVM> GetPaginatedItemsVm(IEnumerable<Tlibrary> modelList, int goToPage = 1)
-        //{
-        //    try
-        //    {
-        //        var selectedItems = GetPaginatedItems(modelList, MaxItemsPerPage, goToPage);
-        //        List<LibraryVM>? viewModelList = selectedItems?.Select(s => Convert(s))?.Where(w => w != null)?.ToList();
-        //        return viewModelList ?? Enumerable.Empty<LibraryVM>();
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        Logs.Log(nameof(LibraryVM), nameof(GetPaginatedItemsVm), ex);
-        //        return Enumerable.Empty<LibraryVM>();
-        //    }
-        //}
-
-        public static LibraryVM? ConvertToViewModel(Tlibrary model)
+        /// <summary>
+        /// Convertit un model en Model de vue
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        public static Library? ConvertToViewModel(Tlibrary model)
         {
             try
             {
@@ -222,7 +261,7 @@ namespace LibApi.ViewModels.Libraries
                 var isGuidCorrect = Guid.TryParse(model.Guid, out Guid guid);
                 if (isGuidCorrect == false) return null;
 
-                var viewModel = new LibraryVM()
+                var viewModel = new Library()
                 {
                     Id = model.Id,
                     //DateAjout = DatesHelpers.Converter.GetDateFromString(model.DateAjout),
@@ -236,7 +275,7 @@ namespace LibApi.ViewModels.Libraries
             }
             catch (Exception ex)
             {
-                Logs.Log(nameof(LibraryVM), nameof(CountBooksAsync), ex);
+                Logs.Log(nameof(Library), nameof(CountBooksAsync), ex);
                 return null;
             }
         }

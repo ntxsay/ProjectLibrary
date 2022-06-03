@@ -1,8 +1,9 @@
 ﻿using AppHelpers;
 using LibApi.Helpers;
 using LibApi.Models.Local.SQLite;
+using LibApi.Services.Libraries;
 using LibApi.ViewModels.Books;
-using LibApi.ViewModels.Libraries;
+using LibShared.ViewModels.Libraries;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -45,12 +46,12 @@ namespace LibApi.Extensions
         {
             try
             {
-                return modelList?.Select(s => LibraryVM.ConvertToViewModel(s))?.Where(w => w != null) ?? Enumerable.Empty<LibraryVM>();
+                return modelList?.Select(s => Library.ConvertToViewModel(s))?.Where(w => w != null) ?? Enumerable.Empty<Library>();
             }
             catch (Exception ex)
             {
                 Logs.Log(nameof(LibraryExtensions), nameof(ConvertToViewModel), ex);
-                return Enumerable.Empty<LibraryVM>();
+                return Enumerable.Empty<Library>();
             }
         }
 

@@ -9,6 +9,19 @@ using System.Threading.Tasks;
 
 namespace AppHelpers.Serialization
 {
+    public static class JsonSerializationExtensions
+    {
+        public static string? GetJsonDataString<T>(this T self) where T : class
+        {
+            return JsonSerialization.SerializeObjectToString(self);
+        }
+
+        public static string? GetJsonDataString<T>(this IEnumerable<T> self) where T : class
+        {
+            return JsonSerialization.SerializeObjectToString(self);
+        }
+    }
+
     public class JsonSerialization
     {
         private const string className = nameof(JsonSerialization);
@@ -155,7 +168,7 @@ namespace AppHelpers.Serialization
             }
         }
 
-        public static string? SerializeClassToString<T>(T ObjectToSerialize) where T : class
+        public static string? SerializeObjectToString<T>(T ObjectToSerialize) where T : class
         {
             try
             {
@@ -166,12 +179,12 @@ namespace AppHelpers.Serialization
             }
             catch (Exception ex)
             {
-                Logs.Log(className, nameof(SerializeClassToString), ex);
+                Logs.Log(className, nameof(SerializeObjectToString), ex);
                 return null;
             }
         }
 
-        public static string? SerializeClassToString<T>(IEnumerable<T> ObjectsToSerialize) where T : class
+        public static string? SerializeObjectToString<T>(IEnumerable<T> ObjectsToSerialize) where T : class
         {
             try
             {
@@ -183,7 +196,7 @@ namespace AppHelpers.Serialization
             }
             catch (Exception ex)
             {
-                Logs.Log(className, nameof(SerializeClassToString), ex);
+                Logs.Log(className, nameof(SerializeObjectToString), ex);
                 return null;
             }
         }

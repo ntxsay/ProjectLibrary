@@ -10,6 +10,7 @@ using System.Runtime.CompilerServices;
 
 namespace LibApi.ViewModels
 {
+    [Obsolete]
     public class GenericItemVM : LibraryHelpers, INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler? PropertyChanged = delegate { };
@@ -65,10 +66,7 @@ namespace LibApi.ViewModels
             return await Task.FromResult<bool>(true);
         }
 
-        public virtual string? GetJsonDataStringAsync()
-        {
-            return JsonSerialization.SerializeClassToString(this);
-        }
+        
 
         //protected async Task<IEnumerable<T>> OrderAsync<T>(SortBy sortBy = SortBy.Name, OrderBy orderBy = OrderBy.Croissant, long? idLibrary = null) where T : class
         //{
