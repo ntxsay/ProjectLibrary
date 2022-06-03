@@ -38,4 +38,9 @@
     <ProjectReference Include="..\AppHelpers\AppHelpers.csproj" />
     <ProjectReference Include="..\LibShared\LibShared.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <None Update="LibraryDB.db">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
 </Project>

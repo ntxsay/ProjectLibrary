@@ -13,16 +13,16 @@ using System.Threading.Tasks;
 
 namespace LibApi.Services.Contacts
 {
-    public class ContactRole : ContactRoleVM
+    public class ContactType : ContactTypeVM
     {
         /// <summary>
-        /// Initialise une nouvelle instance de l'objet <see cref="ContactRole"/> afin créer un nouveau rôle de contact puis d'interagir avec lui.
+        /// Initialise une nouvelle instance de l'objet <see cref="ContactType"/> afin créer un nouveau type de contact puis d'interagir avec lui.
         /// </summary>
-        /// <param name="name">Nom du nouveau rôle</param>
-        /// <param name="description">Description du nouveau rôle</param>
-        /// <remarks>Remarque : Pour ajouter le rôle dans la base de données, appelez la méthode <see cref="CreateAsync"/></remarks>
+        /// <param name="name">Nom du nouveau type</param>
+        /// <param name="description">Description du nouveau type</param>
+        /// <remarks>Remarque : Pour ajouter le type dans la base de données, appelez la méthode <see cref="CreateAsync"/></remarks>
 
-        public ContactRole(string name, string? description = null)
+        public ContactType(string name, string? description = null)
         {
             Name = name.Trim();
             Description = description?.Trim();
@@ -30,7 +30,7 @@ namespace LibApi.Services.Contacts
 
         #region CRUD
         /// <summary>
-        /// Ajoute un rôle dans la base de données
+        /// Ajoute un type de contact dans la base de données
         /// </summary>
         /// <returns></returns>
         public async Task<bool> CreateAsync()
@@ -39,50 +39,50 @@ namespace LibApi.Services.Contacts
             {
                 if (Name.IsStringNullOrEmptyOrWhiteSpace())
                 {
-                    throw new ArgumentNullException(nameof(Name), "Le nom du rôle ne peut pas être nul, vide ou ne contenir que des espaces blancs.");
+                    throw new ArgumentNullException(nameof(Name), "Le nom du type ne peut pas être nul, vide ou ne contenir que des espaces blancs.");
                 }
 
                 using LibrarySqLiteDbContext context = new();
 
-                bool isExist = await context.TcontactRoles.AnyAsync(c => c.Name.ToLower() == Name.ToLower());
+                bool isExist = await context.TcontactTypes.AnyAsync(c => c.Name.ToLower() == Name.ToLower());
                 if (isExist)
                 {
-                    Logs.Log(nameof(ContactRole), nameof(CreateAsync), "Ce rôle existe déjà");
+                    Logs.Log(nameof(ContactType), nameof(CreateAsync), "Ce type existe déjà");
                     return true;
                 }
 
-                TcontactRole tContactRole = new()
+                TcontactType TcontactType = new()
                 {
                     Name = Name,
                     Description = Description,
                 };
 
-                await context.TcontactRoles.AddAsync(tContactRole);
+                await context.TcontactTypes.AddAsync(TcontactType);
                 await context.SaveChangesAsync();
 
-                Id = tContactRole.Id;
+                Id = TcontactType.Id;
 
                 return true;
             }
             catch (ArgumentNullException ex)
             {
-                Logs.Log(nameof(ContactRole), nameof(CreateAsync), ex);
+                Logs.Log(nameof(ContactType), nameof(CreateAsync), ex);
                 return false;
             }
             catch (OperationCanceledException ex)
             {
-                Logs.Log(nameof(ContactRole), nameof(CreateAsync), ex);
+                Logs.Log(nameof(ContactType), nameof(CreateAsync), ex);
                 return false;
             }
             catch (Exception ex)
             {
-                Logs.Log(nameof(ContactRole), nameof(CreateAsync), ex);
+                Logs.Log(nameof(ContactType), nameof(CreateAsync), ex);
                 return false;
             }
         }
 
         /// <summary>
-        /// Met à jour le rôle dans la base de données
+        /// Met à jour le type dans la base de données
         /// </summary>
         /// <returns></returns>
         public async Task<bool> UpdateNameAsync(string value)
@@ -91,45 +91,45 @@ namespace LibApi.Services.Contacts
             {
                 if (value.IsStringNullOrEmptyOrWhiteSpace())
                 {
-                    throw new ArgumentNullException(nameof(value), "Le nom du rôle ne peut pas être nulle, vide ou ne contenir que des espaces blancs.");
+                    throw new ArgumentNullException(nameof(value), "Le nom du type ne peut pas être nulle, vide ou ne contenir que des espaces blancs.");
                 }
 
                 using LibrarySqLiteDbContext context = new();
 
-                TcontactRole? tContactRole = await context.TcontactRoles.SingleOrDefaultAsync(s => s.Id == Id);
-                if (tContactRole == null)
+                TcontactType? TcontactType = await context.TcontactTypes.SingleOrDefaultAsync(s => s.Id == Id);
+                if (TcontactType == null)
                 {
-                    throw new ArgumentNullException(nameof(tContactRole), $"Le rôle n'existe pas avec l'id \"{Id}\".");
+                    throw new ArgumentNullException(nameof(TcontactType), $"La type n'existe pas avec l'id \"{Id}\".");
                 }
 
-                bool isExist = await context.TcontactRoles.AnyAsync(c => c.Id != Id && c.Name.ToLower() == value.ToLower());
+                bool isExist = await context.TcontactTypes.AnyAsync(c => c.Id != Id && c.Name.ToLower() == value.ToLower());
                 if (isExist)
                 {
-                    Logs.Log(nameof(ContactRole), nameof(UpdateNameAsync), "Ce rôle existe déjà");
+                    Logs.Log(nameof(ContactType), nameof(UpdateNameAsync), "Ce type existe déjà");
                     return false;
                 }
 
-                tContactRole.Name = value.Trim();
+                TcontactType.Name = value.Trim();
 
-                context.TcontactRoles.Update(tContactRole);
+                context.TcontactTypes.Update(TcontactType);
                 _ = await context.SaveChangesAsync();
 
-                Name = tContactRole.Name;
+                Name = TcontactType.Name;
                 return true;
             }
             catch (ArgumentNullException ex)
             {
-                Logs.Log(nameof(ContactRole), nameof(UpdateNameAsync), ex);
+                Logs.Log(nameof(ContactType), nameof(UpdateNameAsync), ex);
                 return false;
             }
             catch (OperationCanceledException ex)
             {
-                Logs.Log(nameof(ContactRole), nameof(UpdateNameAsync), ex);
+                Logs.Log(nameof(ContactType), nameof(UpdateNameAsync), ex);
                 return false;
             }
             catch (Exception ex)
             {
-                Logs.Log(nameof(ContactRole), nameof(UpdateNameAsync), ex);
+                Logs.Log(nameof(ContactType), nameof(UpdateNameAsync), ex);
                 return false;
             }
         }
@@ -140,33 +140,33 @@ namespace LibApi.Services.Contacts
             {
                 using LibrarySqLiteDbContext context = new();
 
-                TcontactRole? tContactRole = await context.TcontactRoles.SingleOrDefaultAsync(s => s.Id == Id);
-                if (tContactRole == null)
+                TcontactType? TcontactType = await context.TcontactTypes.SingleOrDefaultAsync(s => s.Id == Id);
+                if (TcontactType == null)
                 {
-                    throw new ArgumentNullException(nameof(tContactRole), $"La rôle n'existe pas avec l'id \"{Id}\".");
+                    throw new ArgumentNullException(nameof(TcontactType), $"Le type n'existe pas avec l'id \"{Id}\".");
                 }
 
-                tContactRole.Description = value?.Trim();
+                TcontactType.Description = value?.Trim();
 
-                context.TcontactRoles.Update(tContactRole);
+                context.TcontactTypes.Update(TcontactType);
                 _ = await context.SaveChangesAsync();
 
-                Description = tContactRole.Description;
+                Description = TcontactType.Description;
                 return true;
             }
             catch (ArgumentNullException ex)
             {
-                Logs.Log(nameof(ContactRole), nameof(UpdateDescriptionAsync), ex);
+                Logs.Log(nameof(ContactType), nameof(UpdateDescriptionAsync), ex);
                 return false;
             }
             catch (OperationCanceledException ex)
             {
-                Logs.Log(nameof(ContactRole), nameof(UpdateDescriptionAsync), ex);
+                Logs.Log(nameof(ContactType), nameof(UpdateDescriptionAsync), ex);
                 return false;
             }
             catch (Exception ex)
             {
-                Logs.Log(nameof(ContactRole), nameof(UpdateDescriptionAsync), ex);
+                Logs.Log(nameof(ContactType), nameof(UpdateDescriptionAsync), ex);
                 return false;
             }
         }
@@ -182,30 +182,30 @@ namespace LibApi.Services.Contacts
             {
                 using LibrarySqLiteDbContext context = new();
 
-                TcontactRole? tContactRole = await context.TcontactRoles.SingleOrDefaultAsync(s => s.Id == Id);
-                if (tContactRole == null)
+                TcontactType? TcontactType = await context.TcontactTypes.SingleOrDefaultAsync(s => s.Id == Id);
+                if (TcontactType == null)
                 {
-                    throw new ArgumentNullException(nameof(TcontactRole), $"Le rôle n'existe pas avec l'id \"{Id}\".");
+                    throw new ArgumentNullException(nameof(TcontactType), $"Le type n'existe pas avec l'id \"{Id}\".");
                 }
 
-                context.TcontactRoles.Remove(tContactRole);
+                context.TcontactTypes.Remove(TcontactType);
                 _ = await context.SaveChangesAsync();
 
                 return true;
             }
             catch (ArgumentNullException ex)
             {
-                Logs.Log(nameof(ContactRole), nameof(DeleteAsync), ex);
+                Logs.Log(nameof(ContactType), nameof(DeleteAsync), ex);
                 return false;
             }
             catch (OperationCanceledException ex)
             {
-                Logs.Log(nameof(ContactRole), nameof(DeleteAsync), ex);
+                Logs.Log(nameof(ContactType), nameof(DeleteAsync), ex);
                 return false;
             }
             catch (Exception ex)
             {
-                Logs.Log(nameof(ContactRole), nameof(DeleteAsync), ex);
+                Logs.Log(nameof(ContactType), nameof(DeleteAsync), ex);
                 return false;
             }
         }

@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using LibApi.Models.Local.SQLite;
-namespace LibApi
+
+namespace LibShared
 {
     public enum GroupBy : byte
     {
@@ -30,7 +30,20 @@ namespace LibApi
 
     public enum OrderBy : byte
     {
-        Croissant,
-        DCroissant
+        /// <summary>
+        /// Trie les éléments par ordre croissant
+        /// </summary>
+        Ascending,
+
+        /// <summary>
+        /// Trie les éléments par ordre décroissant
+        /// </summary>
+        Descending
+    }
+
+    public enum ContactType : byte
+    {
+        Human = 0,
+        Society = 1,
     }
 }

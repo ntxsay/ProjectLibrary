@@ -2,9 +2,27 @@
 using AppHelpers.Serialization;
 using AppHelpers.Strings;
 using LibApi.Extensions;
+using LibApi.Services.Contacts;
 using LibApi.Services.Libraries;
+using LibShared.ViewModels.Contacts;
 
 int maxitemPerPage = 20;
+
+ContactRole contactRole = new ("Ak12" + DateTime.Now.ToString(), null);
+var isRoleCreated = await contactRole.CreateAsync();
+Console.WriteLine("Role Created : " + isRoleCreated);
+Console.WriteLine("Role Name Updated : " + await contactRole.UpdateNameAsync("Alalal" + DateTime.Now.ToString()));
+Console.WriteLine("Role Description Updated : " + await contactRole.UpdateDescriptionAsync("Marshall" + DateTime.Now.ToString()));
+Console.WriteLine(contactRole.GetJsonDataString());
+Console.ReadLine();
+ContactType contactType = new("Ak12" + DateTime.Now.ToString(), null);
+var isTypeCreated = await contactType.CreateAsync();
+Console.WriteLine("Type Created : " + isTypeCreated);
+Console.WriteLine("Type Name Updated : " + await contactType.UpdateNameAsync("Alalal" + DateTime.Now.ToString()));
+Console.WriteLine("Type Description Updated : " + await contactType.UpdateDescriptionAsync("Marshall" + DateTime.Now.ToString()));
+Console.WriteLine(contactType.GetJsonDataString());
+Console.ReadLine();
+
 Library? library = null;
 await CreateLibrary();
 await ListLibraries();
@@ -19,17 +37,14 @@ Console.ReadLine();
     try
     {
         Console.WriteLine("Entrez le nom de la bibliothèque à créer");
-        string? LibraryName = Console.ReadLine();
-        while (LibraryName.IsStringNullOrEmptyOrWhiteSpace())
+        string? libraryName = Console.ReadLine();
+        while (libraryName.IsStringNullOrEmptyOrWhiteSpace())
         {
             Console.WriteLine("Entrez un nom de bibliothèque valide");
-            LibraryName = Console.ReadLine();
+            libraryName = Console.ReadLine();
         }
 
-        library = new()
-        {
-            Name = LibraryName,
-        };
+        library = new(libraryName, null);
 
         var isCreated = await library.CreateAsync();
         if (isCreated)
@@ -60,8 +75,9 @@ async Task ListLibraries()
         }
 
         Console.WriteLine("Liste des bibliothèques. Nombre maximum de page : " + maxitemPerPage);
-
-        var orderedItems = await Library.OrderByDescendingDateCreationAsync();
+        var countLibrary = await Library.CountAsync();
+        Console.WriteLine("Compter nombre de bibliothèque : " + countLibrary);
+        var orderedItems = await Library.OrderByDateCreationAsync();
         int countPage = orderedItems.CountPages(maxitemPerPage);
         Console.WriteLine("Compter nombre de page : " + countPage);
         for (int i = 1; i < countPage + 1; i++)
@@ -94,16 +110,20 @@ async Task UpdateLibrary()
         }
 
         Console.WriteLine("Entrez le nouveau nom de la bibliothèque");
-        library.Name = Console.ReadLine();
-        while (library.Name.IsStringNullOrEmptyOrWhiteSpace())
+        string name = Console.ReadLine();
+        while (name.IsStringNullOrEmptyOrWhiteSpace())
         {
             Console.WriteLine("Entrez un nom de bibliothèque valide");
-            library.Name = Console.ReadLine();
+            name = Console.ReadLine();
         }
+        var isNameUpdated = await library.UpdateNameAsync(name);
+        Console.WriteLine("Name Updated : " + isNameUpdated);
+
         Console.WriteLine("Entrez une description à la bibliothèque");
-        library.Description = Console.ReadLine();
-        var isUpdated = await library.UpdateAsync();
-        Console.WriteLine("Updated : " + isUpdated);
+        string description = Console.ReadLine();
+
+        var isDescUpdated = await library.UpdateDescriptionAsync(description);
+        Console.WriteLine("Description Updated : " + isDescUpdated);
         Console.WriteLine(library.GetJsonDataString());
 
         Console.ReadLine();

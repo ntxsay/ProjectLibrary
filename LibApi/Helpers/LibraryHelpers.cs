@@ -1,6 +1,7 @@
 ﻿using AppHelpers;
 using AppHelpers.Strings;
 using LibApi.Models.Local.SQLite;
+using LibShared;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -12,7 +13,7 @@ namespace LibApi.Helpers
 {
     public class LibraryHelpers
     {
-        internal async Task<IEnumerable<T>> OrderAsync<T>(SortBy sortBy = SortBy.Name, OrderBy orderBy = OrderBy.Croissant, long? idLibrary = null) where T : class
+        internal async Task<IEnumerable<T>> OrderAsync<T>(SortBy sortBy = SortBy.Name, OrderBy orderBy = OrderBy.Ascending, long? idLibrary = null) where T : class
         {
             try
             {
@@ -48,7 +49,7 @@ namespace LibApi.Helpers
         }
 
 
-        protected IEnumerable<T> Order<T>(IEnumerable<T> modelList, OrderBy orderBy = OrderBy.Croissant, SortBy sortBy = SortBy.Name) where T : class
+        protected IEnumerable<T> Order<T>(IEnumerable<T> modelList, OrderBy orderBy = OrderBy.Ascending, SortBy sortBy = SortBy.Name) where T : class
         {
             try
             {
@@ -61,22 +62,22 @@ namespace LibApi.Helpers
                 {
                     if (sortBy == SortBy.Name)
                     {
-                        if (orderBy == OrderBy.Croissant)
+                        if (orderBy == OrderBy.Ascending)
                         {
                             return librariesModel.Where(w => w != null && !w.Name.IsStringNullOrEmptyOrWhiteSpace()).OrderBy(o => o.Name).Select(s => (T)(object)s);
                         }
-                        else if (orderBy == OrderBy.DCroissant)
+                        else if (orderBy == OrderBy.Descending)
                         {
                             return librariesModel.Where(w => w != null && !w.Name.IsStringNullOrEmptyOrWhiteSpace()).OrderByDescending(o => o.Name).Select(s => (T)(object)s);
                         }
                     }
                     else if (sortBy == SortBy.DateCreation)
                     {
-                        if (orderBy == OrderBy.Croissant)
+                        if (orderBy == OrderBy.Ascending)
                         {
                             return librariesModel.OrderBy(o => o.DateAjout).Select(s => (T)(object)s);
                         }
-                        else if (orderBy == OrderBy.DCroissant)
+                        else if (orderBy == OrderBy.Descending)
                         {
                             return librariesModel.OrderByDescending(o => o.DateAjout).Select(s => (T)(object)s);
                         }
@@ -86,22 +87,22 @@ namespace LibApi.Helpers
                 {
                     if (sortBy == SortBy.Name)
                     {
-                        if (orderBy == OrderBy.Croissant)
+                        if (orderBy == OrderBy.Ascending)
                         {
                             return booksModel.Where(w => w != null && !w.MainTitle.IsStringNullOrEmptyOrWhiteSpace()).OrderBy(o => o.MainTitle).Select(s => (T)(object)s);
                         }
-                        else if (orderBy == OrderBy.DCroissant)
+                        else if (orderBy == OrderBy.Descending)
                         {
                             return booksModel.Where(w => w != null && !w.MainTitle.IsStringNullOrEmptyOrWhiteSpace()).OrderByDescending(o => o.MainTitle).Select(s => (T)(object)s);
                         }
                     }
                     else if (sortBy == SortBy.DateCreation)
                     {
-                        if (orderBy == OrderBy.Croissant)
+                        if (orderBy == OrderBy.Ascending)
                         {
                             return booksModel.OrderBy(o => o.DateAjout).Select(s => (T)(object)s);
                         }
-                        else if (orderBy == OrderBy.DCroissant)
+                        else if (orderBy == OrderBy.Descending)
                         {
                             return booksModel.OrderByDescending(o => o.DateAjout).Select(s => (T)(object)s);
                         }

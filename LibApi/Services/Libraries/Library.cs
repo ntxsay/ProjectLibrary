@@ -5,6 +5,7 @@ using AppHelpers.Serialization;
 using AppHelpers.Strings;
 using LibApi.Helpers;
 using LibApi.Models.Local.SQLite;
+using LibShared;
 using LibShared.ViewModels.Libraries;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,48 +13,46 @@ namespace LibApi.Services.Libraries
 {
 	public class Library : LibraryVM
 	{
+        public Library()
+        {
+
+        }
+
+        /// <summary>
+        /// Initialise une nouvelle instance de l'objet <see cref="Library"/> afin créer une nouvelle bibliothèque puis d'interagir avec elle.
+        /// </summary>
+        /// <param name="name">Nom de la nouvelle bibliothèque</param>
+        /// <param name="description">Description de la nouvelle bibliothèque</param>
+        /// <remarks>Remarque : Pour ajouter la bibliothèque dans la base de données, appelez la méthode <see cref="CreateAsync"/></remarks>
+        public Library(string name, string? description = null)
+        {
+            Name = name.Trim();
+            Description = description?.Trim();
+        }
+
         readonly LibraryHelpers libraryHelpers = new ();
 
         /// <summary>
-        /// Obtient toutes bibliothèques trié par nom et par ordre croissant
+        /// Obtient toutes bibliothèques trié par nom et par ordre croissant ou décroissant
         /// </summary>
         /// <returns></returns>
-        public static async Task<Tlibrary[]> OrderByAscendingNameAsync() => (await new LibraryHelpers().OrderAsync<Tlibrary>(SortBy.Name, OrderBy.Croissant))?.ToArray() ?? Array.Empty<Tlibrary>();
-
-        /// <summary>
-        /// Obtient toutes bibliothèques trié par nom et par ordre décroissant
-        /// </summary>
-        /// <returns></returns>
-        public static async Task<Tlibrary[]> OrderByDescendingNameAsync() => (await new LibraryHelpers().OrderAsync<Tlibrary>(SortBy.Name, OrderBy.DCroissant))?.ToArray() ?? Array.Empty<Tlibrary>();
-
-        /// <summary>
-        /// Obtient toutes bibliothèques trié par date d'ajout et par ordre croissant
-        /// </summary>
-        /// <returns></returns>
-        public static async Task<Tlibrary[]> OrderByAscendingDateCreationAsync() => (await new LibraryHelpers().OrderAsync<Tlibrary>(SortBy.DateCreation, OrderBy.Croissant))?.ToArray() ?? Array.Empty<Tlibrary>();
-
-        /// <summary>
-        /// Obtient toutes bibliothèques trié par date d'ajout et par ordre décroissant
-        /// </summary>
-        /// <returns></returns>
-        public static async Task<Tlibrary[]> OrderByDescendingDateCreationAsync() => (await new LibraryHelpers().OrderAsync<Tlibrary>(SortBy.DateCreation, OrderBy.DCroissant))?.ToArray() ?? Array.Empty<Tlibrary>();
+        public static async Task<Tlibrary[]> OrderByNameAsync(OrderBy orderBy = OrderBy.Ascending) => (await new LibraryHelpers().OrderAsync<Tlibrary>(SortBy.Name, orderBy))?.ToArray() ?? Array.Empty<Tlibrary>();
 
 
         /// <summary>
-        /// Obtient tous les livres de la bibliothèque trié par nom et par ordre croissant
+        /// Obtient toutes bibliothèques trié par date d'ajout et par ordre croissant ou décroissant
         /// </summary>
         /// <returns></returns>
-        public async Task<IEnumerable<Tbook>> OrderBooksByAscendingNameAsync() => await libraryHelpers.OrderAsync<Tbook>(SortBy.Name, OrderBy.Croissant);
+        public static async Task<Tlibrary[]> OrderByDateCreationAsync(OrderBy orderBy = OrderBy.Ascending) => (await new LibraryHelpers().OrderAsync<Tlibrary>(SortBy.DateCreation, orderBy))?.ToArray() ?? Array.Empty<Tlibrary>();
+
 
         /// <summary>
-        /// Obtient tous les livres de la bibliothèque trié par nom et par ordre décroissant
+        /// Obtient tous les livres de la bibliothèque trié par nom et par ordre croissant ou décroissant
         /// </summary>
         /// <returns></returns>
-        public async Task<IEnumerable<Tbook>> OrderBooksByDescendingNameAsync() => await libraryHelpers.OrderAsync<Tbook>(SortBy.Name, OrderBy.DCroissant);
+        public async Task<IEnumerable<Tbook>> OrderBooksByNameAsync(OrderBy orderBy = OrderBy.Ascending) => await libraryHelpers.OrderAsync<Tbook>(SortBy.Name, orderBy);
 
-        public Library()
-		{
-		}
+        
 
         #region CRUD
         /// <summary>
@@ -114,13 +113,13 @@ namespace LibApi.Services.Libraries
         /// Met à jour la bibliothèque dans la base de données
         /// </summary>
         /// <returns></returns>
-        public async Task<bool> UpdateAsync()
+        public async Task<bool> UpdateNameAsync(string value)
         {
             try
             {
-                if (Name.IsStringNullOrEmptyOrWhiteSpace())
+                if (value.IsStringNullOrEmptyOrWhiteSpace())
                 {
-                    throw new ArgumentNullException(nameof(Name), "Le nom de la bibliothèque ne peut pas être nulle, vide ou ne contenir que des espaces blancs.");
+                    throw new ArgumentNullException(nameof(value), "Le nom de la bibliothèque ne peut pas être nulle, vide ou ne contenir que des espaces blancs.");
                 }
 
                 using LibrarySqLiteDbContext context = new();
@@ -128,45 +127,86 @@ namespace LibApi.Services.Libraries
                 Tlibrary? tlibrary = await context.Tlibraries.SingleOrDefaultAsync(s => s.Id == Id);
                 if (tlibrary == null)
                 {
-                    throw new ArgumentNullException(nameof(Tlibrary), $"La bibliothèque n'existe pas avec l'id \"{Id}\".");
+                    throw new ArgumentNullException(nameof(tlibrary), $"La bibliothèque n'existe pas avec l'id \"{Id}\".");
                 }
 
-                bool isExist = await context.Tlibraries.AnyAsync(c => c.Id != Id && c.Name.ToLower() == Name.ToLower());
+                bool isExist = await context.Tlibraries.AnyAsync(c => c.Id != Id && c.Name.ToLower() == value.ToLower());
                 if (isExist)
                 {
-                    Logs.Log(nameof(Library), nameof(UpdateAsync), "Cette bibliothèque existe déjà");
+                    Logs.Log(nameof(Library), nameof(UpdateNameAsync), "Cette bibliothèque existe déjà");
                     return false;
                 }
 
                 DateTime dateEdition = DateTime.Now;
-
-                tlibrary.Name = this.Name;
-                tlibrary.Description = this.Description;
+                tlibrary.Name = value.Trim();
                 tlibrary.DateEdition = dateEdition.ToString();
 
                 context.Tlibraries.Update(tlibrary);
                 _ = await context.SaveChangesAsync();
 
                 DateEdition = dateEdition;
+                Name = tlibrary.Name;
 
                 return true;
             }
             catch (ArgumentNullException ex)
             {
-                Logs.Log(nameof(Library), nameof(UpdateAsync), ex);
+                Logs.Log(nameof(Library), nameof(UpdateNameAsync), ex);
                 return false;
             }
             catch (OperationCanceledException ex)
             {
-                Logs.Log(nameof(Library), nameof(UpdateAsync), ex);
+                Logs.Log(nameof(Library), nameof(UpdateNameAsync), ex);
                 return false;
             }
             catch (Exception ex)
             {
-                Logs.Log(nameof(Library), nameof(UpdateAsync), ex);
+                Logs.Log(nameof(Library), nameof(UpdateNameAsync), ex);
                 return false;
             }
         }
+
+        public async Task<bool> UpdateDescriptionAsync(string? value = null)
+        {
+            try
+            {
+                using LibrarySqLiteDbContext context = new();
+
+                Tlibrary? tlibrary = await context.Tlibraries.SingleOrDefaultAsync(s => s.Id == Id);
+                if (tlibrary == null)
+                {
+                    throw new ArgumentNullException(nameof(tlibrary), $"La bibliothèque n'existe pas avec l'id \"{Id}\".");
+                }
+
+                DateTime dateEdition = DateTime.Now;
+                tlibrary.Description = value?.Trim();
+                tlibrary.DateEdition = dateEdition.ToString();
+
+                context.Tlibraries.Update(tlibrary);
+                _ = await context.SaveChangesAsync();
+
+                DateEdition = dateEdition;
+                Description = tlibrary.Description;
+
+                return true;
+            }
+            catch (ArgumentNullException ex)
+            {
+                Logs.Log(nameof(Library), nameof(UpdateDescriptionAsync), ex);
+                return false;
+            }
+            catch (OperationCanceledException ex)
+            {
+                Logs.Log(nameof(Library), nameof(UpdateDescriptionAsync), ex);
+                return false;
+            }
+            catch (Exception ex)
+            {
+                Logs.Log(nameof(Library), nameof(UpdateDescriptionAsync), ex);
+                return false;
+            }
+        }
+
 
         /// <summary>
         /// Supprime la bibliothèque de la base de données
@@ -191,17 +231,17 @@ namespace LibApi.Services.Libraries
             }
             catch (ArgumentNullException ex)
             {
-                Logs.Log(nameof(Library), nameof(UpdateAsync), ex);
+                Logs.Log(nameof(Library), nameof(DeleteAsync), ex);
                 return false;
             }
             catch (OperationCanceledException ex)
             {
-                Logs.Log(nameof(Library), nameof(UpdateAsync), ex);
+                Logs.Log(nameof(Library), nameof(DeleteAsync), ex);
                 return false;
             }
             catch (Exception ex)
             {
-                Logs.Log(nameof(Library), nameof(UpdateAsync), ex);
+                Logs.Log(nameof(Library), nameof(DeleteAsync), ex);
                 return false;
             }
         }
