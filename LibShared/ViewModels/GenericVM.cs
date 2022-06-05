@@ -8,16 +8,16 @@ using System.Threading.Tasks;
 
 namespace LibShared.ViewModels
 {
-    public class GenericVM : INotifyPropertyChanged
+    public abstract class GenericVM : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler? PropertyChanged = delegate { };
 
-        public long Id { get; protected set; }
-        public virtual Guid Guid { get; protected set; } = Guid.NewGuid();
+        public long Id { get;  protected set; }
+        public virtual Guid Guid { get;  protected set; } = Guid.NewGuid();
 
-        public virtual DateTime DateAjout { get; protected set; } = DateTime.Now;
+        public virtual DateTime DateAjout { get;  protected set; } = DateTime.Now;
 
-        public virtual DateTime? DateEdition { get; protected set; }
+        public virtual DateTime? DateEdition { get;  protected set; }
 
         protected string _Name = string.Empty;
         public string Name

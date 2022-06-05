@@ -86,7 +86,7 @@ namespace LibShared.ViewModels.Contacts
         public ObservableCollection<ContactRoleVM> ContactRoles
         {
             get => _ContactRoles;
-            set
+            protected set
             {
                 if (_ContactRoles != value)
                 {
@@ -100,7 +100,7 @@ namespace LibShared.ViewModels.Contacts
         public string? TitreCivilite
         {
             get => _TitreCivilite;
-            set
+            protected set
             {
                 if (_TitreCivilite != value)
                 {
@@ -114,7 +114,7 @@ namespace LibShared.ViewModels.Contacts
         public string? NomNaissance
         {
             get => _NomNaissance;
-            set
+            protected set
             {
                 if (_NomNaissance != value)
                 {
@@ -128,7 +128,7 @@ namespace LibShared.ViewModels.Contacts
         public string? NomUsage
         {
             get => _NomUsage;
-            set
+            protected set
             {
                 if (_NomUsage != value)
                 {

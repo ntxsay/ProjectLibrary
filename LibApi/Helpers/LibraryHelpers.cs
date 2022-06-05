@@ -39,7 +39,8 @@ namespace LibApi.Helpers
                     return Order(modelList.Select(s => (T)(object)s), orderBy, sortBy);
                 }
 
-                return Enumerable.Empty<T>();
+                throw new NotSupportedException($"Le type {typeof(T)} n'est pas supporté dans la méthode {nameof(OrderAsync)}.");
+                //return Enumerable.Empty<T>();
             }
             catch (Exception ex)
             {
@@ -49,7 +50,7 @@ namespace LibApi.Helpers
         }
 
 
-        protected IEnumerable<T> Order<T>(IEnumerable<T> modelList, OrderBy orderBy = OrderBy.Ascending, SortBy sortBy = SortBy.Name) where T : class
+        public IEnumerable<T> Order<T>(IEnumerable<T> modelList, OrderBy orderBy = OrderBy.Ascending, SortBy sortBy = SortBy.Name) where T : class
         {
             try
             {
@@ -82,6 +83,10 @@ namespace LibApi.Helpers
                             return librariesModel.OrderByDescending(o => o.DateAjout).Select(s => (T)(object)s);
                         }
                     }
+                    else
+                    {
+                        throw new NotSupportedException($"{sortBy} n'est pas supporté dans le type {typeof(T)}.");
+                    }
                 }
                 else if (modelList is IEnumerable<Tbook> booksModel)
                 {
@@ -109,8 +114,8 @@ namespace LibApi.Helpers
                     }
                 }
 
-
-                return Enumerable.Empty<T>();
+                throw new NotSupportedException($"Le type {typeof(T)} n'est pas supporté dans la méthode {nameof(Order)}.");
+                //return Enumerable.Empty<T>();
             }
             catch (Exception ex)
             {

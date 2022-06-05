@@ -11,11 +11,23 @@ namespace AppHelpers.Serialization
 {
     public static class JsonSerializationExtensions
     {
+        /// <summary>
+        /// Retourne une chaîne de caractère représentant l'objet convertit au format JSON
+        /// </summary>
+        /// <typeparam name="T">Type de l'objet</typeparam>
+        /// <param name="self">L'objet à convertir</param>
+        /// <returns></returns>
         public static string? GetJsonDataString<T>(this T self) where T : class
         {
             return JsonSerialization.SerializeObjectToString(self);
         }
 
+        /// <summary>
+        /// Retourne une chaîne de caractère représentant un tableau d'objets convertit au format JSON
+        /// </summary>
+        /// <typeparam name="T">Type de l'objet</typeparam>
+        /// <param name="self">tableau d'objets à convertir</param>
+        /// <returns></returns>
         public static string? GetJsonDataString<T>(this IEnumerable<T> self) where T : class
         {
             return JsonSerialization.SerializeObjectToString(self);

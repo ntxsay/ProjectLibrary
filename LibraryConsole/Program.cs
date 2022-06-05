@@ -15,6 +15,7 @@ Console.WriteLine("Role Name Updated : " + await contactRole.UpdateNameAsync("Al
 Console.WriteLine("Role Description Updated : " + await contactRole.UpdateDescriptionAsync("Marshall" + DateTime.Now.ToString()));
 Console.WriteLine(contactRole.GetJsonDataString());
 Console.ReadLine();
+
 ContactType contactType = new("Ak12" + DateTime.Now.ToString(), null);
 var isTypeCreated = await contactType.CreateAsync();
 Console.WriteLine("Type Created : " + isTypeCreated);
@@ -24,7 +25,7 @@ Console.WriteLine(contactType.GetJsonDataString());
 Console.ReadLine();
 
 Library? library = null;
-await CreateLibrary();
+CreateLibrary();
 await ListLibraries();
 await UpdateLibrary();
 await DeleteLibrary();
@@ -32,7 +33,7 @@ await DeleteLibrary();
 Console.ReadLine();
 
 
- async Task CreateLibrary()
+void CreateLibrary()
 {
     try
     {
@@ -44,13 +45,14 @@ Console.ReadLine();
             libraryName = Console.ReadLine();
         }
 
-        library = new(libraryName, null);
 
-        var isCreated = await library.CreateAsync();
+        library = new(libraryName, null);
+        var isCreated = library.Id != 0;
         if (isCreated)
         {
             Console.WriteLine("Created with ID : " + library.Id);
             Console.WriteLine(library.GetJsonDataString());
+
         }
         else
         {
@@ -69,15 +71,17 @@ async Task ListLibraries()
 {
     try
     {
+        library = null;
         if (library == null)
         {
+            library = (await Library.GetSingleAsync(1))?.ConvertToObject();
             return;
         }
 
         Console.WriteLine("Liste des bibliothèques. Nombre maximum de page : " + maxitemPerPage);
         var countLibrary = await Library.CountAsync();
         Console.WriteLine("Compter nombre de bibliothèque : " + countLibrary);
-        var orderedItems = await Library.OrderByDateCreationAsync();
+        var orderedItems = (await Library.GetAllAsync()).OrderItemsBy(LibShared.OrderBy.Ascending, LibShared.SortBy.Name);
         int countPage = orderedItems.CountPages(maxitemPerPage);
         Console.WriteLine("Compter nombre de page : " + countPage);
         for (int i = 1; i < countPage + 1; i++)
