@@ -10,4 +10,10 @@
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Remove="ViewModels\Collections\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="ViewModels\Collections\" />
+  </ItemGroup>
 </Project>

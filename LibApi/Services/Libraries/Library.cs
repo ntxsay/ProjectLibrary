@@ -281,6 +281,7 @@ namespace LibApi.Services.Libraries
                 {
                     throw new ArgumentNullException(nameof(name), "Le nom de la collection ne peut pas être nulle, vide ou ne contenir que des espaces blancs.");
                 }
+
                 using LibrarySqLiteDbContext context = new();
                 bool isExist = await context.Tcollections.AnyAsync(c => c.Name.ToLower() == name.ToLower());
                 if (isExist)
