@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:LibWpfTest"
+        xmlns:local="clr-namespace:LibWpfTest" xmlns:libraries="clr-namespace:LibShared.ViewModels.Libraries;assembly=LibShared" d:DataContext="{d:DesignInstance Type=libraries:LibraryVM}"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
     <Grid>
@@ -29,7 +29,7 @@
                                     <ColumnDefinition Width="*" />
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Text="Nom de la bibliothèque :" Margin="0 0 10 0"/>
-                                <TextBox Grid.Column="1" x:Name="tbxLibraryName" />
+                                <TextBox Grid.Column="1" x:Name="tbxLibraryName" Text="{Binding Name, Mode=TwoWay}"/>
                             </Grid>
                             <Grid Grid.Row="1">
                                 <Grid.RowDefinitions>
@@ -37,7 +37,7 @@
                                     <RowDefinition Height="auto" />
                                 </Grid.RowDefinitions>
                                 <TextBlock Text="Description de la bibliothèque :" Margin="0 0 10 0"/>
-                                <TextBox Grid.Column="1" x:Name="tbxLibraryDescription" Height="100"/>
+                                <TextBox Grid.Column="1" x:Name="tbxLibraryDescription" Height="100" Text="{Binding Description, Mode=TwoWay}"/>
                             </Grid>
                             <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0 20">
                                 <Button x:Name="BtnAJouter" Click="BtnAJouter_Click">Ajouter</Button>

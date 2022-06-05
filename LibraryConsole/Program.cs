@@ -52,7 +52,6 @@ void CreateLibrary()
         {
             Console.WriteLine("Created with ID : " + library.Id);
             Console.WriteLine(library.GetJsonDataString());
-
         }
         else
         {

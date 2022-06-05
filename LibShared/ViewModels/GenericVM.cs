@@ -20,10 +20,10 @@ namespace LibShared.ViewModels
         public virtual DateTime? DateEdition { get;  protected set; }
 
         protected string _Name = string.Empty;
-        public string Name
+        public virtual string Name
         {
             get => _Name;
-            protected set
+            set
             {
                 if (_Name != value)
                 {
@@ -34,10 +34,10 @@ namespace LibShared.ViewModels
         }
 
         protected string? _Description = string.Empty;
-        public string? Description
+        public virtual string? Description
         {
             get => _Description;
-            protected set
+            set
             {
                 if (_Description != value)
                 {

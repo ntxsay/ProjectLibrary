@@ -7,4 +7,10 @@
     <UseWPF>true</UseWPF>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\AppHelpers\AppHelpers.csproj" />
+    <ProjectReference Include="..\LibApi\LibApi.csproj" />
+    <ProjectReference Include="..\LibShared\LibShared.csproj" />
+  </ItemGroup>
+
 </Project>

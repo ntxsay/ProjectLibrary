@@ -13,14 +13,46 @@ using LibShared.ViewModels;
 
 namespace LibApi.Services.Libraries
 {
-	public sealed class Library : LibraryVM
+	public class Library : LibraryVM
 	{
         readonly LibraryHelpers libraryHelpers = new();
 
+        //public override Guid Guid { get; protected set; } = Guid.NewGuid();
+
+        //public virtual DateTime DateAjout { get; protected set; } = DateTime.Now;
+
+        //public virtual DateTime? DateEdition { get; protected set; }
+
+        public new string Name
+        {
+            get => _Name;
+            protected set
+            {
+                if (_Name != value)
+                {
+                    _Name = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public new string? Description
+        {
+            get => _Description;
+            protected set
+            {
+                if (_Description != value)
+                {
+                    _Description = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
         #region Constructeurs
         /// <summary>
-            /// Possibilité d'instancier ce constructeur qu'en interne.
-            /// </summary>
+        /// Possibilité d'instancier ce constructeur qu'en interne.
+        /// </summary>
         private Library()
         {
 
@@ -341,7 +373,7 @@ namespace LibApi.Services.Libraries
         /// <summary>
         /// Convertit un model en Model de vue
         /// </summary>
-        /// <param name="model"></param>
+        /// <param name="model">Modèle de données</param>
         /// <returns></returns>
         public static Library? ConvertToViewModel(Tlibrary model)
         {

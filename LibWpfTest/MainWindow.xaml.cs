@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using LibShared.ViewModels.Libraries;
 
 namespace LibWpfTest
 {
@@ -23,11 +24,15 @@ namespace LibWpfTest
         public MainWindow()
         {
             InitializeComponent();
+            this.DataContext = new LibraryVM();
         }
 
         private void BtnAJouter_Click(object sender, RoutedEventArgs e)
         {
-
+            if (this.DataContext is LibraryVM libraryVM)
+            {
+                
+            }
         }
     }
 }
