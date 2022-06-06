@@ -1,6 +1,6 @@
 ﻿# Fonctionnement de la LibAPI
 
-LibAPI (de Library Application Programing Interface) est une bibliothèque de classe développée avec .NET 6.0 qui vous permet de créer et de gérer une ou des bibliothèques de livres dans une base de données SQLite.
+LibAPI (de Library Application Programing Interface) est une bibliothèque de classe développée avec C# .NET 6.0 qui vous permet de créer et de gérer une ou des bibliothèques de livres dans une base de données SQLite.
 
 ## Gestion d'une bibliothèque 
 
