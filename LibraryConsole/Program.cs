@@ -119,13 +119,13 @@ async Task UpdateLibrary()
             Console.WriteLine("Entrez un nom de bibliothèque valide");
             name = Console.ReadLine();
         }
-        var isNameUpdated = await library.UpdateNameAsync(name);
+        var isNameUpdated = await library.UpdateAsync(name);
         Console.WriteLine("Name Updated : " + isNameUpdated);
 
         Console.WriteLine("Entrez une description à la bibliothèque");
         string description = Console.ReadLine();
 
-        var isDescUpdated = await library.UpdateDescriptionAsync(description);
+        var isDescUpdated = await library.UpdateAsync(null, description);
         Console.WriteLine("Description Updated : " + isDescUpdated);
         Console.WriteLine(library.GetJsonDataString());
 

@@ -32,21 +32,7 @@ namespace LibApi.Extensions
             }
             catch (Exception ex)
             {
-                Logs.Log(nameof(LibraryExtensions), nameof(OrderByName), ex);
-                return Enumerable.Empty<T>();
-            }
-        }
-
-        public static IEnumerable<T> OrderByName<T>(this IEnumerable<T> self, OrderBy orderBy = OrderBy.Ascending) where T : class
-        {
-            try
-            {
-                LibraryHelpers libraryHelpers = new();
-                return libraryHelpers.Order(self, orderBy, SortBy.Name) ?? Enumerable.Empty<T>();
-            }
-            catch (Exception ex)
-            {
-                Logs.Log(nameof(LibraryExtensions), nameof(OrderByName), ex);
+                Logs.Log(nameof(LibraryExtensions), nameof(OrderItemsBy), ex);
                 return Enumerable.Empty<T>();
             }
         }

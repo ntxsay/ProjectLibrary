@@ -49,7 +49,6 @@ namespace LibApi.Helpers
             }
         }
 
-
         public IEnumerable<T> Order<T>(IEnumerable<T> modelList, OrderBy orderBy = OrderBy.Ascending, SortBy sortBy = SortBy.Name) where T : class
         {
             try

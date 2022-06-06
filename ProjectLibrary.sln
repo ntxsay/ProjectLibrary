@@ -13,7 +13,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibraryWinUI", "LibraryWinU
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibWpfTest", "LibWpfTest\LibWpfTest.csproj", "{221132C4-DC9A-4459-B56F-28AF7B9938E5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibShared", "LibShared\LibShared.csproj", "{2D796017-EDBE-45F7-84B5-4EFE64CE0BE7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibShared", "LibShared\LibShared.csproj", "{2D796017-EDBE-45F7-84B5-4EFE64CE0BE7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibTest", "LibTest\LibTest.csproj", "{829FD588-190C-4E25-81EF-23464123E88B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -131,6 +133,22 @@ Global
 		{2D796017-EDBE-45F7-84B5-4EFE64CE0BE7}.Release|x64.Build.0 = Release|Any CPU
 		{2D796017-EDBE-45F7-84B5-4EFE64CE0BE7}.Release|x86.ActiveCfg = Release|Any CPU
 		{2D796017-EDBE-45F7-84B5-4EFE64CE0BE7}.Release|x86.Build.0 = Release|Any CPU
+		{829FD588-190C-4E25-81EF-23464123E88B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{829FD588-190C-4E25-81EF-23464123E88B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{829FD588-190C-4E25-81EF-23464123E88B}.Debug|arm64.ActiveCfg = Debug|Any CPU
+		{829FD588-190C-4E25-81EF-23464123E88B}.Debug|arm64.Build.0 = Debug|Any CPU
+		{829FD588-190C-4E25-81EF-23464123E88B}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{829FD588-190C-4E25-81EF-23464123E88B}.Debug|x64.Build.0 = Debug|Any CPU
+		{829FD588-190C-4E25-81EF-23464123E88B}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{829FD588-190C-4E25-81EF-23464123E88B}.Debug|x86.Build.0 = Debug|Any CPU
+		{829FD588-190C-4E25-81EF-23464123E88B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{829FD588-190C-4E25-81EF-23464123E88B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{829FD588-190C-4E25-81EF-23464123E88B}.Release|arm64.ActiveCfg = Release|Any CPU
+		{829FD588-190C-4E25-81EF-23464123E88B}.Release|arm64.Build.0 = Release|Any CPU
+		{829FD588-190C-4E25-81EF-23464123E88B}.Release|x64.ActiveCfg = Release|Any CPU
+		{829FD588-190C-4E25-81EF-23464123E88B}.Release|x64.Build.0 = Release|Any CPU
+		{829FD588-190C-4E25-81EF-23464123E88B}.Release|x86.ActiveCfg = Release|Any CPU
+		{829FD588-190C-4E25-81EF-23464123E88B}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
