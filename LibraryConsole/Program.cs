@@ -25,7 +25,7 @@ Console.WriteLine(contactType.GetJsonDataString());
 Console.ReadLine();
 
 Library? library = null;
-CreateLibrary();
+await CreateLibrary();
 await ListLibraries();
 await UpdateLibrary();
 await DeleteLibrary();
@@ -33,7 +33,7 @@ await DeleteLibrary();
 Console.ReadLine();
 
 
-void CreateLibrary()
+async Task CreateLibrary()
 {
     try
     {
@@ -46,7 +46,7 @@ void CreateLibrary()
         }
 
 
-        library = new(libraryName, null);
+        library = await Library.CreateAsync(libraryName, null);
         var isCreated = library.Id != 0;
         if (isCreated)
         {

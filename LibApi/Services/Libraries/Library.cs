@@ -11,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using LibApi.Extensions;
 using LibShared.ViewModels;
 using LibApi.Services.Collections;
+using AppHelpers.Dates;
 
 namespace LibApi.Services.Libraries
 {
@@ -77,27 +78,21 @@ namespace LibApi.Services.Libraries
 
         }
 
-        private Library(long id, string name, string? description = null)
-        {
-
-        }
-
         private Library(LibraryVM viewModel)
         {
+            if (viewModel == null)
+            {
+                throw new ArgumentNullException(nameof(viewModel), "Le modèle de données ne peut pas être nulle.");
+            }
 
+            Id = viewModel.Id;
+            Guid = viewModel.Guid;
+            DateAjout = viewModel.DateAjout;
+            DateEdition = viewModel.DateEdition;
+            Name = viewModel.Name;
+            Description = viewModel.Description;
         }
 
-        /// <summary>
-        /// Initialise une nouvelle instance de l'objet <see cref="Library"/> afin créer une nouvelle bibliothèque puis d'interagir avec elle.
-        /// </summary>
-        /// <param name="name">Nom de la nouvelle bibliothèque</param>
-        /// <param name="description">Description de la nouvelle bibliothèque</param>
-        /// <remarks>Remarque : Lors de l'instanciation, la bibliothèque est créée dans la base de données sinon une exception est levée.</remarks>
-        public Library(string name, string? description = null)
-        {
-            using Task creationtask = Task.Run(() => CreateAsync(name, description));
-            creationtask.Wait();
-        }
         #endregion
 
         /// <summary>
@@ -174,7 +169,7 @@ namespace LibApi.Services.Libraries
 
         #region CRUD
         /// <summary>
-        /// Ajoute la bibliothèque dans la base de données
+        /// Ajoute une nouvelle bibliothèque dans la base de données
         /// </summary>
         /// <returns></returns>
         public static async Task<Library?> CreateAsync(string name, string? description = null)
@@ -190,8 +185,7 @@ namespace LibApi.Services.Libraries
             if (existingItem != null)
             {
                 Logs.Log(nameof(Library), nameof(CreateAsync), "Cette bibliothèque existe déjà");
-                Library _library = new(existingItem.Id, existingItem.Name, existingItem.Description);
-                return _library;
+                return ConvertToViewModel(existingItem);
             }
 
             var _dateAjout = DateTime.UtcNow;
@@ -208,14 +202,7 @@ namespace LibApi.Services.Libraries
             await context.Tlibraries.AddAsync(record);
             await context.SaveChangesAsync();
 
-            Library library = new(record.Id, record.Name, record.Description);
-            return library;
-
-            Id = tlibrary.Id;
-            Guid = _guid;
-            DateAjout = _dateAjout;
-            Name = tlibrary.Name;
-            Description = tlibrary.Description;
+            return ConvertToViewModel(record);
         }
 
         /// <summary>
@@ -454,9 +441,9 @@ namespace LibApi.Services.Libraries
                 Library viewModel = new ()
                 {
                     Id = model.Id,
-                    //DateAjout = DatesHelpers.Converter.GetDateFromString(model.DateAjout),
-                    //DateEdition = DatesHelpers.Converter.GetNullableDateFromString(model.DateEdition),
-                    Description = model.Description ?? "",
+                    DateAjout = DateHelpers.Converter.GetDateFromString(model.DateAjout),
+                    DateEdition = DateHelpers.Converter.GetNullableDateFromString(model.DateEdition),
+                    Description = model.Description,
                     Name = model.Name,
                     Guid = isGuidCorrect ? guid : Guid.Empty,
                 };
