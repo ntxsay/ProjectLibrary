@@ -13,7 +13,7 @@ La collection est constituée par un ensemble de livres d’un même éditeur qu
 
 ### Créer une bibliothèque
 
-Tapez l'espace de nom  `using LibApi.Services.Libraries;`  dans votre fichier ensuite déclarez une variable de type  `Library?`  nommée  `library`  puis appelez la méthode asynchrone statique  `await Library.CreateAsync("nom_de_votre_bibliotheque", ["description_de_votre_description"]);`  dans une méthode asynchrone.
+Ajoutez l'espace de nom  `using LibApi.Services.Libraries;`  dans votre fichier ensuite déclarez une variable de type  `Library?`  nommée  `library`  puis appelez la méthode asynchrone statique  `await Library.CreateAsync("nom_de_votre_bibliotheque", ["description_de_votre_description"]);`  dans une méthode asynchrone.
 
     using LibApi.Services.Libraries;
     public async void NewLibrary()
@@ -119,33 +119,90 @@ Appelez la méthode asynchrone  `DeleteAsync();`  de la variable  `library`  pui
 
 ### Ajouter une collection
 
-Appelez ou déclarez une variable de type `Library` en créant ou en récupérant une bibliothèque existante avec l'une des méthodes citées ci-dessus ensuite déclarez une autre variable de type `Collection?` nommée `collection` puis appelez la méthode asynchrone  `AddCollectionAsync("nom_de_votre_collection", ["description_de_votre_collection"]);` 
+Ajoutez l'espace de nom  `using LibApi.Services.Collections;`  dans votre fichier ensuite, appelez ou déclarez une variable de type `Library` en créant ou en récupérant une bibliothèque existante avec l'une des méthodes citées ci-dessus ensuite déclarez une autre variable de type `Collection?` nommée `collection` puis appelez la méthode asynchrone  `AddCollectionAsync("nom_de_votre_collection", ["description_de_votre_collection"]);` 
 
+    using LibApi.Services.Libraries;
+    using LibApi.Services.Collections;
+    
     public async void NewLibraryAndAddCollection()
     {
         Library? library = await Library.CreateAsync("Capucine", "Contient les livres de tante Suzie");
-        Collection? collection = await library.AddCollectionAsync("Le petit futé", "Coté ");
-        if (collection != null)
+        if (library != null)
         {
-            bool _bool = await collection.UpdateAsync("Moi et les monstre");
-            var jsonString = collection.GetJsonDataString();
-            Console.WriteLine(jsonString);
+	        Collection? collection = await library.AddCollectionAsync("Le petit futé", "Coté ");
+	        if (collection != null)
+	        {
+	           //...
+	        }
         }
+        
     }
 
 ### Mettre à jour une collection
 
 Appelez la méthode asynchrone  `UpdateAsync(["nouveau_nom"], ["nouvelle_description"]);`  de la variable  `collection`  .
 
+    public async void NewLibraryAndAddCollectionAndUpdateCollection()
+     {
+         Library? library = await Library.CreateAsync("Capucine", "Contient les livres de tante Suzie");
+         if (library != null)
+         {
+             Collection? collection = await library.AddCollectionAsync("Le petit fute", "Ma description");
+             if (collection != null)
+             {
+                 await collection.UpdateAsync("Moi et les monstre", "La collection des monstres");
+             }
+         }
+     }
+
 Pour mettre à jour uniquement le nom de la collection, vous devez renseigner le premier paramètre et garder le second  `null`  _(afin pour d'éviter la modification de la description à votre insu)_.
 
+    public async void NewLibraryAndAddCollectionAndUpdateCollection()
+    {
+        Library? library = await Library.CreateAsync("Capucine", "Contient les livres de tante Suzie");
+        if (library != null)
+        {
+            Collection? collection = await library.AddCollectionAsync("Le petit fute", "Ma description");
+            if (collection != null)
+            {
+                await collection.UpdateAsync("Moi et les monstre", null);
+            }
+        }
+    }
+
 Pour mettre à jour uniquement sa description, assurez-vous de garder le premier paramètre vide  _(`""`)_  ou  `null`  _(afin pour d'éviter la modification du nom à votre insu)_  puis tapez la nouvelle description dans le second paramètre.
+
+    public async void NewLibraryAndAddCollectionAndUpdateCollection()
+    {
+        Library? library = await Library.CreateAsync("Capucine", "Contient les livres de tante Suzie");
+        if (library != null)
+        {
+            Collection? collection = await library.AddCollectionAsync("Le petit fute", "Ma description");
+            if (collection != null)
+            {
+                await collection.UpdateAsync(null, "La collection des monstres");
+            }
+        }
+    }
 
 Attention : Si les deux paramètres sont vide ou  `null`  ou que la méthode asynchrone  `DeleteAsync()`  ait été appelée avant celle-ci et qu'elle ait retournée la valeur  `true`, alors une  `NotSupportedException`  est levée et retourne la valeur  `false`.
 
 ### Récupérer le modèle de données de toutes les collections d'une bibliothèque
 
-Appelez ou déclarez une variable de type `Library` en créant ou en récupérant une bibliothèque existante avec l'une des méthodes citées ci-dessus ensuite déclarez une autre variable de type `IEnumerable<Tcollection>` nommée `collections` puis appelez la méthode asynchrone  `GetAllCollectionsAsync();` de la variable de type `Library`.
+Appelez ou déclarez une variable de type `Library` en créant ou en récupérant une bibliothèque existante avec l'une des méthodes citées ci-dessus ensuite déclarez une autre variable de type `IEnumerable<Tcollection>?` nommée `collections` puis appelez la méthode asynchrone  `GetAllCollectionsAsync();` de la variable de type `Library`.
+
+    public async void NewLibraryAndGetAllCollections()
+    {
+        Library? library = await Library.CreateAsync("Capucine", "Contient les livres de tante Suzie");
+        if (library != null)
+        {
+            IEnumerable<Tcollection>? collections = await library.GetAllCollectionsAsync();
+            if (collections != null && collections.Any())
+            {
+                //...
+            }
+        }
+    }
 
 ## Résolution de problèmes 
 
