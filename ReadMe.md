@@ -16,6 +16,7 @@ La collection est constituée par un ensemble de livres d’un même éditeur qu
 Ajoutez l'espace de nom  `using LibApi.Services.Libraries;`  dans votre fichier ensuite déclarez une variable de type  `Library?`  nommée  `library`  puis appelez la méthode asynchrone statique  `await Library.CreateAsync("nom_de_votre_bibliotheque", ["description_de_votre_description"]);`  dans une méthode asynchrone.
 
     using LibApi.Services.Libraries;
+    
     public async void NewLibrary()
     {
         Library? library = await Library.CreateAsync("Capucine", "Contient les livres de tante Suzie");
@@ -30,6 +31,8 @@ Ajoutez l'espace de nom  `using LibApi.Services.Libraries;`  dans votre fichier 
 
 Appelez la méthode asynchrone  `UpdateAsync(["nouveau_nom"], ["nouvelle_description"]);`  de la variable  `library`  .
 
+    using LibApi.Services.Libraries;
+    
     public async void NewLibraryAddUpdate()
     {
         Library? library = await Library.CreateAsync("Capucine", "Contient les livres de tante Suzie");
@@ -40,7 +43,9 @@ Appelez la méthode asynchrone  `UpdateAsync(["nouveau_nom"], ["nouvelle_descrip
     }
 
 Pour mettre à jour uniquement le nom de la bibliothèque, vous devez renseigner le premier paramètre et garder le second  `null`  _(afin pour d'éviter la modification de la description à votre insu)_.
-
+    
+    using LibApi.Services.Libraries;
+    
     public async void NewLibraryAddUpdate()
      {
          Library? library = await Library.CreateAsync("Capucine", "Contient les livres de tante Suzie");
@@ -52,6 +57,8 @@ Pour mettre à jour uniquement le nom de la bibliothèque, vous devez renseigner
 
 Pour mettre à jour uniquement sa description, assurez-vous de garder le premier paramètre vide  _(`""`)_  ou  `null`  _(afin pour d'éviter la modification du nom à votre insu)_  puis tapez la nouvelle description dans le second paramètre.
 
+    using LibApi.Services.Libraries;
+    
     public async void NewLibraryAddUpdate()
     {
         Library? library = await Library.CreateAsync("Capucine", "Contient les livres de tante Suzie");
@@ -65,9 +72,12 @@ Attention : Si les deux paramètres sont vide ou  `null`  ou que la méthode asy
 
 ### Récupérer le modèle de données de toutes les bibliothèques
 
-Appelez la méthode statique asynchrone  `await Library.GetAllAsync();`.
+Ajoutez l'espace de nom  `using LibApi.Models.Local.SQLite;`  dans votre fichier puis appelez la méthode statique asynchrone  `await Library.GetAllAsync();`.
 Cette méthode retourne  un objet `IEnumerable<Tlibrary>`.
 
+    using LibApi.Models.Local.SQLite;
+    using LibApi.Services.Libraries;
+    
     public async void GetAllLibrary()
     {
         IEnumerable<Tlibrary>? libraries = await Library.GetAllAsync();
@@ -79,9 +89,12 @@ Cette méthode retourne  un objet `IEnumerable<Tlibrary>`.
 
 ### Récupérer le modèle de données d'une bibliothèque existante
 
-Appelez la méthode statique asynchrone  `await Library.GetSingleAsync(id_bibliotheque_a_recuperer);`.
+Ajoutez l'espace de nom  `using LibApi.Models.Local.SQLite;`  dans votre fichier puis appelez la méthode statique asynchrone  `await Library.GetSingleAsync(id_bibliotheque_a_recuperer);`.
 Cette méthode retourne un objet `Tlibrary?`.
 
+    using LibApi.Models.Local.SQLite;
+    using LibApi.Services.Libraries;
+    
     public async void GetSingleLibrary()
     {
         Tlibrary? library = await Library.GetSingleAsync(1);
@@ -96,6 +109,8 @@ Cette méthode retourne un objet `Tlibrary?`.
 Appelez la méthode statique asynchrone  `await Library.CountAsync();`.
 Cette méthode retourne un objet de type `int`.
 
+    using LibApi.Services.Libraries;
+    
     public async void GetCountLibraries()
     {
         int count = await Library.CountAsync();
@@ -106,6 +121,8 @@ Cette méthode retourne un objet de type `int`.
 
 Appelez la méthode asynchrone  `DeleteAsync();`  de la variable  `library`  puis déclarez-là comme  `null`.
 
+    using LibApi.Services.Libraries;
+    
     public async void Delete()
     {
         Library? library = await Library.CreateAsync("Capucine", "Contient les livres de tante Suzie");
@@ -142,6 +159,9 @@ Ajoutez l'espace de nom  `using LibApi.Services.Collections;`  dans votre fichie
 
 Appelez la méthode asynchrone  `UpdateAsync(["nouveau_nom"], ["nouvelle_description"]);`  de la variable  `collection`  .
 
+    using LibApi.Services.Libraries;
+    using LibApi.Services.Collections;
+    
     public async void NewLibraryAndAddCollectionAndUpdateCollection()
      {
          Library? library = await Library.CreateAsync("Capucine", "Contient les livres de tante Suzie");
@@ -157,6 +177,9 @@ Appelez la méthode asynchrone  `UpdateAsync(["nouveau_nom"], ["nouvelle_descrip
 
 Pour mettre à jour uniquement le nom de la collection, vous devez renseigner le premier paramètre et garder le second  `null`  _(afin pour d'éviter la modification de la description à votre insu)_.
 
+    using LibApi.Services.Libraries;
+    using LibApi.Services.Collections;
+    
     public async void NewLibraryAndAddCollectionAndUpdateCollection()
     {
         Library? library = await Library.CreateAsync("Capucine", "Contient les livres de tante Suzie");
@@ -172,6 +195,9 @@ Pour mettre à jour uniquement le nom de la collection, vous devez renseigner le
 
 Pour mettre à jour uniquement sa description, assurez-vous de garder le premier paramètre vide  _(`""`)_  ou  `null`  _(afin pour d'éviter la modification du nom à votre insu)_  puis tapez la nouvelle description dans le second paramètre.
 
+    using LibApi.Services.Libraries;
+    using LibApi.Services.Collections;
+    
     public async void NewLibraryAndAddCollectionAndUpdateCollection()
     {
         Library? library = await Library.CreateAsync("Capucine", "Contient les livres de tante Suzie");
@@ -191,6 +217,10 @@ Attention : Si les deux paramètres sont vide ou  `null`  ou que la méthode asy
 
 Appelez ou déclarez une variable de type `Library` en créant ou en récupérant une bibliothèque existante avec l'une des méthodes citées ci-dessus ensuite déclarez une autre variable de type `IEnumerable<Tcollection>?` nommée `collections` puis appelez la méthode asynchrone  `GetAllCollectionsAsync();` de la variable de type `Library`.
 
+    using LibApi.Services.Libraries;
+    using LibApi.Services.Collections;
+    using LibApi.Models.Local.SQLite;
+    
     public async void NewLibraryAndGetAllCollections()
     {
         Library? library = await Library.CreateAsync("Capucine", "Contient les livres de tante Suzie");
