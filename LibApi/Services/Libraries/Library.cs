@@ -399,6 +399,45 @@ namespace LibApi.Services.Libraries
             }
         }
 
+        /// <summary>
+        /// Récupère toutes les collections de la bibliothèque actuelle
+        /// </summary>
+        /// <returns></returns>
+        public async Task<IEnumerable<Tcollection>> GetAllCollectionsAsync()
+        {
+            try
+            {
+                if (IsDeleted)
+                {
+                    throw new NotSupportedException($"La bibliothèque {Name} a déjà été supprimée.");
+                }
+
+                using LibrarySqLiteDbContext context = new();
+                var modelList = await context.Tcollections.Where(w => w.IdLibrary == Id).ToListAsync();
+                if (modelList == null || !modelList.Any())
+                {
+                    return Enumerable.Empty<Tcollection>();
+                }
+
+                return modelList;
+            }
+            catch (ArgumentNullException ex)
+            {
+                Logs.Log(nameof(Library), nameof(GetAllCollectionsAsync), ex);
+                return Enumerable.Empty<Tcollection>();
+            }
+            catch (OperationCanceledException ex)
+            {
+                Logs.Log(nameof(Library), nameof(GetAllCollectionsAsync), ex);
+                return Enumerable.Empty<Tcollection>();
+            }
+            catch (Exception ex)
+            {
+                Logs.Log(nameof(Library), nameof(GetAllCollectionsAsync), ex);
+                return Enumerable.Empty<Tcollection>();
+            }
+        }
+
 
         /// <summary>
         /// Compte le nombre de livres dans cette bibliothèque
