@@ -22,6 +22,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\AppHelpers\AppHelpers.csproj" />
     <ProjectReference Include="..\LibApi\LibApi.csproj" />
   </ItemGroup>
 

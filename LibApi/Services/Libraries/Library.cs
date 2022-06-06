@@ -10,11 +10,17 @@ using LibShared.ViewModels.Libraries;
 using Microsoft.EntityFrameworkCore;
 using LibApi.Extensions;
 using LibShared.ViewModels;
+using LibApi.Services.Collections;
 
 namespace LibApi.Services.Libraries
 {
 	public class Library : LibraryVM
 	{
+        /// <summary>
+        /// Obtient une valeur booléenne indiquant si l'objet a déjà été effacé de la base de données
+        /// </summary>
+        public bool IsDeleted { get; private set; }
+
         readonly LibraryHelpers libraryHelpers = new();
 
         //public override Guid Guid { get; protected set; } = Guid.NewGuid();
@@ -22,6 +28,19 @@ namespace LibApi.Services.Libraries
         //public virtual DateTime DateAjout { get; protected set; } = DateTime.Now;
 
         //public virtual DateTime? DateEdition { get; protected set; }
+
+        public new long Id
+        {
+            get => _Id;
+            protected set
+            {
+                if (_Id != value)
+                {
+                    _Id = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
 
         public new string Name
         {
@@ -54,6 +73,16 @@ namespace LibApi.Services.Libraries
         /// Possibilité d'instancier ce constructeur qu'en interne.
         /// </summary>
         private Library()
+        {
+
+        }
+
+        private Library(long id, string name, string? description = null)
+        {
+
+        }
+
+        private Library(LibraryVM viewModel)
         {
 
         }
@@ -148,7 +177,7 @@ namespace LibApi.Services.Libraries
         /// Ajoute la bibliothèque dans la base de données
         /// </summary>
         /// <returns></returns>
-        private async Task CreateAsync(string name, string? description = null)
+        public static async Task<Library?> CreateAsync(string name, string? description = null)
         {
             if (name.IsStringNullOrEmptyOrWhiteSpace())
             {
@@ -157,17 +186,18 @@ namespace LibApi.Services.Libraries
 
             using LibrarySqLiteDbContext context = new();
 
-            bool isExist = await context.Tlibraries.AnyAsync(c => c.Name.ToLower() == name.Trim().ToLower());
-            if (isExist)
+            Tlibrary? existingItem = await context.Tlibraries.SingleOrDefaultAsync(c => c.Name.ToLower() == name.Trim().ToLower());
+            if (existingItem != null)
             {
                 Logs.Log(nameof(Library), nameof(CreateAsync), "Cette bibliothèque existe déjà");
-                return;
+                Library _library = new(existingItem.Id, existingItem.Name, existingItem.Description);
+                return _library;
             }
 
             var _dateAjout = DateTime.UtcNow;
             var _guid = System.Guid.NewGuid();
 
-            Tlibrary tlibrary = new()
+            Tlibrary record = new()
             {
                 DateAjout = _dateAjout.ToString(),
                 Guid = _guid.ToString(),
@@ -175,8 +205,11 @@ namespace LibApi.Services.Libraries
                 Description = description?.Trim(),
             };
 
-            await context.Tlibraries.AddAsync(tlibrary);
+            await context.Tlibraries.AddAsync(record);
             await context.SaveChangesAsync();
+
+            Library library = new(record.Id, record.Name, record.Description);
+            return library;
 
             Id = tlibrary.Id;
             Guid = _guid;
@@ -196,6 +229,11 @@ namespace LibApi.Services.Libraries
         {
             try
             {
+                if (IsDeleted)
+                {
+                    throw new NotSupportedException($"La bibliothèque {Name} a déjà été supprimée.");
+                }
+
                 //S'il n'y a pas de nouveau nom et que la modification de la description est ignoré, alors génère une erreur.
                 if (newName.IsStringNullOrEmptyOrWhiteSpace() && newDescription == null)
                 {
@@ -238,7 +276,17 @@ namespace LibApi.Services.Libraries
                 _ = await context.SaveChangesAsync();
 
                 DateEdition = dateEdition;
-                Name = tlibrary.Name;
+
+                if (!newName.IsStringNullOrEmptyOrWhiteSpace())
+                {
+                    Name = tlibrary.Name;
+                }
+
+                //La mise à jour de la description n'est pas ignorée si elle est différent de null.
+                if (newDescription != null)
+                {
+                    Description = tlibrary.Description;
+                }
 
                 return true;
             }
@@ -267,6 +315,11 @@ namespace LibApi.Services.Libraries
         {
             try
             {
+                if (IsDeleted)
+                {
+                    throw new NotSupportedException($"La bibliothèque {Name} a déjà été supprimée.");
+                }
+
                 using LibrarySqLiteDbContext context = new();
 
                 Tlibrary? tlibrary = await context.Tlibraries.SingleOrDefaultAsync(s => s.Id == Id);
@@ -278,6 +331,7 @@ namespace LibApi.Services.Libraries
                 context.Tlibraries.Remove(tlibrary);
                 _ = await context.SaveChangesAsync();
 
+                IsDeleted = true;
                 return true;
             }
             catch (ArgumentNullException ex)
@@ -305,21 +359,27 @@ namespace LibApi.Services.Libraries
         /// <param name="name">Nom de la bibliothèque</param>
         /// <param name="description"></param>
         /// <returns></returns>
-        public async Task<bool> AddCollectionAsync(string name, string? description = null)
+        public async Task<Collection?> AddCollectionAsync(string name, string? description = null)
         {
             try
             {
+                if (IsDeleted)
+                {
+                    throw new NotSupportedException($"La bibliothèque {Name} a déjà été supprimée.");
+                }
+
                 if (name.IsStringNullOrEmptyOrWhiteSpace())
                 {
                     throw new ArgumentNullException(nameof(name), "Le nom de la collection ne peut pas être nulle, vide ou ne contenir que des espaces blancs.");
                 }
 
                 using LibrarySqLiteDbContext context = new();
-                bool isExist = await context.Tcollections.AnyAsync(c => c.Name.ToLower() == name.ToLower());
-                if (isExist)
+                Tcollection? existingItem = await context.Tcollections.SingleOrDefaultAsync(c => c.Name.ToLower() == name.ToLower());
+                if (existingItem != null)
                 {
                     Logs.Log(nameof(Library), nameof(AddCollectionAsync), "Cette collection existe déjà");
-                    return true;
+                    Collection _collection = new(existingItem.Id, Id, existingItem.Name, existingItem.Description);
+                    return _collection;
                 }
 
                 Tcollection record = new()
@@ -331,22 +391,24 @@ namespace LibApi.Services.Libraries
 
                 await context.Tcollections.AddAsync(record);
                 await context.SaveChangesAsync();
-                return true;
+
+                Collection collection = new(record.Id, Id, record.Name, record.Description);
+                return collection;
             }
             catch (ArgumentNullException ex)
             {
                 Logs.Log(nameof(Library), nameof(AddCollectionAsync), ex);
-                return false;
+                return null;
             }
             catch (OperationCanceledException ex)
             {
                 Logs.Log(nameof(Library), nameof(AddCollectionAsync), ex);
-                return false;
+                return null;
             }
             catch (Exception ex)
             {
                 Logs.Log(nameof(Library), nameof(AddCollectionAsync), ex);
-                return false;
+                return null;
             }
         }
 
@@ -360,6 +422,11 @@ namespace LibApi.Services.Libraries
         {
             try
             {
+                if (IsDeleted)
+                {
+                    throw new NotSupportedException($"La bibliothèque {Name} a déjà été supprimée.");
+                }
+
                 using LibrarySqLiteDbContext context = new();
                 return await context.Tbooks.CountAsync(w => w.IdLibrary == Id, cancellationToken);
             }

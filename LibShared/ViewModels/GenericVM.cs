@@ -12,7 +12,20 @@ namespace LibShared.ViewModels
     {
         public event PropertyChangedEventHandler? PropertyChanged = delegate { };
 
-        public long Id { get;  protected set; }
+        protected long _Id;
+        public virtual long Id
+        {
+            get => _Id;
+            set
+            {
+                if (_Id != value)
+                {
+                    _Id = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
         public virtual Guid Guid { get;  protected set; } = Guid.NewGuid();
 
         public virtual DateTime DateAjout { get;  protected set; } = DateTime.Now;
