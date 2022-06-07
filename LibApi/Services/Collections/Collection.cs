@@ -22,14 +22,6 @@ namespace LibApi.Services.Collections
 
         }
 
-        internal Collection(long id, long idLibrary, string name, string? description = null)
-        {
-            Id = id;
-            idLibrary = IdLibrary;
-            Name = name;
-            Description = description;
-        }
-
         public new long Id
         {
             get => _Id;
@@ -73,7 +65,7 @@ namespace LibApi.Services.Collections
         /// <summary>
         /// Met à jour la collection dans la base de données
         /// </summary>
-        /// <remarks>Remarque : si aucun paramètre n'est renseigné alors une <see cref="NotSupportedException"/> est levée et annule ainsi l'opération de mise à jour.</remarks>
+        /// <remarks>Remarque : si aucun paramètre n'est renseigné alors une <see cref="InvalidOperationException"/> est levée et annule ainsi l'opération de mise à jour.</remarks>
         /// <param name="newName"></param>
         /// <param name="newDescription">Nouvelle description. Si le paramètre est null alors la modification de ce paramètre est ingoré.</param>
         /// <returns></returns>
@@ -83,13 +75,13 @@ namespace LibApi.Services.Collections
             {
                 if (IsDeleted)
                 {
-                    throw new NotSupportedException($"La collection {Name} a déjà été supprimée.");
+                    throw new InvalidOperationException($"La collection {Name} a déjà été supprimée.");
                 }
 
                 //S'il n'y a pas de nouveau nom et que la modification de la description est ignoré, alors génère une erreur.
                 if (newName.IsStringNullOrEmptyOrWhiteSpace() && newDescription == null)
                 {
-                    throw new NotSupportedException("Le nouveau nom de la collection ou sa nouvelle description devait être renseignée.");
+                    throw new InvalidOperationException("Le nouveau nom de la collection ou sa nouvelle description devait être renseignée.");
                 }
 
                 using LibrarySqLiteDbContext context = new();
@@ -97,7 +89,7 @@ namespace LibApi.Services.Collections
                 Tcollection? record = await context.Tcollections.SingleOrDefaultAsync(s => s.Id == Id);
                 if (record == null)
                 {
-                    throw new ArgumentNullException(nameof(record), $"La collection n'existe pas avec l'id \"{Id}\".");
+                    throw new ArgumentException(nameof(record), $"La collection n'existe pas avec l'id \"{Id}\".");
                 }
 
                 if (!newName.IsStringNullOrEmptyOrWhiteSpace())
@@ -105,8 +97,7 @@ namespace LibApi.Services.Collections
                     bool isExist = await context.Tcollections.AnyAsync(c => c.Id != Id && c.Name.ToLower() == newName.Trim().ToLower())!;
                     if (isExist)
                     {
-                        Logs.Log(nameof(Collection), nameof(UpdateAsync), "Cette collection existe déjà");
-                        return false;
+                        throw new ArgumentException($"Cette collection existe déjà.");
                     }
                 }
 
@@ -136,16 +127,6 @@ namespace LibApi.Services.Collections
                 }
 
                 return true;
-            }
-            catch (ArgumentNullException ex)
-            {
-                Logs.Log(nameof(Collection), nameof(UpdateAsync), ex);
-                return false;
-            }
-            catch (OperationCanceledException ex)
-            {
-                Logs.Log(nameof(Collection), nameof(UpdateAsync), ex);
-                return false;
             }
             catch (Exception ex)
             {
@@ -200,6 +181,30 @@ namespace LibApi.Services.Collections
         }
 
         #endregion
+
+        public static Collection? ViewModelConverter(Tcollection model)
+        {
+            try
+            {
+                if (model == null) return null;
+
+                Collection viewModel = new()
+                {
+                    Id = model.Id,
+                    IdLibrary = model.IdLibrary,
+                    Description = model.Description,
+                    Name = model.Name,
+                    //BooksId = (await GetBooksIdInCollectionAsync(model.Id)).ToList()
+                };
+
+                return viewModel;
+            }
+            catch (Exception ex)
+            {
+                Logs.Log(nameof(Collection), nameof(DeleteAsync), ex);
+                return null;
+            }
+        }
 
     }
 }

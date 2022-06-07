@@ -1,5 +1,5 @@
 using AppHelpers.Serialization;
-using LibApi.Models.Local.SQLite;
+using AppHelpers;
 using LibApi.Services.Collections;
 using LibApi.Services.Libraries;
 
@@ -15,6 +15,8 @@ namespace LibTest
             {
                 //...
             }
+
+            Assert.NotNull(library);
         }
 
         [Fact]
@@ -23,21 +25,22 @@ namespace LibTest
             Library? library = await Library.CreateAsync("Capucine", "Contient les livres de tante Suzie");
             if (library != null)
             {
-                await library.UpdateAsync("Capucine 2", "Contient les livres de tante Suzie et tante Anne");
+                bool isUpdated = await library.UpdateAsync("Capucine 2", "Contient les livres de tante Suzie et tante Anne");
+                Assert.True(isUpdated);
             }
+            Assert.NotNull(library);
         }
 
         [Fact]
         public async void NewLibraryAndAddCollection()
         {
             Library? library = await Library.CreateAsync("Library_" + DateTime.Now.ToString("yyyyMMddHHmmss"));
-            Collection? collection = await library.AddCollectionAsync("Le petit fut�", "uu");
-            if (collection != null)
+            if (library != null)
             {
-                bool _bool = await collection.UpdateAsync("Moi et les monstre");
-                var jsonString = collection.GetJsonDataString();
-                Console.WriteLine(jsonString);
+                Collection? collection = await library.AddCollectionAsync("Le petit futfut", "uu");
+                Assert.NotNull(collection);
             }
+            Assert.NotNull(library);
         }
 
         [Fact]
@@ -49,9 +52,12 @@ namespace LibTest
                 Collection? collection = await library.AddCollectionAsync("Le petit fute", "Ma description");
                 if (collection != null)
                 {
-                    await collection.UpdateAsync("Moi et les monstre", null);
+                    bool isUpdated = await collection.UpdateAsync("Moi et les monstre", null);
+                    Assert.True(isUpdated);
                 }
+                Assert.NotNull(collection);
             }
+            Assert.NotNull(library);
         }
 
         [Fact]
@@ -68,41 +74,45 @@ namespace LibTest
                 }
                 Assert.True(collection != null);
             }
-
+            Assert.NotNull(library);
         }
 
         [Fact]
         public async void NewLibraryAndGetAllCollections()
         {
-            Library? library = await Library.CreateAsync("Capucine", "Contient les livres de tante Suzie");
+            Library? library = await Library.CreateAsync("Capucine", "Contient les livres de tante Suzie", true);
             if (library != null)
             {
-                IEnumerable<Tcollection>? collections = await library.GetAllCollectionsAsync();
-                if (collections != null && collections.Any())
+                IEnumerable<Collection> collections = await library.GetAllCollectionsAsync();
+                if (collections != null)
                 {
-                    //...
+                    Assert.NotEmpty(collections);
                 }
+                Assert.NotNull(collections);
             }
+            Assert.NotNull(library);
         }
 
         [Fact]
         public async void GetSingleLibrary()
         {
-            Tlibrary? library = await Library.GetSingleAsync(1);
+            Library? library = await Library.GetSingleAsync(1);
             if (library != null)
             {
                 //...
             }
+            Assert.NotNull(library);
         }
 
         [Fact]
         public async void GetAllLibrary()
         {
-            IEnumerable<Tlibrary>? libraries = await Library.GetAllAsync();
-            if (libraries != null && libraries.Any())
+            IEnumerable<Library> libraries = await Library.GetAllAsync();
+            if (libraries != null)
             {
-                //...
+                Assert.NotEmpty(libraries);
             }
+            Assert.NotNull(libraries);
         }
 
         [Fact]
@@ -118,8 +128,10 @@ namespace LibTest
             Library? library = await Library.CreateAsync("Capucine", "Contient les livres de tante Suzie");
             if (library != null)
             {
-                await library.DeleteAsync();
+                bool isDeleted = await library.DeleteAsync();
+                Assert.True(isDeleted);
             }
+            Assert.NotNull(library);
         }
     }
 }

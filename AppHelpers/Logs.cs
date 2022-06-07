@@ -24,6 +24,7 @@ namespace AppHelpers
             try
             {
                 Debug.WriteLine($"{className}.{methodName} : {message}");
+                Console.WriteLine($"{className}.{methodName} : {message}");
             }
             catch (Exception ex)
             {
