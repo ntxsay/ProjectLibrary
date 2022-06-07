@@ -46,4 +46,13 @@ namespace LibShared
         Human = 0,
         Society = 1,
     }
+
+    public enum ContactRole : byte
+    {
+        Adherant = 0,
+        Author = 1,
+        EditorHouse = 2,
+        Translator = 3,
+        Illustrator = 4
+    }
 }

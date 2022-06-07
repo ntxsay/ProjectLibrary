@@ -301,7 +301,7 @@ namespace LibApi.Services.Libraries
                 //La mise à jour de la description n'est pas ignorée si elle est différent de null.
                 if (newDescription != null)
                 {
-                    tlibrary.Description = newDescription.Trim();
+                    tlibrary.Description = newDescription?.Trim();
                 }
 
                 DateTime dateEdition = DateTime.Now;

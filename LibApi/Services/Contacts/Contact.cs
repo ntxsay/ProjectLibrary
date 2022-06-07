@@ -40,6 +40,61 @@ namespace LibApi.Services.Contacts
 
         #region CRUD
         /// <summary>
+        /// Ajoute une nouvelle bibliothèque dans la base de données puis retourne un objet <see cref="Library"/>
+        /// </summary>
+        /// <param name="name">Nom de la nouvelle bibliothèque</param>
+        /// <param name="description"></param>
+        /// <param name="openIfExist">[**Applicable uniquement si la bibliothèque existe déjà] : si true alors retourne la bibliotèque existante sinon lève une <see cref="InvalidOperationException"/>.</param>
+        /// <returns></returns>
+        public static async Task<Contact?> CreateAsync(LibShared.ContactType contactType, string fullName, string? description = null, bool openIfExist = false)
+        {
+            try
+            {
+                if (name.IsStringNullOrEmptyOrWhiteSpace())
+                {
+                    throw new ArgumentNullException(nameof(name), "Le nom de la bibliothèque ne peut pas être nulle, vide ou ne contenir que des espaces blancs.");
+                }
+
+                using LibrarySqLiteDbContext context = new();
+
+                Tlibrary? existingItem = await context.Tlibraries.SingleOrDefaultAsync(c => c.Name.ToLower() == name.Trim().ToLower());
+                if (existingItem != null)
+                {
+                    Logs.Log(nameof(Library), nameof(CreateAsync), $"La bibliothèque {name} existe déjà.");
+                    if (openIfExist)
+                    {
+                        return ConvertToViewModel(existingItem);
+                    }
+                    else
+                    {
+                        throw new InvalidOperationException($"La bibliothèque {name} existe déjà.");
+                    }
+                }
+
+                var _dateAjout = DateTime.UtcNow;
+                var _guid = System.Guid.NewGuid();
+
+                Tlibrary record = new()
+                {
+                    DateAjout = _dateAjout.ToString(),
+                    Guid = _guid.ToString(),
+                    Name = name.Trim(),
+                    Description = description?.Trim(),
+                };
+
+                await context.Tlibraries.AddAsync(record);
+                await context.SaveChangesAsync();
+
+                return ConvertToViewModel(record);
+            }
+            catch (Exception ex)
+            {
+                Logs.Log(nameof(Library), nameof(CreateAsync), ex);
+                return null;
+            }
+        }
+
+        /// <summary>
         /// Ajoute un contact dans la base de données
         /// </summary>
         /// <returns></returns>

@@ -13,7 +13,7 @@ namespace LibApi.Models.Local.SQLite
         }
 
         public long Id { get; set; }
-        public long IdContactType { get; set; }
+        public long ContactType { get; set; }
         public string Guid { get; set; } = null!;
         public string DateAjout { get; set; } = null!;
         public string? DateEdition { get; set; }
@@ -33,7 +33,6 @@ namespace LibApi.Models.Local.SQLite
         public string? NoMobile { get; set; }
         public string? Observation { get; set; }
 
-        public virtual TcontactType IdContactTypeNavigation { get; set; } = null!;
         public virtual ICollection<TbookContactRoleConnector> TbookContactRoleConnectors { get; set; }
         public virtual ICollection<TbookExemplary> TbookExemplaries { get; set; }
         public virtual ICollection<TbookPret> TbookPrets { get; set; }

@@ -29,8 +29,6 @@ namespace LibApi.Models.Local.SQLite
         public virtual DbSet<TbookReading> TbookReadings { get; set; } = null!;
         public virtual DbSet<Tcollection> Tcollections { get; set; } = null!;
         public virtual DbSet<Tcontact> Tcontacts { get; set; } = null!;
-        public virtual DbSet<TcontactRole> TcontactRoles { get; set; } = null!;
-        public virtual DbSet<TcontactType> TcontactTypes { get; set; } = null!;
         public virtual DbSet<Tlibrary> Tlibraries { get; set; } = null!;
         public virtual DbSet<TlibraryCategorie> TlibraryCategories { get; set; } = null!;
 
@@ -111,10 +109,6 @@ namespace LibApi.Models.Local.SQLite
                 entity.HasOne(d => d.IdContactNavigation)
                     .WithMany(p => p.TbookContactRoleConnectors)
                     .HasForeignKey(d => d.IdContact);
-
-                entity.HasOne(d => d.IdRoleNavigation)
-                    .WithMany(p => p.TbookContactRoleConnectors)
-                    .HasForeignKey(d => d.IdRole);
             });
 
             modelBuilder.Entity<TbookEtat>(entity =>
@@ -265,25 +259,14 @@ namespace LibApi.Models.Local.SQLite
                 entity.HasIndex(e => e.Id, "IX_TContact_Id")
                     .IsUnique();
 
-                entity.HasOne(d => d.IdContactTypeNavigation)
-                    .WithMany(p => p.Tcontacts)
-                    .HasForeignKey(d => d.IdContactType);
-            });
+#warning A ne pas oublier
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
 
-            modelBuilder.Entity<TcontactRole>(entity =>
-            {
-                entity.ToTable("TContactRole");
+                entity.Property(e => e.DateAjout).IsRequired();
 
-                entity.HasIndex(e => e.Id, "IX_TContactRole_Id")
-                    .IsUnique();
-            });
+                entity.Property(e => e.Guid).IsRequired();
 
-            modelBuilder.Entity<TcontactType>(entity =>
-            {
-                entity.ToTable("TContactType");
 
-                entity.HasIndex(e => e.Id, "IX_TContactType_Id")
-                    .IsUnique();
             });
 
             modelBuilder.Entity<Tlibrary>(entity =>
@@ -307,7 +290,6 @@ namespace LibApi.Models.Local.SQLite
                 entity.Property(e => e.Guid).IsRequired();
 
                 entity.Property(e => e.Name).IsRequired();
-
             });
 
             modelBuilder.Entity<TlibraryCategorie>(entity =>

@@ -8,11 +8,11 @@ using LibShared.ViewModels.Contacts;
 
 int maxitemPerPage = 20;
 
-ContactRole contactRole = new ("Ak12" + DateTime.Now.ToString(), null);
-var isRoleCreated = await contactRole.CreateAsync();
+ContactRole? contactRole = await ContactRole.CreateAsync("Ak12" + DateTime.Now.ToString(), null);
+var isRoleCreated = contactRole != null;
 Console.WriteLine("Role Created : " + isRoleCreated);
-Console.WriteLine("Role Name Updated : " + await contactRole.UpdateNameAsync("Alalal" + DateTime.Now.ToString()));
-Console.WriteLine("Role Description Updated : " + await contactRole.UpdateDescriptionAsync("Marshall" + DateTime.Now.ToString()));
+Console.WriteLine("Role Name Updated : " + await contactRole.UpdateAsync("Alalal" + DateTime.Now.ToString()), null);
+Console.WriteLine("Role Description Updated : " + await contactRole.UpdateAsync(null, "Marshall" + DateTime.Now.ToString()));
 Console.WriteLine(contactRole.GetJsonDataString());
 Console.ReadLine();
 
@@ -73,7 +73,7 @@ async Task ListLibraries()
         library = null;
         if (library == null)
         {
-            library = (await Library.GetSingleAsync(1))?.ConvertToObject();
+            library = await Library.GetSingleAsync(1);
             return;
         }
 
@@ -87,7 +87,7 @@ async Task ListLibraries()
         {
             Console.WriteLine("Items de page la page  : " + i);
             var displayyedItem = orderedItems.DisplayPage(maxitemPerPage, i).GetJsonDataString();
-            var displayyedItemVM = orderedItems.DisplayPage(maxitemPerPage, i).ConvertToViewModel().GetJsonDataString();
+            var displayyedItemVM = orderedItems.DisplayPage(maxitemPerPage, i).GetJsonDataString();
             Console.WriteLine(displayyedItem);
             Console.WriteLine();
             Console.WriteLine(displayyedItemVM);

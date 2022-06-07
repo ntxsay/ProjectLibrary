@@ -14,5 +14,12 @@
       <FileName>Services\Collections\Collection.cs</FileName>
     </TypeIdentifier>
   </Class>
+  <Class Name="LibApi.Services.Contacts.ContactRole">
+    <Position X="10.5" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAACAAAAAAAgAAAAAAAAAAQAAAAAAAgACAAAAYAAAIA=</HashCode>
+      <FileName>Services\Contacts\ContactRole.cs</FileName>
+    </TypeIdentifier>
+  </Class>
   <Font Name="Segoe UI" Size="9" />
 </ClassDiagram>
