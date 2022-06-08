@@ -124,7 +124,7 @@ namespace LibApi.Services.Contacts
                         contactVM.NomNaissance = split[1].Trim();
 
                         StringBuilder stringBuilder = new ();
-                        for (int i = 2; i < split.Length + 1; i++)
+                        for (int i = 2; i < split.Length; i++)
                             stringBuilder.Append($"{split[i]} ");
                         
                         contactVM.AutresPrenoms = stringBuilder.ToString().Trim();
