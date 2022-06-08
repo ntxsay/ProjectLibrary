@@ -369,16 +369,6 @@ namespace LibApi.Services.Libraries
                 IsDeleted = true;
                 return true;
             }
-            catch (ArgumentNullException ex)
-            {
-                Logs.Log(nameof(Library), nameof(DeleteAsync), ex);
-                return false;
-            }
-            catch (OperationCanceledException ex)
-            {
-                Logs.Log(nameof(Library), nameof(DeleteAsync), ex);
-                return false;
-            }
             catch (Exception ex)
             {
                 Logs.Log(nameof(Library), nameof(DeleteAsync), ex);

@@ -1,95 +1,110 @@
 ﻿using AppHelpers;
+using AppHelpers.Dates;
 using AppHelpers.Strings;
 using LibApi.Models.Local.SQLite;
+using LibShared;
 using LibShared.ViewModels.Contacts;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace LibApi.Services.Contacts
 {
-    public class Contact : ContactVM, IDisposable
+    public sealed class Contact : ContactVM
     {
-        private bool disposedValue;
-        LibrarySqLiteDbContext context = new();
-
         /// <summary>
-        /// Initialise une nouvelle instance de l'objet <see cref="Contact"/> afin créer un nouveau contact puis d'interagir avec lui.
+        /// Obtient une valeur booléenne indiquant si l'objet a déjà été effacé de la base de données
         /// </summary>
-        /// <remarks>Remarque : Pour ajouter le contact dans la base de données, appelez la méthode <see cref="CreateAsync"/></remarks>
-        public Contact(string nomNaissance, string prenom, string? autresPrenoms = null)
-        {
-            NomNaissance = nomNaissance.Trim();
-            Prenom = prenom.Trim();
-            AutresPrenoms = autresPrenoms?.Trim();
-            ContactType = LibShared.ContactType.Human;
-        }
+        public bool IsDeleted { get; private set; }
 
-        /// <summary>
-        /// Initialise une nouvelle instance de l'objet <see cref="Contact"/> afin créer un nouveau contact puis d'interagir avec lui.
-        /// </summary>
-        /// <remarks>Remarque : Pour ajouter le contact dans la base de données, appelez la méthode <see cref="CreateAsync"/></remarks>
-        public Contact(string societyName)
+
+        private Contact()
         {
-            SocietyName = societyName.Trim();
-            ContactType = LibShared.ContactType.Society;
+
         }
 
         #region CRUD
         /// <summary>
-        /// Ajoute une nouvelle bibliothèque dans la base de données puis retourne un objet <see cref="Library"/>
+        /// Ajoute un nouveau contact dans la base de données puis retourne un objet <see cref="Contact"/>
         /// </summary>
-        /// <param name="name">Nom de la nouvelle bibliothèque</param>
-        /// <param name="description"></param>
-        /// <param name="openIfExist">[**Applicable uniquement si la bibliothèque existe déjà] : si true alors retourne la bibliotèque existante sinon lève une <see cref="InvalidOperationException"/>.</param>
+        /// <param name="fullName">Nom complet de la société ou de la personne. Les formats pour la personne : [titreCivilite] prenom nom autresPrenoms</param>
+        /// <param name="description">Description du contact</param>
+        /// <param name="contactType">Type de contact</param>
+        /// <param name="openIfExist">Obtient le contact existant au lieu de générer une erreur</param>
         /// <returns></returns>
-        public static async Task<Contact?> CreateAsync(LibShared.ContactType contactType, string fullName, string? description = null, bool openIfExist = false)
+        public static async Task<Contact?> CreateAsync(string fullName, string? description = null, ContactType contactType = ContactType.Human, bool openIfExist = false)
         {
             try
             {
-                if (name.IsStringNullOrEmptyOrWhiteSpace())
+                if (fullName.IsStringNullOrEmptyOrWhiteSpace())
                 {
-                    throw new ArgumentNullException(nameof(name), "Le nom de la bibliothèque ne peut pas être nulle, vide ou ne contenir que des espaces blancs.");
+                    throw new ArgumentNullException(nameof(fullName), "Le nom du contact ou de la société ne peut pas être nulle, vide ou ne contenir que des espaces blancs.");
                 }
 
-                using LibrarySqLiteDbContext context = new();
-
-                Tlibrary? existingItem = await context.Tlibraries.SingleOrDefaultAsync(c => c.Name.ToLower() == name.Trim().ToLower());
-                if (existingItem != null)
+                ContactVM contactVM = new()
                 {
-                    Logs.Log(nameof(Library), nameof(CreateAsync), $"La bibliothèque {name} existe déjà.");
-                    if (openIfExist)
-                    {
-                        return ConvertToViewModel(existingItem);
-                    }
-                    else
-                    {
-                        throw new InvalidOperationException($"La bibliothèque {name} existe déjà.");
-                    }
-                }
-
-                var _dateAjout = DateTime.UtcNow;
-                var _guid = System.Guid.NewGuid();
-
-                Tlibrary record = new()
-                {
-                    DateAjout = _dateAjout.ToString(),
-                    Guid = _guid.ToString(),
-                    Name = name.Trim(),
-                    Description = description?.Trim(),
+                    ContactType = contactType,
                 };
 
-                await context.Tlibraries.AddAsync(record);
-                await context.SaveChangesAsync();
+                if (contactType == ContactType.Society)
+                {
+                    contactVM.SocietyName = fullName.Trim();
+                }
+                else if (contactType == ContactType.Human)
+                {
+                    foreach (string civility in CivilityHelpers.CiviliteListAll())
+                    {
+                        bool isMatch = false;
+                        if (fullName.Contains(civility))
+                        {
+                            fullName = fullName.Replace(civility, "");
+                            isMatch = true;
+                        }
+                        else if (fullName.ToLower().Contains(civility.ToLower()))
+                        {
+                            fullName = fullName.Replace(civility.ToLower(), "");
+                            isMatch = true;
+                        }
 
-                return ConvertToViewModel(record);
+                        if (isMatch)
+                        {
+                            contactVM.TitreCivilite = civility;
+                            break;
+                        }
+                    }
+
+                    var split = fullName.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+                    if (split.Length == 1)
+                    {
+                        contactVM.Prenom = split[0].Trim();
+                    }
+                    else if (split.Length == 2)
+                    {
+                        contactVM.Prenom = split[0].Trim();
+                        contactVM.NomNaissance = split[1].Trim();
+                    }
+                    else if (split.Length > 2)
+                    {
+                        contactVM.Prenom = split[0].Trim();
+                        contactVM.NomNaissance = split[1].Trim();
+
+                        StringBuilder stringBuilder = new ();
+                        for (int i = 2; i < split.Length + 1; i++)
+                            stringBuilder.Append($"{split[i]} ");
+                        
+                        contactVM.AutresPrenoms = stringBuilder.ToString().Trim();
+                    }
+                }
+
+                return await CreateAsync(contactVM, openIfExist);
             }
             catch (Exception ex)
             {
-                Logs.Log(nameof(Library), nameof(CreateAsync), ex);
+                Logs.Log(nameof(Contact), nameof(CreateAsync), ex);
                 return null;
             }
         }
@@ -97,62 +112,89 @@ namespace LibApi.Services.Contacts
         /// <summary>
         /// Ajoute un contact dans la base de données
         /// </summary>
+        /// <param name="viewModel"></param>
+        /// <param name="openIfExist"></param>
         /// <returns></returns>
-        public async Task<bool> CreateAsync()
+        public static async Task<Contact?> CreateAsync(ContactVM viewModel, bool openIfExist = false)
         {
             try
             {
-                if (ContactType == LibShared.ContactType.Human)
+                if (viewModel == null)
                 {
-                    if (NomNaissance.IsStringNullOrEmptyOrWhiteSpace() || Prenom.IsStringNullOrEmptyOrWhiteSpace())
+                    throw new ArgumentNullException(nameof(viewModel), $"Le modèle de vue du contact ne peut être null.");
+                }
+
+                using LibrarySqLiteDbContext context = new();
+
+                if (viewModel.ContactType == ContactType.Human)
+                {
+                    if (viewModel.TitreCivilite.IsStringNullOrEmptyOrWhiteSpace() ||
+                    viewModel.NomNaissance.IsStringNullOrEmptyOrWhiteSpace() ||
+                    viewModel.Prenom.IsStringNullOrEmptyOrWhiteSpace())
                     {
-                        throw new ArgumentNullException(nameof(Name), "Les informations minimales obligatoires à renseigner sont : le nom de naissance et le prénom.");
+                        throw new ArgumentNullException(nameof(viewModel), "Le nom de naissance et le prénom du contact doivent au moins être renseignés.");
                     }
                 }
-                else if (ContactType == LibShared.ContactType.Society)
+                else if (viewModel.ContactType == ContactType.Society)
                 {
-                    if (SocietyName.IsStringNullOrEmptyOrWhiteSpace())
+                    if (viewModel.SocietyName.IsStringNullOrEmptyOrWhiteSpace())
                     {
-                        throw new ArgumentNullException(nameof(Name), "Les informations minimales obligatoires à renseigner est : le nom de la société.");
+                        throw new ArgumentNullException(nameof(viewModel), "Le nom de la société ne peut pas être nulle, vide ou ne contenir que des espaces blancs.");
                     }
                 }
 
-                bool isExist = await context.TcontactTypes.AnyAsync(c => c.Name.ToLower() == Name.ToLower());
-                if (isExist)
+                Tcontact? existingItem = await GetContactIfExistAsync(viewModel);
+                if (existingItem != null)
                 {
-                    Logs.Log(nameof(Contact), nameof(CreateAsync), "Ce type existe déjà");
-                    return true;
+                    Logs.Log(nameof(Contact), nameof(CreateAsync), $"Le contact : \"{viewModel.NomNaissance} {viewModel.Prenom}\" ou la société: \"{viewModel.SocietyName}\" existe déjà.");
+                    if (openIfExist)
+                    {
+                        return ConvertToViewModel(existingItem);
+                    }
+                    else
+                    {
+                        throw new InvalidOperationException($"Le contact : \"{viewModel.NomNaissance} {viewModel.Prenom}\" ou la société: \"{viewModel.SocietyName}\" existe déjà.");
+                    }
                 }
 
-                TcontactType TcontactType = new()
+                var _dateAjout = DateTime.UtcNow;
+                var _guid = System.Guid.NewGuid();
+
+                Tcontact record = new ()
                 {
-                    Name = Name,
-                    Description = Description,
+                    Guid = _guid.ToString(),
+                    DateAjout = _dateAjout.ToString(),
+                    DateEdition = null,
+                    Observation = viewModel.Observation,
+                    TitreCivilite = viewModel.TitreCivilite,
+                    NomNaissance = viewModel.NomNaissance,
+                    NomUsage = viewModel.NomUsage,
+                    Prenom = viewModel.Prenom,
+                    AutresPrenoms = viewModel.AutresPrenoms,
+                    AdressPostal = viewModel.AdressePostal,
+                    CodePostal = viewModel.CodePostal,
+                    Ville = viewModel.Ville,
+                    NoMobile = viewModel.NoMobile,
+                    NoTelephone = viewModel.NoTelephone,
+                    MailAdress = viewModel.AdresseMail,
+                    DateNaissance = viewModel.DateNaissance?.ToString(),
+                    Nationality = viewModel.Nationality,
+                    SocietyName = viewModel.SocietyName,
+                    ContactType = (long)viewModel.ContactType,
                 };
 
-                await context.TcontactTypes.AddAsync(TcontactType);
+                await context.Tcontacts.AddAsync(record);
                 await context.SaveChangesAsync();
 
-                Id = TcontactType.Id;
-
-                return true;
-            }
-            catch (ArgumentNullException ex)
-            {
-                Logs.Log(nameof(Contact), nameof(CreateAsync), ex);
-                return false;
-            }
-            catch (OperationCanceledException ex)
-            {
-                Logs.Log(nameof(Contact), nameof(CreateAsync), ex);
-                return false;
+                return ConvertToViewModel(record);
             }
             catch (Exception ex)
             {
                 Logs.Log(nameof(Contact), nameof(CreateAsync), ex);
-                return false;
+                return null;
             }
         }
+
 
         /// <summary>
         /// Met à jour le type dans la base de données
@@ -253,28 +295,30 @@ namespace LibApi.Services.Contacts
         {
             try
             {
-                using LibrarySqLiteDbContext context = new();
-
-                TcontactType? TcontactType = await context.TcontactTypes.SingleOrDefaultAsync(s => s.Id == Id);
-                if (TcontactType == null)
+                if (IsDeleted)
                 {
-                    throw new ArgumentNullException(nameof(TcontactType), $"Le type n'existe pas avec l'id \"{Id}\".");
+                    throw new NotSupportedException($"Le contact a déjà été supprimée.");
                 }
 
-                context.TcontactTypes.Remove(TcontactType);
+                using LibrarySqLiteDbContext context = new();
+
+                Tcontact? record = await context.Tcontacts.SingleOrDefaultAsync(s => s.Id == Id);
+                if (record == null)
+                {
+                    throw new ArgumentNullException(nameof(record), $"Le contact n'existe pas avec l'id \"{Id}\".");
+                }
+
+                List<TbookContactRoleConnector> tbookContactRoleConnector = await context.TbookContactRoleConnectors.Where(s => s.IdContact == Id).ToListAsync();
+                if (tbookContactRoleConnector.Any())
+                {
+                    context.TbookContactRoleConnectors.RemoveRange(tbookContactRoleConnector);
+                }
+
+                context.Tcontacts.Remove(record);
                 _ = await context.SaveChangesAsync();
+                IsDeleted = true;
 
                 return true;
-            }
-            catch (ArgumentNullException ex)
-            {
-                Logs.Log(nameof(Contact), nameof(DeleteAsync), ex);
-                return false;
-            }
-            catch (OperationCanceledException ex)
-            {
-                Logs.Log(nameof(Contact), nameof(DeleteAsync), ex);
-                return false;
             }
             catch (Exception ex)
             {
@@ -285,92 +329,118 @@ namespace LibApi.Services.Contacts
 
         #endregion
 
-        public async Task<Tuple<bool, long>> IsContactExistAsync(bool isEdit = false, long? modelId = null)
+        public static async Task<Tcontact?> GetContactIfExistAsync(ContactVM viewModel, bool isEdit = false, long? editingId = null)
         {
             try
             {
-                List<Tcontact> existingItemList = new List<Tcontact>();
+                if (viewModel == null)
+                {
+                    throw new ArgumentNullException(nameof(viewModel), $"Le modèle de vue du contact ne peut être null.");
+                }
 
-                if (!isEdit || modelId == null)
+                using LibrarySqLiteDbContext context = new();
+                List<Tcontact> existingItemList = new ();
+
+                if (!isEdit || editingId == null)
                 {
                     existingItemList = await context.Tcontacts.ToListAsync();
                 }
                 else
                 {
-                    existingItemList = await context.Tcontacts.Where(c => c.Id != (long)modelId).ToListAsync();
+                    existingItemList = await context.Tcontacts.Where(c => c.Id != (long)editingId).ToListAsync();
                 }
 
                 if (existingItemList != null && existingItemList.Any())
                 {
-                    string? titreCivilite = TitreCivilite?.Trim()?.ToLower();
-                    string? nomNaissance = NomNaissance?.Trim()?.ToLower();
-                    string? prenom = Prenom?.Trim()?.ToLower();
-                    string? autrePrenom = AutresPrenoms?.Trim()?.ToLower();
-                    string? nomUsage = NomUsage?.Trim()?.ToLower();
-                    string? societyName = SocietyName?.Trim()?.ToLower();
+                    string? titreCivilite = viewModel.TitreCivilite?.Trim()?.ToLower();
+                    string? nomNaissance = viewModel.NomNaissance?.Trim()?.ToLower();
+                    string? prenom = viewModel.Prenom?.Trim()?.ToLower();
+                    string? autrePrenom = viewModel.AutresPrenoms?.Trim()?.ToLower();
+                    string? nomUsage = viewModel.NomUsage?.Trim()?.ToLower();
+                    string? societyName = viewModel.SocietyName?.Trim()?.ToLower();
 
                     foreach (var item in existingItemList)
                     {
                         //Si personne Physique
-                        if (ContactType == LibShared.ContactType.Human)
+                        if (viewModel.ContactType == ContactType.Human)
                         {
                             if (item.TitreCivilite?.ToLower() == titreCivilite && item.NomNaissance?.ToLower() == nomNaissance &&
                             item.Prenom?.ToLower() == prenom && item.AutresPrenoms?.ToLower() == autrePrenom &&
                             item.NomUsage?.ToLower() == nomUsage)
                             {
-                                return new Tuple<bool, long>(true, item.Id);
+                                return item;
                             }
                         }
                         //Si personne Morale
-                        else if (ContactType == LibShared.ContactType.Society)
+                        else if (viewModel.ContactType == ContactType.Society)
                         {
                             if (item.SocietyName?.ToLower() == societyName)
                             {
-                                return new Tuple<bool, long>(true, item.Id);
+                                return item;
                             }
                         }
                     }
                 }
 
-                return new Tuple<bool, long>(false, 0);
-
+                return null;
             }
             catch (Exception ex)
             {
-                Logs.Log(nameof(Contact), nameof(DeleteAsync), ex);
-                return new Tuple<bool, long>(false, 0);
+                Logs.Log(nameof(Contact), nameof(GetContactIfExistAsync), ex);
+                return null;
             }
         }
 
-
-        protected virtual void Dispose(bool disposing)
+        public static Contact? ConvertToViewModel(Tcontact model)
         {
-            if (!disposedValue)
+            try
             {
-                if (disposing)
+                if (model == null) return null;
+
+                var isGuidCorrect = Guid.TryParse(model.Guid, out Guid guid);
+                if (isGuidCorrect == false) return null;
+
+                Contact viewModel = new ()
                 {
-                    // TODO: supprimer l'état managé (objets managés)
-                    context.Dispose();
-                }
+                    Id = model.Id,
+                    Guid = isGuidCorrect ? guid : Guid.Empty,
+                    ContactType = (ContactType)model.ContactType,
+                    DateAjout = DateHelpers.Converter.GetDateFromString(model.DateAjout),
+                    DateEdition = DateHelpers.Converter.GetNullableDateFromString(model.DateEdition),
+                    Observation = model.Observation,
+                    TitreCivilite = model.TitreCivilite,
+                    NomNaissance = model.NomNaissance,
+                    NomUsage = model.NomUsage,
+                    Prenom = model.Prenom,
+                    AutresPrenoms = model.AutresPrenoms,
+                    AdressePostal = model.AdressPostal,
+                    CodePostal = model.CodePostal,
+                    Ville = model.Ville,
+                    NoMobile = model.NoMobile,
+                    NoTelephone = model.NoTelephone,
+                    AdresseMail = model.MailAdress,
+                    DateNaissance = DateHelpers.Converter.GetNullableDateFromString(model.DateNaissance),
+                    SocietyName = model.SocietyName,
+                    Nationality = model.Nationality,
+                };
 
-                // TODO: libérer les ressources non managées (objets non managés) et substituer le finaliseur
-                // TODO: affecter aux grands champs une valeur null
-                disposedValue = true;
+                //if (model.TcontactRole == null || !model.TcontactRole.Any())
+                //{
+                //    await CompleteModelInfos(model);
+                //}
+
+                //if (model.TcontactRole != null && model.TcontactRole.Count > 0)
+                //{
+                //    viewModel.ContactRoles = new ObservableCollection<ContactRole>(model.TcontactRole.Select(s => (ContactRole)s.Role));
+                //}
+
+                return viewModel;
             }
-        }
-
-        // // TODO: substituer le finaliseur uniquement si 'Dispose(bool disposing)' a du code pour libérer les ressources non managées
-        // ~Contact()
-        // {
-        //     // Ne changez pas ce code. Placez le code de nettoyage dans la méthode 'Dispose(bool disposing)'
-        //     Dispose(disposing: false);
-        // }
-
-        public void Dispose()
-        {
-            // Ne changez pas ce code. Placez le code de nettoyage dans la méthode 'Dispose(bool disposing)'
-            Dispose(disposing: true);
-            GC.SuppressFinalize(this);
+            catch (Exception ex)
+            {
+                Logs.Log(nameof(Contact), nameof(ConvertToViewModel), ex);
+                return null;
+            }
         }
     }
 }

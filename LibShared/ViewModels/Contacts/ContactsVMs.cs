@@ -68,11 +68,11 @@ namespace LibShared.ViewModels.Contacts
     public class ContactVM : GenericVM
     {
 
-        private ContactType _ContactType = ContactType.Human;
+        protected ContactType _ContactType = ContactType.Human;
         public ContactType ContactType
         {
             get => _ContactType;
-            protected set
+            set
             {
                 if (_ContactType != value)
                 {
@@ -82,11 +82,11 @@ namespace LibShared.ViewModels.Contacts
             }
         }
 
-        private ObservableCollection<ContactRoleVM> _ContactRoles = new ObservableCollection<ContactRoleVM>();
+        protected ObservableCollection<ContactRoleVM> _ContactRoles = new ObservableCollection<ContactRoleVM>();
         public ObservableCollection<ContactRoleVM> ContactRoles
         {
             get => _ContactRoles;
-            protected set
+            set
             {
                 if (_ContactRoles != value)
                 {
@@ -96,11 +96,11 @@ namespace LibShared.ViewModels.Contacts
             }
         }
 
-        private string? _TitreCivilite;
+        protected string? _TitreCivilite;
         public string? TitreCivilite
         {
             get => _TitreCivilite;
-            protected set
+            set
             {
                 if (_TitreCivilite != value)
                 {
@@ -110,11 +110,11 @@ namespace LibShared.ViewModels.Contacts
             }
         }
 
-        private string? _NomNaissance;
+        protected string? _NomNaissance;
         public string? NomNaissance
         {
             get => _NomNaissance;
-            protected set
+            set
             {
                 if (_NomNaissance != value)
                 {
@@ -124,11 +124,11 @@ namespace LibShared.ViewModels.Contacts
             }
         }
 
-        private string? _NomUsage = String.Empty;
+        protected string? _NomUsage = String.Empty;
         public string? NomUsage
         {
             get => _NomUsage;
-            protected set
+            set
             {
                 if (_NomUsage != value)
                 {
@@ -138,7 +138,7 @@ namespace LibShared.ViewModels.Contacts
             }
         }
 
-        private string? _Prenom;
+        protected string? _Prenom;
         public string? Prenom
         {
             get => _Prenom;
@@ -152,7 +152,7 @@ namespace LibShared.ViewModels.Contacts
             }
         }
 
-        private string? _AutresPrenoms = String.Empty;
+        protected string? _AutresPrenoms = String.Empty;
         public string? AutresPrenoms
         {
             get => _AutresPrenoms;
@@ -166,7 +166,7 @@ namespace LibShared.ViewModels.Contacts
             }
         }
 
-        private string? _AdressePostal;
+        protected string? _AdressePostal;
         public string? AdressePostal
         {
             get => _AdressePostal;
@@ -180,7 +180,7 @@ namespace LibShared.ViewModels.Contacts
             }
         }
 
-        private string? _Ville;
+        protected string? _Ville;
         public string? Ville
         {
             get => _Ville;
@@ -194,7 +194,7 @@ namespace LibShared.ViewModels.Contacts
             }
         }
 
-        private string? _CodePostal;
+        protected string? _CodePostal;
         public string? CodePostal
         {
             get => _CodePostal;
@@ -208,7 +208,7 @@ namespace LibShared.ViewModels.Contacts
             }
         }
 
-        private string? _AdresseMail;
+        protected string? _AdresseMail;
         public string? AdresseMail
         {
             get => _AdresseMail;
@@ -222,7 +222,7 @@ namespace LibShared.ViewModels.Contacts
             }
         }
 
-        private string? _NoTelephone;
+        protected string? _NoTelephone;
         public string? NoTelephone
         {
             get => _NoTelephone;
@@ -236,7 +236,7 @@ namespace LibShared.ViewModels.Contacts
             }
         }
 
-        private string? _NoMobile;
+        protected string? _NoMobile;
         public string? NoMobile
         {
             get => _NoMobile;
@@ -250,7 +250,7 @@ namespace LibShared.ViewModels.Contacts
             }
         }
 
-        private string? _Observation;
+        protected string? _Observation;
         public string? Observation
         {
             get => _Observation;
@@ -264,7 +264,7 @@ namespace LibShared.ViewModels.Contacts
             }
         }
 
-        private string? _SocietyName;
+        protected string? _SocietyName;
         public string? SocietyName
         {
             get => _SocietyName;
@@ -278,7 +278,7 @@ namespace LibShared.ViewModels.Contacts
             }
         }
 
-        private string? _Nationality;
+        protected string? _Nationality;
         public string? Nationality
         {
             get => _Nationality;
@@ -288,21 +288,6 @@ namespace LibShared.ViewModels.Contacts
                 {
                     _Nationality = value;
                     OnPropertyChanged();
-                }
-            }
-        }
-
-        private string? _JaquettePath;
-        [JsonIgnore]
-        public string? JaquettePath
-        {
-            get => this._JaquettePath;
-            set
-            {
-                if (this._JaquettePath != value)
-                {
-                    this._JaquettePath = value;
-                    this.OnPropertyChanged();
                 }
             }
         }
@@ -320,6 +305,22 @@ namespace LibShared.ViewModels.Contacts
                 }
             }
         }
+
+        protected string? _JaquettePath;
+        [JsonIgnore]
+        public string? JaquettePath
+        {
+            get => this._JaquettePath;
+            set
+            {
+                if (this._JaquettePath != value)
+                {
+                    this._JaquettePath = value;
+                    this.OnPropertyChanged();
+                }
+            }
+        }
+
         
     }
 }
