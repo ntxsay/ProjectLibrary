@@ -8,21 +8,7 @@ using LibShared.ViewModels.Contacts;
 
 int maxitemPerPage = 20;
 
-ContactRole? contactRole = await ContactRole.CreateAsync("Ak12" + DateTime.Now.ToString(), null);
-var isRoleCreated = contactRole != null;
-Console.WriteLine("Role Created : " + isRoleCreated);
-Console.WriteLine("Role Name Updated : " + await contactRole.UpdateAsync("Alalal" + DateTime.Now.ToString()), null);
-Console.WriteLine("Role Description Updated : " + await contactRole.UpdateAsync(null, "Marshall" + DateTime.Now.ToString()));
-Console.WriteLine(contactRole.GetJsonDataString());
-Console.ReadLine();
 
-ContactType contactType = new("Ak12" + DateTime.Now.ToString(), null);
-var isTypeCreated = await contactType.CreateAsync();
-Console.WriteLine("Type Created : " + isTypeCreated);
-Console.WriteLine("Type Name Updated : " + await contactType.UpdateNameAsync("Alalal" + DateTime.Now.ToString()));
-Console.WriteLine("Type Description Updated : " + await contactType.UpdateDescriptionAsync("Marshall" + DateTime.Now.ToString()));
-Console.WriteLine(contactType.GetJsonDataString());
-Console.ReadLine();
 
 Library? library = null;
 await CreateLibrary();

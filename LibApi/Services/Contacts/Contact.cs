@@ -14,13 +14,14 @@ using System.Threading.Tasks;
 
 namespace LibApi.Services.Contacts
 {
-    public sealed class Contact : ContactVM
+    public sealed class Contact : ContactVM, IDisposable
     {
         /// <summary>
         /// Obtient une valeur booléenne indiquant si l'objet a déjà été effacé de la base de données
         /// </summary>
         public bool IsDeleted { get; private set; }
 
+        LibrarySqLiteDbContext context = new ();
 
         private Contact()
         {
@@ -124,7 +125,6 @@ namespace LibApi.Services.Contacts
                     throw new ArgumentNullException(nameof(viewModel), $"Le modèle de vue du contact ne peut être null.");
                 }
 
-                using LibrarySqLiteDbContext context = new();
 
                 if (viewModel.ContactType == ContactType.Human)
                 {
@@ -192,6 +192,93 @@ namespace LibApi.Services.Contacts
             {
                 Logs.Log(nameof(Contact), nameof(CreateAsync), ex);
                 return null;
+            }
+        }
+
+        public async Task<bool> AddOrUpdateAdressAsync(string? codePostal = "", string? ville = "", string adressPostal = "", string? noFixe = "", string? noMobile = "", string? email = "")
+        {
+            try
+            {
+                if (codePostal == null && ville == null && adressPostal == null && adressPostal == null && noFixe == null && noMobile == null && email == null)
+                {
+                    throw new InvalidOperationException("Tous les paramètres ne peuvent pas être null.");
+                }
+
+                Tcontact? tcontact = await context.Tcontacts.SingleOrDefaultAsync(s => s.Id == Id);
+                if (tcontact == null)
+                {
+                    throw new ArgumentNullException(nameof(tcontact), $"Le contact n'existe pas avec l'id \"{Id}\".");
+                }
+
+                if (codePostal != null)
+                {
+                    tcontact.CodePostal = codePostal.Trim();
+                }
+
+                if (ville != null)
+                {
+                    tcontact.Ville = ville.Trim();
+                }
+
+                if (adressPostal != null)
+                {
+                    tcontact.AdressPostal = adressPostal.Trim();
+                }
+
+                if (noFixe != null)
+                {
+                    tcontact.NoTelephone = noFixe.Trim();
+                }
+
+                if (noMobile != null)
+                {
+                    tcontact.NoMobile = noMobile.Trim();
+                }
+
+                if (email != null)
+                {
+                    tcontact.MailAdress = email.Trim();
+                }
+
+                context.Tcontacts.Update(tcontact);
+                _ = await context.SaveChangesAsync();
+
+                if (codePostal != null)
+                {
+                    CodePostal = codePostal.Trim();
+                }
+
+                if (ville != null)
+                {
+                    Ville = ville.Trim();
+                }
+
+                if (adressPostal != null)
+                {
+                    AdressePostal = adressPostal.Trim();
+                }
+
+                if (noFixe != null)
+                {
+                    NoTelephone = noFixe.Trim();
+                }
+
+                if (noMobile != null)
+                {
+                    NoMobile = noMobile.Trim();
+                }
+
+                if (email != null)
+                {
+                    AdresseMail = email.Trim();
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Logs.Log(nameof(Contact), nameof(AddOrUpdateAdressAsync), ex);
+                return false;
             }
         }
 
@@ -441,6 +528,11 @@ namespace LibApi.Services.Contacts
                 Logs.Log(nameof(Contact), nameof(ConvertToViewModel), ex);
                 return null;
             }
+        }
+
+        public void Dispose()
+        {
+            context.Dispose();
         }
     }
 }
