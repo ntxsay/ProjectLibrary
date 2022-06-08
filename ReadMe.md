@@ -1,7 +1,7 @@
-﻿
+
 # La LibAPI
 
-LibAPI (Library Application Programing Interface) est une bibliothèque de classe développée avec C# .NET 6.0 qui vous permet de créer et de gérer une ou des bibliothèques de livres dans une base de données SQLite.
+LibAPI (Library Application Programing Interface) est une bibliothèque de classe développée avec C# et .NET 6.0 qui vous permet de créer et de gérer une ou des bibliothèques de livres dans une base de données SQLite.
 
 ## Introduction/Contexte
 
@@ -13,19 +13,72 @@ La collection est constituée par un ensemble de livres d’un même éditeur qu
 
 ### Créer une bibliothèque
 
-Ajoutez l'espace de nom  `using LibApi.Services.Libraries;`  dans votre fichier ensuite déclarez une variable de type  `Library?`  nommée  `library`  puis appelez la méthode asynchrone statique  `await Library.CreateAsync("nom_de_votre_bibliotheque", ["description_de_votre_description"]);`  dans une méthode asynchrone.
+Ajoutez l'espace de nom  `using LibApi.Services.Libraries;`  dans votre fichier ensuite déclarez une variable de type  `Library?`  nommée  `library`  puis appelez la méthode asynchrone statique  `await Library.CreateAsync("nom_de_votre_bibliotheque", ["description_de_votre_description"], [Ouvrir_Si_Existe_Deja]);`  dans une méthode asynchrone.
 
     using LibApi.Services.Libraries;
     
     public async void NewLibrary()
     {
-        Library? library = await Library.CreateAsync("Capucine", "Contient les livres de tante Suzie");
+        Library? library = await Library.CreateAsync("Ma_bibliotheque", "Ma_description", false);
         if (library != null)
         {
             //...
         }
     }
 
+### Récupérer des bibliothèques existantes
+
+ 1. Récupérer toutes les bibliothèques
+
+Appelez la méthode statique asynchrone  `await Library.GetAllAsync();`.
+
+    using LibApi.Services.Libraries;
+    
+    public async void GetAllLibrary()
+    {
+        IEnumerable<Library> libraries = await Library.GetAllAsync();
+        if (libraries.Any())
+        {
+            //...
+        }
+    }
+
+ 2. Récupérer plusieurs bibliothèques
+
+
+### Récupérer une bibliothèque existante
+
+ 1. Récupérer une bibliothèque par son *id*
+
+Appelez la méthode statique asynchrone  `await Library.GetSingleAsync(id_bibliotheque_a_recuperer);`.
+
+    using LibApi.Services.Libraries;
+    
+    public async void GetSingleLibraryById()
+    {
+        Library? library = await Library.GetSingleAsync(1);
+        if (library != null)
+        {
+            //...
+        }
+    }
+
+ 2. Récupérer une bibliothèque par son *nom*
+
+Appelez la méthode statique asynchrone  `await Library.GetSingleAsync("nom_de_la_bibliotheque_recuperer");`.
+
+Remarque : le paramètre de la méthode n'est pas sensible à la casse.
+
+    using LibApi.Services.Libraries;
+    
+    public async void GetSingleLibraryByName()
+    {
+        Library? library = await Library.GetSingleAsync("Ma_bibliotheque");
+        if (library != null)
+        {
+            //...
+        }
+    }
 
 ### Mettre à jour la bibliothèque
 
@@ -55,7 +108,7 @@ Pour mettre à jour uniquement le nom de la bibliothèque, vous devez renseigner
          }
      }
 
-Pour mettre à jour uniquement sa description, assurez-vous de garder le premier paramètre vide  _(`""`)_  ou  `null`  _(afin pour d'éviter la modification du nom à votre insu)_  puis tapez la nouvelle description dans le second paramètre.
+Pour mettre à jour uniquement sa description, assurez vous de garder le premier paramètre vide _`""`_  ou  `null`  _(afin pour d'éviter la modification du nom à votre insu)_  puis tapez la nouvelle description dans le second paramètre.
 
     using LibApi.Services.Libraries;
     
@@ -70,39 +123,9 @@ Pour mettre à jour uniquement sa description, assurez-vous de garder le premier
 
 Attention : Si les deux paramètres sont vide ou  `null`  ou que la méthode asynchrone  `DeleteAsync()`  ait été appelée avant celle-ci et qu'elle ait retournée la valeur  `true`, alors une  `NotSupportedException`  est levée et retourne la valeur  `false`.
 
-### Récupérer le modèle de données de toutes les bibliothèques
 
-Ajoutez l'espace de nom  `using LibApi.Models.Local.SQLite;`  dans votre fichier puis appelez la méthode statique asynchrone  `await Library.GetAllAsync();`.
-Cette méthode retourne  un objet `IEnumerable<Tlibrary>`.
 
-    using LibApi.Models.Local.SQLite;
-    using LibApi.Services.Libraries;
-    
-    public async void GetAllLibrary()
-    {
-        IEnumerable<Tlibrary>? libraries = await Library.GetAllAsync();
-        if (libraries != null && libraries.Any())
-        {
-            //...
-        }
-    }
 
-### Récupérer le modèle de données d'une bibliothèque existante
-
-Ajoutez l'espace de nom  `using LibApi.Models.Local.SQLite;`  dans votre fichier puis appelez la méthode statique asynchrone  `await Library.GetSingleAsync(id_bibliotheque_a_recuperer);`.
-Cette méthode retourne un objet `Tlibrary?`.
-
-    using LibApi.Models.Local.SQLite;
-    using LibApi.Services.Libraries;
-    
-    public async void GetSingleLibrary()
-    {
-        Tlibrary? library = await Library.GetSingleAsync(1);
-        if (library != null)
-        {
-            //...
-        }
-    }
 
 ### Compter le nombre de bibliothèque existant
 
@@ -193,7 +216,7 @@ Pour mettre à jour uniquement le nom de la collection, vous devez renseigner le
         }
     }
 
-Pour mettre à jour uniquement sa description, assurez-vous de garder le premier paramètre vide  _(`""`)_  ou  `null`  _(afin pour d'éviter la modification du nom à votre insu)_  puis tapez la nouvelle description dans le second paramètre.
+Pour mettre à jour uniquement sa description, assurez vous de garder le premier paramètre vide  _(`""`)_  ou  `null`  _(afin pour d'éviter la modification du nom à votre insu)_  puis tapez la nouvelle description dans le second paramètre.
 
     using LibApi.Services.Libraries;
     using LibApi.Services.Collections;
@@ -219,15 +242,14 @@ Appelez ou déclarez une variable de type `Library` en créant ou en récupéran
 
     using LibApi.Services.Libraries;
     using LibApi.Services.Collections;
-    using LibApi.Models.Local.SQLite;
     
     public async void NewLibraryAndGetAllCollections()
     {
         Library? library = await Library.CreateAsync("Capucine", "Contient les livres de tante Suzie");
         if (library != null)
         {
-            IEnumerable<Tcollection>? collections = await library.GetAllCollectionsAsync();
-            if (collections != null && collections.Any())
+            IEnumerable<Collection> collections = await library.GetAllCollectionsAsync();
+            if (collections.Any())
             {
                 //...
             }
