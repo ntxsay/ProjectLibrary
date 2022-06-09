@@ -52,7 +52,6 @@ namespace LibApi.Services.Categories
         }
         #endregion
 
-
         #region CRUD
         /// <summary>
         /// Ajoute une nouvelle sous-catégorie à la catégorie actuelle.
@@ -221,6 +220,50 @@ namespace LibApi.Services.Categories
         }
 
         #endregion
+
+        /// <summary>
+        /// Insère cette catégorie dans une autre
+        /// </summary>
+        /// <param name="parentCategory">Catégorie parente</param>
+        /// <returns>Retourne une valeur booléenne</returns>
+        public async Task<bool> InsertInAnotherCategoryAsync(Category parentCategory)
+        {
+            try
+            {
+                if (IdParentCategory == null)
+                {
+                    throw new NotSupportedException("Impossible d'insérer une catégorie parente dans une catégorie enfant.");
+                }
+
+                if (parentCategory.IdLibrary != IdLibrary)
+                {
+                    throw new NotSupportedException("Impossible d'insérer une catégorie dans une autre provenant d'une autre bibliothèque.");
+                }
+
+                bool isAlreadyExist = await context.TlibraryCategories.AnyAsync(c => c.Name.ToLower() == Name.ToLower() && c.IdParentCategorie == parentCategory.Id && c.IdLibrary == IdLibrary);
+                if (isAlreadyExist == true)
+                {
+                    throw new NotSupportedException("Une catégorie du même nom existe déjà à cet emplacement");
+                }
+
+                TlibraryCategorie? record = await context.TlibraryCategories.SingleOrDefaultAsync(s => s.Id == Id);
+                if (record == null)
+                {
+                    throw new ArgumentNullException(nameof(record), $"La catégorie n'existe pas avec l'id \"{Id}\".");
+                }
+
+                record.IdParentCategorie = parentCategory.Id;
+                context.TlibraryCategories.Update(record);
+                await context.SaveChangesAsync();
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Logs.Log(nameof(Category), nameof(InsertInAnotherCategoryAsync), ex);
+                return false;
+            }
+        }
 
         public static Category? ConvertToViewModel(TlibraryCategorie model)
         {
