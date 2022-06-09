@@ -1,4 +1,5 @@
 ﻿using System;
+using LibApi;
 using LibApi.Services.Contacts;
 using LibShared;
 using LibShared.ViewModels.Contacts;
@@ -67,6 +68,22 @@ namespace LibTest
             }
 
             Assert.NotNull(contact);
+        }
+
+        [Fact]
+        public async void SearchContact()
+        {
+            IEnumerable<Contact> contact = await Contact.SearchAsync("capesterre", Search.Terms.Contains, null);
+            if (contact != null)
+            {
+                //...
+                Assert.NotEmpty(contact);
+            }
+            else if (contact == null)
+            {
+                Assert.NotNull(contact);
+            }
+
         }
     }
 }

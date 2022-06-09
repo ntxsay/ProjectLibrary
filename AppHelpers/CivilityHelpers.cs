@@ -7,8 +7,17 @@ using System.Threading.Tasks;
 
 namespace AppHelpers
 {
+    public enum DisplayCivility
+    {
+        TitreNomnaissancePrenom,
+        PrenomAutresprenomsNomnaissanceNomusage,
+        NomnaissanceNomusagePrenomAutresprenoms
+    }
+
     public class CivilityHelpers
     {
+        
+
         public enum Genre
         {
             UnSpecified,

@@ -551,6 +551,68 @@ namespace LibApi.Services.Contacts
 
         #endregion
 
+        #region Méthodes statiques
+        /// <summary>
+            /// Obtient la liste de tous les contacts
+            /// </summary>
+            /// <param name="contactType"></param>
+            /// <returns></returns>
+        public static async Task<IEnumerable<Contact>> GetAllAsync(ContactType? contactType = null)
+        {
+            try
+            {
+                using LibrarySqLiteDbContext context = new();
+
+                List<Tcontact>? tcontacts = null;
+                if (contactType == null)
+                {
+                    tcontacts = await context.Tcontacts.ToListAsync();
+                }
+                else
+                {
+                    tcontacts = await context.Tcontacts.Where(w => w.ContactType == (byte)contactType).ToListAsync();
+                }
+
+                if (tcontacts != null && tcontacts.Any())
+                {
+                    return tcontacts.Select(s => ConvertToViewModel(s)).Where(w => w != null) ?? Enumerable.Empty<Contact>()!;
+                }
+
+                return Enumerable.Empty<Contact>();
+            }
+            catch (Exception ex)
+            {
+                Logs.Log(nameof(Contact), nameof(GetPersonIfExistAsync), ex);
+                return Enumerable.Empty<Contact>();
+            }
+        }
+
+        /// <summary>
+        /// Obtient la liste de tous les contacts
+        /// </summary>
+        /// <param name="contactType"></param>
+        /// <returns></returns>
+        public static async Task<Contact?> GetSingleAsync(long idContact)
+        {
+            try
+            {
+                using LibrarySqLiteDbContext context = new();
+
+                Tcontact? tcontact = await context.Tcontacts.SingleOrDefaultAsync(s => s.Id == idContact);
+                if (tcontact == null)
+                {
+                    return null;
+                }
+
+                return ConvertToViewModel(tcontact);
+            }
+            catch (Exception ex)
+            {
+                Logs.Log(nameof(Contact), nameof(GetPersonIfExistAsync), ex);
+                return null;
+            }
+        }
+
         private static async Task<Tcontact?> GetPersonIfExistAsync(LibrarySqLiteDbContext context, string? _titreCivilite = null, string? _nomNaissance = null, string? _nomUsage = null, string? _prenom = null, string? _autresPrenoms = null, bool isEdit = false, long? editingId = null)
         {
             try
@@ -560,7 +622,7 @@ namespace LibApi.Services.Contacts
                     throw new InvalidOperationException("Le nom de famille et le prénom doiven être renseignés.");
                 }
 
-                List<Tcontact> existingItemList = new ();
+                List<Tcontact> existingItemList = new();
 
                 if (!isEdit || editingId == null)
                 {
@@ -641,6 +703,271 @@ namespace LibApi.Services.Contacts
             }
         }
 
+        public static string? DisplayName(Tcontact model, DisplayCivility displayCivility = DisplayCivility.PrenomAutresprenomsNomnaissanceNomusage)
+        {
+            try
+            {
+                if (model == null)
+                {
+                    return null;
+                }
+
+                string? value = null;
+                string titrecivility = !model.TitreCivilite.IsStringNullOrEmptyOrWhiteSpace() ? model.TitreCivilite + " " : "";
+                string prenom = !model.Prenom.IsStringNullOrEmptyOrWhiteSpace() ? model.Prenom + " " : "";
+                string autresPrenoms = !model.AutresPrenoms.IsStringNullOrEmptyOrWhiteSpace() ? model.AutresPrenoms + " " : "";
+                string nomNaissance = !model.NomNaissance.IsStringNullOrEmptyOrWhiteSpace() ? model.NomNaissance + " " : "";
+                string nomUsage = !model.NomUsage.IsStringNullOrEmptyOrWhiteSpace() ? model.NomUsage + " " : "";
+
+                var contactType = (ContactType)model.ContactType;
+                if (contactType == ContactType.Human)
+                {
+                    switch (displayCivility)
+                    {
+                        case DisplayCivility.TitreNomnaissancePrenom:
+                            value = $"{titrecivility}{nomNaissance}{prenom?.Trim()}";
+                            break;
+                        case DisplayCivility.PrenomAutresprenomsNomnaissanceNomusage:
+                            value = $"{prenom}{autresPrenoms}{nomNaissance}{nomUsage?.Trim()}";
+                            break;
+                        case DisplayCivility.NomnaissanceNomusagePrenomAutresprenoms:
+                            value = $"{nomNaissance}{nomUsage}{prenom}{autresPrenoms?.Trim()}";
+                            break;
+                        default:
+                            break;
+                    }
+                }
+                else if (contactType == ContactType.Society)
+                {
+                    value = model.SocietyName;
+
+                }
+
+                return value?.Trim();
+            }
+            catch (Exception ex)
+            {
+                Logs.Log(nameof(Contact), nameof(DisplayName), ex);
+                return null;
+            }
+        }
+
+        public static string? DisplayName(ContactVM model, DisplayCivility displayCivility = DisplayCivility.PrenomAutresprenomsNomnaissanceNomusage)
+        {
+            try
+            {
+                if (model == null)
+                {
+                    return null;
+                }
+
+                string? value = null;
+                string titrecivility = !model.TitreCivilite.IsStringNullOrEmptyOrWhiteSpace() ? model.TitreCivilite + " " : "";
+                string prenom = !model.Prenom.IsStringNullOrEmptyOrWhiteSpace() ? model.Prenom + " " : "";
+                string autresPrenoms = !model.AutresPrenoms.IsStringNullOrEmptyOrWhiteSpace() ? model.AutresPrenoms + " " : "";
+                string nomNaissance = !model.NomNaissance.IsStringNullOrEmptyOrWhiteSpace() ? model.NomNaissance + " " : "";
+                string nomUsage = !model.NomUsage.IsStringNullOrEmptyOrWhiteSpace() ? model.NomUsage + " " : "";
+
+                if (model.ContactType == ContactType.Human)
+                {
+                    switch (displayCivility)
+                    {
+                        case DisplayCivility.TitreNomnaissancePrenom:
+                            value = $"{titrecivility}{nomNaissance}{prenom?.Trim()}";
+                            break;
+                        case DisplayCivility.PrenomAutresprenomsNomnaissanceNomusage:
+                            value = $"{prenom}{autresPrenoms}{nomNaissance}{nomUsage?.Trim()}";
+                            break;
+                        case DisplayCivility.NomnaissanceNomusagePrenomAutresprenoms:
+                            value = $"{nomNaissance}{nomUsage}{prenom}{autresPrenoms?.Trim()}";
+                            break;
+                        default:
+                            break;
+                    }
+                }
+                else if (model.ContactType == ContactType.Society)
+                {
+                    value = model.SocietyName;
+                }
+
+                return value?.Trim();
+            }
+            catch (Exception ex)
+            {
+                Logs.Log(nameof(Contact), nameof(DisplayName), ex);
+                return null;
+            }
+        }
+
+        public static async Task<IEnumerable<Contact>> SearchAsync(string searchTerm, Search.Terms termParameter = Search.Terms.Contains, ContactType? contactType = null)
+        {
+            try
+            {
+                if (searchTerm.IsStringNullOrEmptyOrWhiteSpace() || searchTerm.Length < 2)
+                {
+                    throw new ArgumentNullException(nameof(searchTerm), "Le terme de la recherche doit contenir au moins deux caractères.");
+                }
+
+                List<Tcontact> tcontacts = new ();
+
+                using LibrarySqLiteDbContext context = new();
+                if (contactType == null)
+                {
+                    tcontacts = await context.Tcontacts.ToListAsync();
+                }
+                else
+                {
+                    tcontacts = await context.Tcontacts.Where(w => w.ContactType == (byte)contactType).ToListAsync();
+                }
+
+                List<Tcontact> filteredTcontact = new();
+                if (tcontacts != null && tcontacts.Any())
+                {
+                    List<Tcontact>? searchedInCivility = tcontacts.Select(s => SearchInCivility(s, searchTerm, termParameter)).Where(w => w != null).ToList();
+                    if (searchedInCivility != null && searchedInCivility.Any())
+                    {
+                        filteredTcontact.AddRange(searchedInCivility);
+                    }
+
+                    List<Tcontact>? searchedInOtherLocation = tcontacts.Select(s => SearchInOtherLocation(s, searchTerm, termParameter)).Where(w => w != null).ToList();
+                    if (searchedInOtherLocation != null && searchedInOtherLocation.Any())
+                    {
+                        filteredTcontact.AddRange(searchedInOtherLocation);
+                    }
+                }
+
+                if (filteredTcontact != null && filteredTcontact.Any())
+                {
+                    filteredTcontact = filteredTcontact.Distinct().ToList();
+
+                    return filteredTcontact.Select(s => ConvertToViewModel(s)) ?? Enumerable.Empty<Contact>();
+                }
+
+                return Enumerable.Empty<Contact>();
+            }
+            catch (Exception ex)
+            {
+                Logs.Log(nameof(Contact), nameof(SearchInOtherLocation), ex);
+                return Enumerable.Empty<Contact>();
+            }
+        }
+
+        private static Tcontact? SearchInCivility(Tcontact tcontact, string searchTerm, Search.Terms termParameter = Search.Terms.Contains)
+        {
+            try
+            {
+                if (searchTerm.IsStringNullOrEmptyOrWhiteSpace() || searchTerm.Length < 2)
+                {
+                    throw new ArgumentNullException(nameof(searchTerm), "Le terme de la recherche doit contenir au moins deux caractères.");
+                }
+
+                string termToLower = searchTerm.ToLower();
+
+                var enumDisplayCivlityList = Enum.GetValues(typeof(DisplayCivility)).Cast<DisplayCivility>();
+                foreach (DisplayCivility displayStyle in enumDisplayCivlityList)
+                {
+                    string? contactDisplayStyle = DisplayName(tcontact, displayStyle);
+                    switch (termParameter)
+                    {
+                        case Search.Terms.Equals:
+                            if (contactDisplayStyle?.ToLower() == termToLower)
+                            {
+                                return tcontact;
+                            }
+                            break;
+                        case Search.Terms.Contains:
+                            if (contactDisplayStyle?.ToLower().Contains(termToLower) == true)
+                            {
+                                return tcontact;
+                            }
+
+                            break;
+                        case Search.Terms.StartWith:
+                            if (contactDisplayStyle?.ToLower().StartsWith(termToLower) == true)
+                            {
+                                return tcontact;
+                            }
+                            break;
+                        case Search.Terms.EndWith:
+                            if (contactDisplayStyle?.ToLower().EndsWith(termToLower) == true)
+                            {
+                                return tcontact;
+                            }
+                            break;
+                        default:
+                            break;
+                    }
+                }
+
+                return null;
+            }
+            catch (Exception ex)
+            {
+                Logs.Log(nameof(Contact), nameof(SearchInCivility), ex);
+                return null;
+            }
+        }
+
+
+        private static Tcontact? SearchInOtherLocation(Tcontact tcontact, string searchTerm, Search.Terms termParameter = Search.Terms.Contains)
+        {
+            try
+            {
+                if (searchTerm.IsStringNullOrEmptyOrWhiteSpace() || searchTerm.Length < 2)
+                {
+                    throw new ArgumentNullException(nameof(searchTerm), "Le terme de la recherche doit contenir au moins deux caractères.");
+                }
+
+                string termToLower = searchTerm.ToLower();
+
+                switch (termParameter)
+                {
+                    case Search.Terms.Equals:
+                        if (tcontact.Observation?.ToLower() == termToLower || tcontact.Nationality?.ToLower() == termToLower || tcontact.AdressPostal?.ToLower() == termToLower ||
+                            tcontact.Ville?.ToLower() == termToLower || tcontact.CodePostal?.ToLower() == termToLower || tcontact.MailAdress?.ToLower() == termToLower
+                            || tcontact.NoTelephone?.ToLower() == termToLower || tcontact.NoMobile?.ToLower() == termToLower)
+                        {
+                            return tcontact;
+                        }
+                        break;
+                    case Search.Terms.Contains:
+                        if (tcontact.Observation?.ToLower().Contains(termToLower) == true || tcontact.Nationality?.ToLower().Contains(termToLower) == true || tcontact.AdressPostal?.ToLower().Contains(termToLower) == true ||
+                            tcontact.Ville?.ToLower().Contains(termToLower) == true || tcontact.CodePostal?.ToLower().Contains(termToLower) == true || tcontact.MailAdress?.ToLower().Contains(termToLower) == true
+                            || tcontact.NoTelephone?.ToLower().Contains(termToLower) == true || tcontact.NoMobile?.ToLower().Contains(termToLower) == true)
+                        {
+                            return tcontact;
+                        }
+
+                        break;
+                    case Search.Terms.StartWith:
+                        if (tcontact.Observation?.ToLower().StartsWith(termToLower) == true || tcontact.Nationality?.ToLower().StartsWith(termToLower) == true || tcontact.AdressPostal?.ToLower().StartsWith(termToLower) == true ||
+                            tcontact.Ville?.ToLower().StartsWith(termToLower) == true || tcontact.CodePostal?.ToLower().StartsWith(termToLower) == true || tcontact.MailAdress?.ToLower().StartsWith(termToLower) == true
+                            || tcontact.NoTelephone?.ToLower().StartsWith(termToLower) == true || tcontact.NoMobile?.ToLower().StartsWith(termToLower) == true)
+                        {
+                            return tcontact;
+                        }
+
+                        break;
+                    case Search.Terms.EndWith:
+                        if (tcontact.Observation?.ToLower().EndsWith(termToLower) == true || tcontact.Nationality?.ToLower().EndsWith(termToLower) == true || tcontact.AdressPostal?.ToLower().EndsWith(termToLower) == true ||
+                            tcontact.Ville?.ToLower().EndsWith(termToLower) == true || tcontact.CodePostal?.ToLower().EndsWith(termToLower) == true || tcontact.MailAdress?.ToLower().EndsWith(termToLower) == true
+                            || tcontact.NoTelephone?.ToLower().EndsWith(termToLower) == true || tcontact.NoMobile?.ToLower().EndsWith(termToLower) == true)
+                        {
+                            return tcontact;
+                        }
+                        break;
+                    default:
+                        return null;
+                }
+
+                return null;
+            }
+            catch (Exception ex)
+            {
+                Logs.Log(nameof(Contact), nameof(SearchInOtherLocation), ex);
+                return null;
+            }
+        }
 
         public static Contact? ConvertToViewModel(Tcontact model)
         {
@@ -651,7 +978,7 @@ namespace LibApi.Services.Contacts
                 var isGuidCorrect = Guid.TryParse(model.Guid, out Guid guid);
                 if (isGuidCorrect == false) return null;
 
-                Contact viewModel = new ()
+                Contact viewModel = new()
                 {
                     Id = model.Id,
                     Guid = isGuidCorrect ? guid : Guid.Empty,
@@ -684,6 +1011,7 @@ namespace LibApi.Services.Contacts
             }
         }
 
+        #endregion
         public void Dispose()
         {
             context.Dispose();
