@@ -52,6 +52,34 @@ namespace LibApi.Services.Libraries
 
         #endregion
 
+        #region Properties
+        public new string Name
+        {
+            get => _Name;
+            private set
+            {
+                if (_Name != value)
+                {
+                    _Name = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public new string? Description
+        {
+            get => _Description;
+            private set
+            {
+                if (_Description != value)
+                {
+                    _Description = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+        #endregion
+
         /// <summary>
         /// Obtient tous les livres de la bibliothèque trié par nom et par ordre croissant ou décroissant
         /// </summary>
@@ -132,7 +160,6 @@ namespace LibApi.Services.Libraries
                 return null;
             }
         }
-
 
         /// <summary>
         /// Compte le nombre de bibliothèque dans la base de données
@@ -230,8 +257,6 @@ namespace LibApi.Services.Libraries
                 {
                     throw new InvalidOperationException("Le nouveau nom de la bibliothèque ou sa nouvelle description doit être renseignée.");
                 }
-
-                
 
                 Tlibrary? tlibrary = await context.Tlibraries.SingleOrDefaultAsync(s => s.Id == Id);
                 if (tlibrary == null)
@@ -350,7 +375,7 @@ namespace LibApi.Services.Libraries
                     throw new ArgumentNullException(nameof(name), "Le nom de la collection ne peut pas être nulle, vide ou ne contenir que des espaces blancs.");
                 }
 
-                Tcollection? existingItem = await context.Tcollections.SingleOrDefaultAsync(c => c.Name.ToLower() == name.ToLower());
+                Tcollection? existingItem = await context.Tcollections.SingleOrDefaultAsync(c => c.Name.ToLower() == name.ToLower() && c.IdLibrary == Id);
                 if (existingItem != null)
                 {
                     Logs.Log(nameof(Library), nameof(AddCollectionAsync), "Cette collection existe déjà");
@@ -566,7 +591,7 @@ namespace LibApi.Services.Libraries
                     throw new ArgumentNullException(nameof(name), "Le nom de la catégorie ne peut pas être nulle, vide ou ne contenir que des espaces blancs.");
                 }
 
-                TlibraryCategorie? existingItem = await context.TlibraryCategories.SingleOrDefaultAsync(c => c.Name.ToLower() == name.ToLower());
+                TlibraryCategorie? existingItem = await context.TlibraryCategories.SingleOrDefaultAsync(c => c.Name.ToLower() == name.ToLower() && c.IdLibrary == Id);
                 if (existingItem != null)
                 {
                     Logs.Log(nameof(Library), nameof(AddCategoryAsync), "Cette catégorie existe déjà");

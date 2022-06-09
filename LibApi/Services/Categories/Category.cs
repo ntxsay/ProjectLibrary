@@ -24,7 +24,91 @@ namespace LibApi.Services.Categories
 
         }
 
+        #region Properties
+        public new string Name
+        {
+            get => _Name;
+            private set
+            {
+                if (_Name != value)
+                {
+                    _Name = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public new string? Description
+        {
+            get => _Description;
+            private set
+            {
+                if (_Description != value)
+                {
+                    _Description = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+        #endregion
+
+
         #region CRUD
+        /// <summary>
+        /// Ajoute une nouvelle sous-catégorie à la catégorie actuelle.
+        /// </summary>
+        /// <param name="name">Nom de la collection</param>
+        /// <param name="description">Description de la collection</param>
+        /// <remarks>Si la collection existe, la collection existante sera retournée.</remarks>
+        /// <returns></returns>
+        public async Task<Category?> AddSubCategoryAsync(string name, string? description = null, bool openIfExist = false)
+        {
+            try
+            {
+                if (IsDeleted)
+                {
+                    throw new InvalidOperationException($"La catégorie {Name} a déjà été supprimée.");
+                }
+
+                if (name.IsStringNullOrEmptyOrWhiteSpace())
+                {
+                    throw new ArgumentNullException(nameof(name), "Le nom de la sous-catégorie ne peut pas être nulle, vide ou ne contenir que des espaces blancs.");
+                }
+
+                TlibraryCategorie? existingItem = await context.TlibraryCategories.SingleOrDefaultAsync(c => c.Name.ToLower() == name.ToLower() && c.IdParentCategorie == Id && c.IdLibrary == IdLibrary);
+                if (existingItem != null)
+                {
+                    Logs.Log(nameof(Category), nameof(AddSubCategoryAsync), "Une catégorie/sous-catégorie portant le même nom existe déjà");
+                    if (openIfExist)
+                    {
+                        return Category.ConvertToViewModel(existingItem);
+                    }
+                    else
+                    {
+                        throw new InvalidOperationException($"La catégorie {name} existe déjà.");
+                    }
+                }
+
+                TlibraryCategorie record = new()
+                {
+                    Name = name.Trim(),
+                    IdLibrary = IdLibrary,
+                    IdParentCategorie = Id,
+                    Description = description?.Trim(),
+                };
+
+                await context.TlibraryCategories.AddAsync(record);
+                await context.SaveChangesAsync();
+
+                return ConvertToViewModel(record);
+            }
+            catch (Exception ex)
+            {
+                Logs.Log(nameof(Category), nameof(AddSubCategoryAsync), ex);
+                return null;
+            }
+        }
+
         /// <summary>
         /// Met à jour la catégorie dans la base de données
         /// </summary>

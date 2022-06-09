@@ -16,7 +16,7 @@ namespace LibShared.ViewModels
         public virtual long Id
         {
             get => _Id;
-            set
+            protected set
             {
                 if (_Id != value)
                 {

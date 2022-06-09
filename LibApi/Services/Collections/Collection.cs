@@ -22,6 +22,34 @@ namespace LibApi.Services.Collections
 
         }
 
+        #region Properties
+        public new string Name
+        {
+            get => _Name;
+            private set
+            {
+                if (_Name != value)
+                {
+                    _Name = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public new string? Description
+        {
+            get => _Description;
+            private set
+            {
+                if (_Description != value)
+                {
+                    _Description = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+        #endregion
+
         #region CRUD
         /// <summary>
         /// Met à jour la collection dans la base de données

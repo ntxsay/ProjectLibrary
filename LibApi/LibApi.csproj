@@ -42,7 +42,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Update="LibraryDB.db">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
 </Project>
