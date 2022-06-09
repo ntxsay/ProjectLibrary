@@ -10,20 +10,12 @@ namespace LibShared.ViewModels.Libraries
 {
     public class LibraryVM : GenericVM
     {
-        private short _MaxItemsPerPage = 100;
 
-        [Obsolete]
-        public short MaxItemsPerPage
-        {
-            get => this._MaxItemsPerPage;
-            set
-            {
-                if (_MaxItemsPerPage != value)
-                {
-                    this._MaxItemsPerPage = value;
-                    this.OnPropertyChanged();
-                }
-            }
-        }
+        public virtual Guid Guid { get; protected set; } = Guid.NewGuid();
+
+        public virtual DateTime DateAjout { get; protected set; } = DateTime.Now;
+
+        public virtual DateTime? DateEdition { get; protected set; }
+
     }
 }

@@ -1,7 +1,7 @@
 ﻿using AppHelpers;
 using AppHelpers.Strings;
 using LibApi.Models.Local.SQLite;
-using LibShared.ViewModels.Collections;
+using LibShared.ViewModels.Categories;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -9,22 +9,24 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace LibApi.Services.Collections
+namespace LibApi.Services.Categories
 {
-    public sealed class Collection : CollectionVM
+    public sealed class Category : CategoryVM, IDisposable
     {
         /// <summary>
         /// Obtient une valeur booléenne indiquant si l'objet a déjà été effacé de la base de données
         /// </summary>
         public bool IsDeleted { get; private set; }
-        private Collection()
+        LibrarySqLiteDbContext context = new ();
+
+        private Category()
         {
 
         }
 
         #region CRUD
         /// <summary>
-        /// Met à jour la collection dans la base de données
+        /// Met à jour la catégorie dans la base de données
         /// </summary>
         /// <remarks>Remarque : si aucun paramètre n'est renseigné alors une <see cref="InvalidOperationException"/> est levée et annule ainsi l'opération de mise à jour.</remarks>
         /// <param name="newName"></param>
@@ -36,21 +38,19 @@ namespace LibApi.Services.Collections
             {
                 if (IsDeleted)
                 {
-                    throw new InvalidOperationException($"La collection {Name} a déjà été supprimée.");
+                    throw new InvalidOperationException($"La catégorie {Name} a déjà été supprimée.");
                 }
 
                 //S'il n'y a pas de nouveau nom et que la modification de la description est ignoré, alors génère une erreur.
                 if (newName.IsStringNullOrEmptyOrWhiteSpace() && newDescription == null)
                 {
-                    throw new InvalidOperationException("Le nouveau nom de la collection ou sa nouvelle description devait être renseignée.");
+                    throw new InvalidOperationException("Le nouveau nom de la catégorie ou sa nouvelle description doivent être renseignées.");
                 }
 
-                using LibrarySqLiteDbContext context = new();
-
-                Tcollection? record = await context.Tcollections.SingleOrDefaultAsync(s => s.Id == Id);
+                TlibraryCategorie? record = await context.TlibraryCategories.SingleOrDefaultAsync(s => s.Id == Id);
                 if (record == null)
                 {
-                    throw new ArgumentException(nameof(record), $"La collection n'existe pas avec l'id \"{Id}\".");
+                    throw new ArgumentException(nameof(record), $"La catégorie n'existe pas avec l'id \"{Id}\".");
                 }
 
                 if (!newName.IsStringNullOrEmptyOrWhiteSpace())
@@ -58,7 +58,7 @@ namespace LibApi.Services.Collections
                     bool isExist = await context.Tcollections.AnyAsync(c => c.Id != Id && c.Name.ToLower() == newName.Trim().ToLower())!;
                     if (isExist)
                     {
-                        throw new ArgumentException($"Cette collection existe déjà.");
+                        throw new ArgumentException($"Cette catégorie existe déjà.");
                     }
                 }
 
@@ -73,7 +73,7 @@ namespace LibApi.Services.Collections
                     record.Description = newDescription.Trim();
                 }
 
-                context.Tcollections.Update(record);
+                context.TlibraryCategories.Update(record);
                 _ = await context.SaveChangesAsync();
 
                 if (!newName.IsStringNullOrEmptyOrWhiteSpace())
@@ -91,13 +91,13 @@ namespace LibApi.Services.Collections
             }
             catch (Exception ex)
             {
-                Logs.Log(nameof(Collection), nameof(UpdateAsync), ex);
+                Logs.Log(nameof(Category), nameof(UpdateAsync), ex);
                 return false;
             }
         }
 
         /// <summary>
-        /// Supprime la collection de la base de données
+        /// Supprime la catégorie de la base de données
         /// </summary>
         /// <returns></returns>
         public async Task<bool> DeleteAsync()
@@ -106,66 +106,65 @@ namespace LibApi.Services.Collections
             {
                 if (IsDeleted)
                 {
-                    throw new NotSupportedException($"La collection {Name} a déjà été supprimée.");
+                    throw new InvalidOperationException($"La catégorie {Name} a déjà été supprimée.");
                 }
 
-                using LibrarySqLiteDbContext context = new();
-
-                Tcollection? record = await context.Tcollections.SingleOrDefaultAsync(s => s.Id == Id);
+                TlibraryCategorie? record = await context.TlibraryCategories.SingleOrDefaultAsync(s => s.Id == Id);
                 if (record == null)
                 {
-                    throw new ArgumentNullException(nameof(Tcollection), $"La collection n'existe pas avec l'id \"{Id}\".");
+                    throw new ArgumentNullException(nameof(Tcollection), $"La catégorie n'existe pas avec l'id \"{Id}\".");
                 }
 
-                context.Tcollections.Remove(record);
+                List< TlibraryCategorie> recordChilds = await context.TlibraryCategories.Where(s => s.IdParentCategorie == Id).ToListAsync();
+                if (recordChilds.Any())
+                {
+                    recordChilds.ForEach(f => f.IdParentCategorie = null);
+                    context.TlibraryCategories.UpdateRange(recordChilds);
+                }
+
+                context.TlibraryCategories.Remove(record);
                 _ = await context.SaveChangesAsync();
-                
+
                 IsDeleted = true;
 
                 return true;
             }
-            catch (ArgumentNullException ex)
-            {
-                Logs.Log(nameof(Collection), nameof(DeleteAsync), ex);
-                return false;
-            }
-            catch (OperationCanceledException ex)
-            {
-                Logs.Log(nameof(Collection), nameof(DeleteAsync), ex);
-                return false;
-            }
             catch (Exception ex)
             {
-                Logs.Log(nameof(Collection), nameof(DeleteAsync), ex);
+                Logs.Log(nameof(Category), nameof(DeleteAsync), ex);
                 return false;
             }
         }
 
         #endregion
 
-        public static Collection? ViewModelConverter(Tcollection model)
+        public static Category? ConvertToViewModel(TlibraryCategorie model)
         {
             try
             {
                 if (model == null) return null;
 
-                Collection viewModel = new()
+                Category viewModel = new()
                 {
                     Id = model.Id,
                     IdLibrary = model.IdLibrary,
+                    IdParentCategory = model.IdParentCategorie,
                     Description = model.Description,
                     Name = model.Name,
-                    //BooksId = (await GetBooksIdInCollectionAsync(model.Id)).ToList()
                 };
 
                 return viewModel;
             }
             catch (Exception ex)
             {
-                Logs.Log(nameof(Collection), nameof(ViewModelConverter), ex);
+                Logs.Log(nameof(Category), nameof(ConvertToViewModel), ex);
                 return null;
             }
         }
 
+        public void Dispose()
+        {
+            context?.Dispose();
+        }
     }
 }

@@ -26,12 +26,6 @@ namespace LibShared.ViewModels
             }
         }
 
-        public virtual Guid Guid { get;  protected set; } = Guid.NewGuid();
-
-        public virtual DateTime DateAjout { get;  protected set; } = DateTime.Now;
-
-        public virtual DateTime? DateEdition { get;  protected set; }
-
         protected string _Name = string.Empty;
         public virtual string Name
         {

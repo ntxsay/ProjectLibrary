@@ -11,62 +11,23 @@ namespace LibShared.ViewModels.Contacts
 {
     public class ContactRoleVM : GenericVM
     {
-        [JsonIgnore]
-        [Obsolete($"La propriété {nameof(Guid)} n'est pas supportée dans {nameof(ContactRoleVM)} et lèvera une {nameof(NotSupportedException)} s'il y a usage.", true)]
-        public override Guid Guid
-        {
-            get => throw new NotSupportedException($"La propriété {nameof(Guid)} n'est pas supportée dans {nameof(ContactRoleVM)}.");
-            protected set => throw new NotSupportedException($"La propriété {nameof(Guid)} n'est pas supportée dans {nameof(ContactRoleVM)}.");
-        }
-
-        [JsonIgnore]
-        [Obsolete($"La propriété {nameof(DateAjout)} n'est pas supportée dans {nameof(ContactRoleVM)} et lèvera une {nameof(NotSupportedException)} s'il y a usage.", true)]
-        public override DateTime DateAjout
-        {
-            get => throw new NotSupportedException($"La propriété {nameof(DateAjout)} n'est pas supportée dans {nameof(ContactRoleVM)}.");
-            protected set => throw new NotSupportedException($"La propriété {nameof(DateAjout)} n'est pas supportée dans {nameof(ContactRoleVM)}.");
-        }
-
-        [JsonIgnore]
-        [Obsolete($"La propriété {nameof(DateEdition)} n'est pas supportée dans {nameof(ContactRoleVM)} et lèvera une {nameof(NotSupportedException)} s'il y a usage.", true)]
-        public override DateTime? DateEdition
-        {
-            get => throw new NotSupportedException($"La propriété {nameof(DateEdition)} n'est pas supportée dans {nameof(ContactRoleVM)}.");
-            protected set => throw new NotSupportedException($"La propriété {nameof(DateEdition)} n'est pas supportée dans {nameof(ContactRoleVM)}.");
-        }
+        
 
     }
 
     public class ContactTypeVM : GenericVM
     {
-        [JsonIgnore]
-        [Obsolete($"La propriété {nameof(Guid)} n'est pas supportée dans {nameof(ContactTypeVM)} et lèvera une {nameof(NotSupportedException)} s'il y a usage.", true)]
-        public override Guid Guid
-        {
-            get => throw new NotSupportedException($"La propriété {nameof(Guid)} n'est pas supportée dans {nameof(ContactTypeVM)}.");
-            protected set => throw new NotSupportedException($"La propriété {nameof(Guid)} n'est pas supportée dans {nameof(ContactTypeVM)}.");
-        }
-
-        [JsonIgnore]
-        [Obsolete($"La propriété {nameof(DateAjout)} n'est pas supportée dans {nameof(ContactTypeVM)} et lèvera une {nameof(NotSupportedException)} s'il y a usage.", true)]
-        public override DateTime DateAjout
-        {
-            get => throw new NotSupportedException($"La propriété {nameof(DateAjout)} n'est pas supportée dans {nameof(ContactTypeVM)}.");
-            protected set => throw new NotSupportedException($"La propriété {nameof(DateAjout)} n'est pas supportée dans {nameof(ContactTypeVM)}.");
-        }
-
-        [JsonIgnore]
-        [Obsolete($"La propriété {nameof(DateEdition)} n'est pas supportée dans {nameof(ContactTypeVM)} et lèvera une {nameof(NotSupportedException)} s'il y a usage.", true)]
-        public override DateTime? DateEdition
-        {
-            get => throw new NotSupportedException($"La propriété {nameof(DateEdition)} n'est pas supportée dans {nameof(ContactTypeVM)}.");
-            protected set => throw new NotSupportedException($"La propriété {nameof(DateEdition)} n'est pas supportée dans {nameof(ContactTypeVM)}.");
-        }
+        
 
     }
 
     public class ContactVM : GenericVM
     {
+        public virtual Guid Guid { get; protected set; } = Guid.NewGuid();
+
+        public virtual DateTime DateAjout { get; protected set; } = DateTime.Now;
+
+        public virtual DateTime? DateEdition { get; protected set; }
 
         protected ContactType _ContactType = ContactType.Human;
         public ContactType ContactType
