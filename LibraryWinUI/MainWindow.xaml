@@ -12,7 +12,7 @@
                               IsBackButtonVisible="{x:Bind ViewModelPage.IsBackArrowVisible, Mode=OneWay}" IsPaneToggleButtonVisible="True" ItemInvoked="PrincipalNaviguation_ItemInvoked"
                               BackRequested="PrincipalNaviguation_BackRequested">
             <MUIXC:NavigationView.MenuItems>
-                <MUIXC:NavigationViewItem Content="{x:Bind ViewModelPage.LibraryCollectionMenuItem.Text, Mode=OneWay}" Tag="{x:Bind ViewModelPage.LibraryCollectionMenuItem.Tag, Mode=OneWay}">
+                <MUIXC:NavigationViewItem x:Uid="/MainWindowRessources/LibraryMenuItemText">
                     <MUIXC:NavigationViewItem.Icon>
                         <FontIcon Glyph="&#xe721;"/>
                     </MUIXC:NavigationViewItem.Icon>

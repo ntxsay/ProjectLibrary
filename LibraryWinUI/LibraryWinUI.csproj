@@ -10,6 +10,7 @@
     <PublishProfile>win10-$(Platform).pubxml</PublishProfile>
     <UseWinUI>true</UseWinUI>
     <EnablePreviewMsixTooling>true</EnablePreviewMsixTooling>
+    <DefaultLanguage>fr-FR</DefaultLanguage>
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="Pages\**" />
@@ -32,8 +33,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.0.3" />
-    <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.22000.194" />
+    <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.1.0" />
+    <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.22000.197" />
     <Manifest Include="$(ApplicationManifest)" />
   </ItemGroup>
 
@@ -46,9 +47,9 @@
   <ItemGroup>
     <ProjectReference Include="..\AppHelpers\AppHelpers.csproj" />
     <ProjectReference Include="..\LibApi\LibApi.csproj" />
-    <ProjectReference Include="..\LibShared\LibShared.csproj" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Strings\en-US\" />
     <Folder Include="Views\" />
   </ItemGroup>
   <ItemGroup>

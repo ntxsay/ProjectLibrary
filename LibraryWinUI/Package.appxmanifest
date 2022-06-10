@@ -7,7 +7,7 @@
   IgnorableNamespaces="uap rescap">
 
   <Identity
-    Name="4da8568a-cd12-49e0-bb2e-162b17ecb66e"
+    Name="ntxsayLibraryWinUI110"
     Publisher="CN=loicbastaraud"
     Version="1.0.0.0" />
 
