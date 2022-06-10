@@ -11,6 +11,15 @@
     <UseWinUI>true</UseWinUI>
     <EnablePreviewMsixTooling>true</EnablePreviewMsixTooling>
   </PropertyGroup>
+  <ItemGroup>
+    <Compile Remove="Pages\**" />
+    <EmbeddedResource Remove="Pages\**" />
+    <None Remove="Pages\**" />
+    <Page Remove="Pages\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove="Views\Pages\MainCollectionPage.xaml" />
+  </ItemGroup>
 
   <ItemGroup>
     <Content Include="Assets\SplashScreen.scale-200.png" />
@@ -37,5 +46,12 @@
   <ItemGroup>
     <ProjectReference Include="..\AppHelpers\AppHelpers.csproj" />
     <ProjectReference Include="..\LibApi\LibApi.csproj" />
+    <ProjectReference Include="..\LibShared\LibShared.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Views\" />
+  </ItemGroup>
+  <ItemGroup>
+    <PRIResource Remove="Pages\**" />
   </ItemGroup>
 </Project>

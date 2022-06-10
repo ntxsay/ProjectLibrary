@@ -230,14 +230,14 @@ namespace LibApi.Services.Categories
         {
             try
             {
-                if (IdParentCategory == null)
-                {
-                    throw new NotSupportedException("Impossible d'insérer une catégorie parente dans une catégorie enfant.");
-                }
-
                 if (parentCategory.IdLibrary != IdLibrary)
                 {
                     throw new NotSupportedException("Impossible d'insérer une catégorie dans une autre provenant d'une autre bibliothèque.");
+                }
+
+                if (parentCategory.IdParentCategory == Id)
+                {
+                    throw new NotSupportedException("Impossible d'insérer une catégorie parente dans une catégorie enfant.");
                 }
 
                 bool isAlreadyExist = await context.TlibraryCategories.AnyAsync(c => c.Name.ToLower() == Name.ToLower() && c.IdParentCategorie == parentCategory.Id && c.IdLibrary == IdLibrary);
