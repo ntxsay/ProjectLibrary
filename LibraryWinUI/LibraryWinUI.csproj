@@ -33,6 +33,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="CommunityToolkit.WinUI.UI.Controls" Version="7.1.2" />
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.1.0" />
     <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.22000.197" />
     <Manifest Include="$(ApplicationManifest)" />
@@ -49,8 +50,11 @@
     <ProjectReference Include="..\LibApi\LibApi.csproj" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Code\Converters\" />
     <Folder Include="Strings\en-US\" />
-    <Folder Include="Views\" />
+    <Folder Include="ViewModels\CustomControls\" />
+    <Folder Include="ViewModels\UserControls\" />
+    <Folder Include="Views\UserControls\" />
   </ItemGroup>
   <ItemGroup>
     <PRIResource Remove="Pages\**" />

@@ -18,6 +18,37 @@ namespace LibraryWinUI.ViewModels.Pages
 
         }
 
+        #region SplitView
+        private bool _IsSplitViewOpen;
+        public bool IsSplitViewOpen
+        {
+            get => this._IsSplitViewOpen;
+            set
+            {
+                if (_IsSplitViewOpen != value)
+                {
+                    this._IsSplitViewOpen = value;
+                    this.OnPropertyChanged();
+                }
+            }
+        }
+
+        public const double MinSplitViewWidth = 400;
+
+        private double _SplitViewWidth = MinSplitViewWidth;
+        public double SplitViewWidth
+        {
+            get => this._SplitViewWidth;
+            set
+            {
+                if (_SplitViewWidth != value)
+                {
+                    this._SplitViewWidth = value;
+                    this.OnPropertyChanged();
+                }
+            }
+        } 
+        #endregion
 
         public void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {

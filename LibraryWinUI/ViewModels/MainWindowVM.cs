@@ -23,37 +23,6 @@ namespace LibraryWinUI.ViewModels
 
         }
 
-        public ItemTagContentVM AboutMenuItem => new()
-        {
-            Text = "À propos de ...",
-            Tag = "About"
-        };
-
-        public ItemTagContentVM SettingsMenuItem => new()
-        {
-            Text = "Paramètres",
-            Tag = "settings"
-        };
-
-        public ItemTagContentVM NewElementMenuItem => new()
-        {
-            Text = "Nouvel élément",
-            Tag = "AddNewElement"
-        };
-
-        public ItemTagContentVM LibraryCollectionMenuItem => new()
-        {
-            Text = "Bibliothèques",
-            Tag = "library-collection"
-        };
-
-        public ItemTagContentVM ContactCollectionMenuItem => new()
-        {
-            Text = "Adhérants",
-            Tag = "contact-collection"
-        };
-
-
         private NavigationViewBackButtonVisible _IsBackArrowVisible;
         public NavigationViewBackButtonVisible IsBackArrowVisible
         {

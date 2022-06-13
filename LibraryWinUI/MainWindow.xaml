@@ -12,7 +12,7 @@
                               IsBackButtonVisible="{x:Bind ViewModelPage.IsBackArrowVisible, Mode=OneWay}" IsPaneToggleButtonVisible="True" ItemInvoked="PrincipalNaviguation_ItemInvoked"
                               BackRequested="PrincipalNaviguation_BackRequested">
             <MUIXC:NavigationView.MenuItems>
-                <MUIXC:NavigationViewItem x:Uid="/MainWindowRessources/LibraryMenuItemText">
+                <MUIXC:NavigationViewItem x:Uid="/MainWindowRessources/LibraryNavViewMenuItem">
                     <MUIXC:NavigationViewItem.Icon>
                         <FontIcon Glyph="&#xe721;"/>
                     </MUIXC:NavigationViewItem.Icon>
@@ -41,14 +41,8 @@
                 <ColumnDefinition x:Name="RightPaddingColumn" Width="0"/>
             </Grid.ColumnDefinitions>
             <Image x:Name="TitleBarIcon" Source="/Images/WindowIcon.png"
-           Grid.Column="1"
-           Width="16" Height="16"
-           Margin="8,0,0,0"/>
-            <TextBlock x:Name="TitleTextBlock" 
-               Text="App title" 
-               Style="{StaticResource CaptionTextBlockStyle}"
-               Grid.Column="2"
-               VerticalAlignment="Center"
+           Grid.Column="1" Width="16" Height="16" Margin="0,0,0,0"/>
+            <TextBlock x:Name="TitleTextBlock"  Text="App title"  Style="{StaticResource CaptionTextBlockStyle}" Grid.Column="2" VerticalAlignment="Center"
                Margin="4,0,0,0"/>
             <!--<AutoSuggestBox Grid.Column="4" QueryIcon="Find"
                     PlaceholderText="Search"

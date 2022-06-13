@@ -1,4 +1,5 @@
-﻿using Microsoft.UI.Xaml;
+﻿using LibraryWinUI.ViewModels.Pages;
+using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Data;
@@ -23,6 +24,7 @@ namespace LibraryWinUI.Views.Pages
     /// </summary>
     public sealed partial class MainCollectionPage : Page
     {
+        MainCollectionPageVM ViewModelPage = new ();
         public MainCollectionPage()
         {
             this.InitializeComponent();

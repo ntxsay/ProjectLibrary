@@ -27,6 +27,7 @@ using Windows.Storage.Pickers;
 using WinRT.Interop;
 using Microsoft.UI.Dispatching;
 using LibraryWinUI.Views.Pages;
+using Windows.ApplicationModel.Resources;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -38,6 +39,9 @@ namespace LibraryWinUI
     /// </summary>
     public sealed partial class MainWindow : Window
     {
+        //readonly ResourceLoader langResource = ResourceLoader.GetForCurrentView("MainWindowRessources");
+        ResourceLoader langResource = ResourceLoader.GetForViewIndependentUse("MainWindowRessources");
+        int _marginLeftTitleBar = 80;
         public MainWindowVM ViewModelPage { get; set; } = new MainWindowVM();
         private AppWindow m_AppWindow;
         public MainWindow()
@@ -52,6 +56,8 @@ namespace LibraryWinUI
             {
                 var titleBar = m_AppWindow.TitleBar;
                 titleBar.ExtendsContentIntoTitleBar = true;
+                titleBar.ButtonBackgroundColor = Colors.Transparent;
+                titleBar.ButtonInactiveBackgroundColor = Colors.Transparent;
                 AppTitleBar.Loaded += AppTitleBar_Loaded;
                 AppTitleBar.SizeChanged += AppTitleBar_SizeChanged;
             }
@@ -100,8 +106,7 @@ namespace LibraryWinUI
         {
             // Check to see if customization is supported.
             // Currently only supported on Windows 11.
-            if (AppWindowTitleBar.IsCustomizationSupported()
-                && m_AppWindow.TitleBar.ExtendsContentIntoTitleBar)
+            if (AppWindowTitleBar.IsCustomizationSupported() && m_AppWindow.TitleBar.ExtendsContentIntoTitleBar)
             {
                 // Update drag region if the size of the title bar changes.
                 SetDragRegionForCustomTitleBar(m_AppWindow);
@@ -148,8 +153,7 @@ namespace LibraryWinUI
         {
             // Check to see if customization is supported.
             // Currently only supported on Windows 11.
-            if (AppWindowTitleBar.IsCustomizationSupported()
-                && appWindow.TitleBar.ExtendsContentIntoTitleBar)
+            if (AppWindowTitleBar.IsCustomizationSupported() && appWindow.TitleBar.ExtendsContentIntoTitleBar)
             {
                 double scaleAdjustment = GetScaleAdjustment();
 
@@ -159,7 +163,7 @@ namespace LibraryWinUI
                 List<Windows.Graphics.RectInt32> dragRectsList = new();
 
                 Windows.Graphics.RectInt32 dragRectL;
-                dragRectL.X = (int)((LeftPaddingColumn.ActualWidth + 80) * scaleAdjustment); //(int)((LeftPaddingColumn.ActualWidth) * scaleAdjustment);
+                dragRectL.X = (int)((LeftPaddingColumn.ActualWidth + _marginLeftTitleBar) * scaleAdjustment); //(int)((LeftPaddingColumn.ActualWidth) * scaleAdjustment);
                 dragRectL.Y = 0;
                 dragRectL.Height = (int)(AppTitleBar.ActualHeight * scaleAdjustment);
                 dragRectL.Width = (int)((IconColumn.ActualWidth
@@ -254,7 +258,8 @@ namespace LibraryWinUI
                     return;
                 }
 
-                if (itemTag == ViewModelPage.LibraryCollectionMenuItem.Tag)
+                //ResourceLoader langResource = ResourceLoader.GetForViewIndependentUse("MainWindowRessources");
+                if (itemTag == langResource.GetString("LibraryNavViewMenuItem/Tag"))
                 {
                     LibrariesOrBooksCollectionNavigation();
                 }
@@ -267,7 +272,6 @@ namespace LibraryWinUI
                 return;
             }
         }
-
 
         private void PrincipalNaviguation_BackRequested(NavigationView sender, NavigationViewBackRequestedEventArgs args)
         {
@@ -311,14 +315,14 @@ namespace LibraryWinUI
                     ? NavigationViewBackButtonVisible.Visible
                     : NavigationViewBackButtonVisible.Collapsed;
 
-                //if (this.MainFrameContainer.CanGoBack)
-                //{
-                //    AppTitleBar.Margin = new Thickness(40, 0, 0, 0);
-                //}
-                //else
-                //{
-                //    AppTitleBar.Margin = new Thickness(0, 0, 0, 0);
-                //}
+                if (!this.MainFrameContainer.CanGoBack)
+                {
+                    AppTitleBar.Margin = new Thickness(40, 0, 0, 0);
+                }
+                else
+                {
+                    AppTitleBar.Margin = new Thickness(80, 0, 0, 0);
+                }
             }
             catch (Exception ex)
             {

@@ -117,10 +117,10 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="LibraryMenuItemTag.Tag" xml:space="preserve">
-    <value>library-collection</value>
-  </data>
-  <data name="LibraryMenuItemText.Content" xml:space="preserve">
+  <data name="LibraryNavViewMenuItem.Content" xml:space="preserve">
     <value>Bibliothèques</value>
+  </data>
+  <data name="LibraryNavViewMenuItem.Tag" xml:space="preserve">
+    <value>library-collection</value>
   </data>
 </root>
