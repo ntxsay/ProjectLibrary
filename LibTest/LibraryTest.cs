@@ -203,6 +203,38 @@ namespace LibTest
                 Assert.NotNull(subCategory2);
             }
         }
+
+        [Fact]
+        public async void GetTreeCategoriesCategory()
+        {
+            Library? library = await Library.CreateAsync("Ma Biliothèque", null, true);
+            if (library == null)
+            {
+                Assert.NotNull(library);
+            }
+
+            Category? category = await library.AddCategoryAsync("Romans", "uu", true);
+
+            if (category == null)
+            {
+                Assert.NotNull(category);
+            }
+
+            var subCategory1 = await category.AddSubCategoryAsync("Romans policiers", "uu", true);
+            if (subCategory1 == null)
+            {
+                Assert.NotNull(subCategory1);
+            }
+
+            var subCategory2 = await category.AddSubCategoryAsync("Romans scientifiques", "uu", true);
+            if (subCategory2 == null)
+            {
+                Assert.NotNull(subCategory2);
+            }
+
+            var tree = await library.GetCategoriesTreeAsync();
+            Assert.NotEmpty(tree);
+        }
     }
 
     

@@ -13,6 +13,7 @@ using LibShared.ViewModels;
 using LibApi.Services.Collections;
 using AppHelpers.Dates;
 using LibApi.Services.Categories;
+using LibShared.ViewModels.Categories;
 
 namespace LibApi.Services.Libraries
 {
@@ -755,6 +756,37 @@ namespace LibApi.Services.Libraries
             }
         }
 
+        /// <summary>
+        /// Obtient toute l'arborescence des catégories enfants de cette bibliothèque.
+        /// </summary>
+        /// <returns></returns>
+        public async Task<IEnumerable<Category>> GetCategoriesTreeAsync()
+        {
+            try
+            {
+                List<TlibraryCategorie> Parentcategories = await context.TlibraryCategories.Where(w => w.IdParentCategorie == null && w.IdLibrary == Id).ToListAsync();
+                if (Parentcategories != null && Parentcategories.Any())
+                {
+                    List<Category?> categories = Parentcategories.Select(s => Category.ConvertToViewModel(s)).Where(w => w != null).ToList();
+                    foreach (var category in categories)
+                    {
+                        if (category != null)
+                        {
+                            await Category.GetChildCategoriesAsync(category, Id);
+                        }
+                    }
+
+                    return categories;
+                }
+
+                return Enumerable.Empty<Category>();
+            }
+            catch (Exception ex)
+            {
+                Logs.Log(nameof(Library), nameof(GetCategoriesTreeAsync), ex);
+                return Enumerable.Empty<Category>();
+            }
+        }
         #endregion
 
 

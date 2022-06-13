@@ -5,6 +5,7 @@ using LibShared.ViewModels.Categories;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -46,6 +47,20 @@ namespace LibApi.Services.Categories
                 if (_Description != value)
                 {
                     _Description = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        private IEnumerable<Category> _Childs = Enumerable.Empty<Category>();
+        public IEnumerable<Category> Childs
+        {
+            get => _Childs;
+            private set
+            {
+                if (_Childs != value)
+                {
+                    _Childs = value;
                     OnPropertyChanged();
                 }
             }
@@ -220,6 +235,83 @@ namespace LibApi.Services.Categories
         }
 
         #endregion
+
+
+        /// <summary>
+        /// Obtient toute l'arborescence des catégories enfants de cette catégorie.
+        /// </summary>
+        /// <returns></returns>
+        public async Task<IEnumerable<Category>> GetCategoriesTreeAsync()
+        {
+            try
+            {
+                List<TlibraryCategorie> Parentcategories = await context.TlibraryCategories.Where(w => w.IdParentCategorie == Id && w.IdLibrary == IdLibrary).ToListAsync();
+                if (Parentcategories != null && Parentcategories.Any())
+                {
+                    List<Category?> categories = Parentcategories.Select(s => ConvertToViewModel(s)).Where(w => w != null).ToList();
+                    foreach (var category in categories)
+                    {
+                        if (category != null)
+                        {
+                            await Category.GetChildCategoriesAsync(category, IdLibrary);
+                        }
+                    }
+
+                    return categories;
+                }
+
+                return Enumerable.Empty<Category>();
+            }
+            catch (Exception ex)
+            {
+                Logs.Log(nameof(Category), nameof(GetCategoriesTreeAsync), ex);
+                return Enumerable.Empty<Category>();
+            }
+        }
+
+        internal static async Task GetChildCategoriesAsync(Category parentCategory, long idLibrary)
+        {
+            try
+            {
+                if (parentCategory == null)
+                {
+                    return;
+                }
+
+                using LibrarySqLiteDbContext context = new();
+
+                List<TlibraryCategorie> Parentcategories = await context.TlibraryCategories.Where(w => w.IdParentCategorie == parentCategory.Id && w.IdLibrary == idLibrary).ToListAsync();
+                if (Parentcategories != null && Parentcategories.Any())
+                {
+                    List<Category> categories = new();
+                    foreach (var category in Parentcategories)
+                    {
+                        var _category = ConvertToViewModel(category);
+                        if (_category != null)
+                        {
+                            categories.Add(_category);
+                        }
+                    }
+
+                    if (categories.Count > 0)
+                    {
+                        parentCategory.Childs = categories;
+                        if (parentCategory.Childs != null && parentCategory.Childs.Any())
+                        {
+                            foreach (var child in parentCategory.Childs)
+                            {
+                                await GetChildCategoriesAsync(child, idLibrary);
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Logs.Log(nameof(Category), nameof(GetChildCategoriesAsync), ex);
+                return;
+            }
+        }
 
         /// <summary>
         /// Insère cette catégorie dans une autre
