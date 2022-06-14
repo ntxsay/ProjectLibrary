@@ -29,5 +29,49 @@ namespace LibraryWinUI.Views.Pages
         {
             this.InitializeComponent();
         }
+
+        private void ASB_SearchItem_QuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
+        {
+            //try
+            //{
+            //    if (sender.Text.IsStringNullOrEmptyOrWhiteSpace())
+            //    {
+            //        MyTeachingTip.Target = sender;
+            //        MyTeachingTip.Title = sender.PlaceholderText;
+            //        MyTeachingTip.Subtitle = "Vous devez d'abord entrer votre mot-clé avant de lancer la recherche.";
+            //        MyTeachingTip.IsOpen = true;
+            //        return;
+            //    }
+
+            //    if (MyTeachingTip.IsOpen)
+            //    {
+            //        MyTeachingTip.IsOpen = false;
+            //    }
+
+            //    ResearchItemVM researchItemVM = new ResearchItemVM()
+            //    {
+            //        Term = sender.Text?.Trim(),
+            //        TermParameter = Code.Search.Terms.Contains,
+            //        SearchInMainTitle = true,
+            //    };
+
+            //    if (IsContainsBookCollection(out _))
+            //    {
+            //        researchItemVM.SearchInAuthors = true;
+            //        researchItemVM.SearchInEditors = true;
+            //        researchItemVM.SearchInOtherTitles = true;
+            //        researchItemVM.SearchInCollections = true;
+            //    }
+
+            //    LaunchSearch(new List<ResearchItemVM>() { researchItemVM }, true);
+            //}
+            //catch (Exception ex)
+            //{
+            //    MethodBase m = MethodBase.GetCurrentMethod();
+            //    Logs.Log(ex, m);
+            //    return;
+            //}
+        }
+
     }
 }
