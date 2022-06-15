@@ -59,4 +59,7 @@
   <ItemGroup>
     <PRIResource Remove="Pages\**" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Remove="Assets\Backgrounds\Image1.jpg" />
+  </ItemGroup>
 </Project>

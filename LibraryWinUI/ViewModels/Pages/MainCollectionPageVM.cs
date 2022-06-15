@@ -19,7 +19,7 @@ namespace LibraryWinUI.ViewModels.Pages
         }
 
         #region SplitView
-        private bool _IsSplitViewOpen;
+        private bool _IsSplitViewOpen = true;
         public bool IsSplitViewOpen
         {
             get => this._IsSplitViewOpen;

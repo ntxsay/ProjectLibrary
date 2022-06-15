@@ -49,7 +49,6 @@ namespace LibraryWinUI
             this.InitializeComponent();
 
             m_AppWindow = GetAppWindowForCurrentWindow();
-
             // Check to see if customization is supported.
             // Currently only supported on Windows 11.
             if (AppWindowTitleBar.IsCustomizationSupported())

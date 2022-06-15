@@ -237,6 +237,59 @@ namespace LibApi.Services.Libraries
             }
         }
 
+        public static async Task<Library?> CreateAsync(LibraryVM viewModel, bool openIfExist = false)
+        {
+            try
+            {
+                if (viewModel == null)
+                {
+                    throw new ArgumentNullException(nameof(viewModel), "Le modèle de vue ne peut pas être null.");
+                }
+
+                if (viewModel.Name.IsStringNullOrEmptyOrWhiteSpace())
+                {
+                    throw new ArgumentNullException(nameof(viewModel.Name), "Le nom de la bibliothèque ne peut pas être nulle, vide ou ne contenir que des espaces blancs.");
+                }
+
+                using LibrarySqLiteDbContext context = new();
+                Tlibrary? existingItem = await context.Tlibraries.SingleOrDefaultAsync(c => c.Name.ToLower() == viewModel.Name.Trim().ToLower());
+                if (existingItem != null)
+                {
+                    Logs.Log(nameof(Library), nameof(CreateAsync), $"La bibliothèque {viewModel.Name} existe déjà.");
+                    if (openIfExist)
+                    {
+                        return ConvertToViewModel(existingItem);
+                    }
+                    else
+                    {
+                        throw new InvalidOperationException($"La bibliothèque {viewModel.Name} existe déjà.");
+                    }
+                }
+
+                var _dateAjout = DateTime.UtcNow;
+                var _guid = System.Guid.NewGuid();
+
+                Tlibrary record = new()
+                {
+                    DateAjout = _dateAjout.ToString(),
+                    Guid = _guid.ToString(),
+                    Name = viewModel.Name.Trim(),
+                    Description = viewModel.Description?.Trim(),
+                };
+
+                await context.Tlibraries.AddAsync(record);
+                await context.SaveChangesAsync();
+
+                return ConvertToViewModel(record);
+            }
+            catch (Exception ex)
+            {
+                Logs.Log(nameof(Library), nameof(CreateAsync), ex);
+                return null;
+            }
+        }
+
+
         /// <summary>
         /// Met à jour la bibliothèque dans la base de données
         /// </summary>

@@ -9,6 +9,7 @@ namespace LibApi.Models.Local.SQLite
     {
         public LibrarySqLiteDbContext()
         {
+            Database.EnsureCreated();
         }
 
         public LibrarySqLiteDbContext(DbContextOptions<LibrarySqLiteDbContext> options)
