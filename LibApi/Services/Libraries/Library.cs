@@ -162,6 +162,62 @@ namespace LibApi.Services.Libraries
             }
         }
 
+        public static async Task<IEnumerable<long>> DeleteAsync(IEnumerable<long> idList)
+        {
+            List<long> idsNotDeleted = new ();
+            try
+            {
+                if (idList == null || !idList.Any())
+                {
+                    return idList;
+                }
+
+                using LibrarySqLiteDbContext context = new();
+                foreach (long id in idList)
+                {
+                    if (!await DeleteAsync(context, id))
+                    {
+                        idsNotDeleted.Add(id);
+                    }
+                }
+                
+                return idsNotDeleted;
+            }
+            catch (Exception ex)
+            {
+                Logs.Log(nameof(Library), nameof(DeleteAsync), ex);
+                return idsNotDeleted;
+            }
+        }
+
+        public static async Task<bool> DeleteAsync(LibrarySqLiteDbContext context, long id)
+        {
+            try
+            {
+                Tlibrary? tlibrary = await context.Tlibraries.SingleOrDefaultAsync(s => s.Id == id);
+                if (tlibrary == null)
+                {
+                    throw new ArgumentNullException(nameof(Tlibrary), $"La bibliothèque n'existe pas avec l'id \"{id}\".");
+                }
+
+                List<Tcollection>? tcollections = await context.Tcollections.Where(s => s.IdLibrary == id).ToListAsync();
+                if (tcollections.Any())
+                {
+                    context.Tcollections.RemoveRange(tcollections);
+                }
+
+                context.Tlibraries.Remove(tlibrary);
+                _ = await context.SaveChangesAsync();
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Logs.Log(nameof(Library), nameof(DeleteAsync), ex);
+                return false;
+            }
+        }
+
         /// <summary>
         /// Compte le nombre de bibliothèque dans la base de données
         /// </summary>
