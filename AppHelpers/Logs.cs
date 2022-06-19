@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 
 namespace AppHelpers
 {
@@ -19,7 +20,7 @@ namespace AppHelpers
             }
         }
 
-        public static void Log(string className, string methodName, string message)
+        public static void Log(string className, [CallerMemberName] string? methodName = null, string message = "Message sans objet")
         {
             try
             {

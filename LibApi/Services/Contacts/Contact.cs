@@ -582,7 +582,7 @@ namespace LibApi.Services.Contacts
             }
             catch (Exception ex)
             {
-                Logs.Log(nameof(Contact), nameof(GetPersonIfExistAsync), ex);
+                Logs.Log(nameof(Contact), nameof(GetAllAsync), ex);
                 return Enumerable.Empty<Contact>();
             }
         }

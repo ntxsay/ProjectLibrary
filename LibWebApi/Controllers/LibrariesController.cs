@@ -40,6 +40,7 @@ namespace LibWebApi.Controllers
             
         }
 
+        [Route("api/[controller]/create")]
         [HttpPost(Name = "Create")]
         public async Task<long> CreateFromVMAsync(LibraryVM viewModel)
         {
@@ -49,13 +50,13 @@ namespace LibWebApi.Controllers
                 return 0;
             }
 
-            Library? library = await Library.CreateAsync(viewModel);
+            using Library? library = await Library.CreateAsync(viewModel);
             if (library == null)
             {
                 _logger.LogWarning("La biliothèque n'a pas pu être créée.");
                 return 0;
             }
-            
+
             return library.Id;
         }
 
@@ -80,7 +81,7 @@ namespace LibWebApi.Controllers
 
        
 
-        [HttpPatch(Name = "edit/{id}")]
+        [HttpPut(Name = "edit/{id}")]
         public async Task<bool> EditAsync(long id, string? newName, string? newDescription = null)
         {
             if (newName.IsStringNullOrEmptyOrWhiteSpace() && newDescription == null)
@@ -99,8 +100,7 @@ namespace LibWebApi.Controllers
             return true;
         }
 
-        [HttpDelete(Name = "delete/{id}")]
-        [ActionName("delete/{id}")]
+        [HttpDelete(Name = "{id}")]
         public async Task<bool> DeleteAsync(IEnumerable<long> id)
         {
             if (id != null && id.Any())
