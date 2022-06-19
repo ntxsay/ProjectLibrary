@@ -21,6 +21,9 @@ app.UseHttpsRedirection();
 
 app.UseAuthorization();
 
-app.MapControllers();
+//app.MapControllers();
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Libraries}/{action=Index}/{id?}");
 
 app.Run();

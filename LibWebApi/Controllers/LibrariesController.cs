@@ -27,7 +27,7 @@ namespace LibWebApi.Controllers
             }
             else
             {
-                Library? library = await Library.GetSingleAsync((long)id);
+                using Library? library = await Library.GetSingleAsync((long)id);
                 if (library == null)
                 {
                     _logger.LogWarning("La bibliothèque n'existe pas.");
@@ -40,7 +40,7 @@ namespace LibWebApi.Controllers
             
         }
 
-        [Route("api/[controller]/create")]
+        //[Route("api/[controller]/create")]
         [HttpPost(Name = "Create")]
         public async Task<long> CreateFromVMAsync(LibraryVM viewModel)
         {
@@ -53,7 +53,7 @@ namespace LibWebApi.Controllers
             using Library? library = await Library.CreateAsync(viewModel);
             if (library == null)
             {
-                _logger.LogWarning("La biliothèque n'a pas pu être créée.");
+                _logger.LogWarning("La bibliothèque n'a pas pu être créée.");
                 return 0;
             }
 
