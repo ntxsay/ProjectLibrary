@@ -907,7 +907,7 @@ namespace LibApi.Services.Libraries
         /// <param name="description">Description de la collection</param>
         /// <remarks>Si la collection existe, la collection existante sera retournée.</remarks>
         /// <returns></returns>
-        public async Task<Book?> CreateBookAsync(string title, string lang, string format, string dateParution, string notes, string? description = null, bool openIfExist = false)
+        public async Task<Book?> CreateBookAsync(string title, string? lang = null, string? format = null, string? dateParution = null, string? notes = null, string? description = null, bool openIfExist = false)
         {
             try
             {

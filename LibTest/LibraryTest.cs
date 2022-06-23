@@ -240,14 +240,19 @@ namespace LibTest
         [Fact]
         public async void NewBook()
         {
-            Library? library = await Library.CreateAsync("Ma Noo", null, true);
+            using Library? library = await Library.CreateAsync("Ma Noo", null, true);
             if (library == null)
             {
                 Assert.NotNull(library);
                 return;
             }
 
-            Book? book = await library.CreateBookAsync("Mon livre", "Francais", "Broché", "22/09/2020", "uu", "hhh", true);
+            using Book? book = await library.CreateBookAsync("Mon livre", "Francais", "Broché", "22/09/2020", "uu", "hhh", true);
+            if (book != null)
+            {
+                var result = await book.UpdateAsync(title: "Le Marquis");
+                Assert.True(result);
+            }
             Assert.NotNull(book);
         }
     }

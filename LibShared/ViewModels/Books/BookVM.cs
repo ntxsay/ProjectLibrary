@@ -1,4 +1,5 @@
-﻿using LibShared.ViewModels.Contacts;
+﻿using LibShared.ViewModels.Collections;
+using LibShared.ViewModels.Contacts;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -10,14 +11,14 @@ using System.Threading.Tasks;
 
 namespace LibShared.ViewModels.Books
 {
-    public class BookVM : GenericVM
+    public abstract class BookVM : GenericVM
     {
         [JsonIgnore]
         public long? IdLibrary { get; set; }
         public Guid Guid { get; set; } = Guid.NewGuid();
         public long CountOpening { get; set; }
 
-        private string _MainTitle;
+        protected string _MainTitle = "";
 
         [DisplayName("Titre du livre")]
         public string MainTitle
@@ -33,7 +34,7 @@ namespace LibShared.ViewModels.Books
             }
         }
 
-        private ObservableCollection<string> _TitresOeuvre = new ObservableCollection<string>();
+        protected ObservableCollection<string> _TitresOeuvre = new ObservableCollection<string>();
 
         [DisplayName("Autre(s) titre(s)")]
         public ObservableCollection<string> TitresOeuvre
@@ -49,9 +50,9 @@ namespace LibShared.ViewModels.Books
             }
         }
 
-        private string _TitresOeuvreStringList;
+        protected string? _TitresOeuvreStringList;
         [JsonIgnore]
-        public string TitresOeuvreStringList
+        public string? TitresOeuvreStringList
         {
             get => _TitresOeuvreStringList;
             set
@@ -64,7 +65,7 @@ namespace LibShared.ViewModels.Books
             }
         }
 
-        private ObservableCollection<ContactVM> _Auteurs = new ObservableCollection<ContactVM>();
+        protected ObservableCollection<ContactVM> _Auteurs = new ObservableCollection<ContactVM>();
         public ObservableCollection<ContactVM> Auteurs
         {
             get => _Auteurs;
@@ -78,9 +79,9 @@ namespace LibShared.ViewModels.Books
             }
         }
 
-        private string _AuteursStringList;
+        protected string? _AuteursStringList;
         [JsonIgnore]
-        public string AuteursStringList
+        public string? AuteursStringList
         {
             get => _AuteursStringList;
             set
@@ -93,7 +94,7 @@ namespace LibShared.ViewModels.Books
             }
         }
 
-        private DateTime _DateAjout = DateTime.UtcNow;
+        protected DateTime _DateAjout = DateTime.UtcNow;
         public DateTime DateAjout
         {
             get => _DateAjout;
@@ -107,7 +108,7 @@ namespace LibShared.ViewModels.Books
             }
         }
 
-        private DateTime? _DateEdition;
+        protected DateTime? _DateEdition;
         public DateTime? DateEdition
         {
             get => _DateEdition;
@@ -135,7 +136,7 @@ namespace LibShared.ViewModels.Books
         //    }
         //}
 
-        private string _JaquettePath = String.Empty;
+        protected string _JaquettePath = String.Empty;
 
         [JsonIgnore]
         public string JaquettePath
@@ -165,7 +166,7 @@ namespace LibShared.ViewModels.Books
         //    }
         //}
 
-        private long _NbExemplaires;
+        protected long _NbExemplaires;
         public long NbExemplaires
         {
             get => _NbExemplaires;
@@ -179,7 +180,7 @@ namespace LibShared.ViewModels.Books
             }
         }
 
-        private long _NbPrets;
+        protected long _NbPrets;
         public long NbPrets
         {
             get => _NbPrets;
@@ -192,6 +193,183 @@ namespace LibShared.ViewModels.Books
                 }
             }
         }
+
+        #region Publication
+        protected string? _DayParution;
+        public string? DayParution
+        {
+            get => this._DayParution;
+            set
+            {
+                if (this._DayParution != value)
+                {
+                    this._DayParution = value;
+                    this.OnPropertyChanged();
+                }
+            }
+        }
+
+        protected string? _MonthParution;
+        public string? MonthParution
+        {
+            get => this._MonthParution;
+            set
+            {
+                if (this._MonthParution != value)
+                {
+                    this._MonthParution = value;
+                    this.OnPropertyChanged();
+                }
+            }
+        }
+
+        protected string? _YearParution;
+        public string? YearParution
+        {
+            get => this._YearParution;
+            set
+            {
+                if (this._YearParution != value)
+                {
+                    this._YearParution = value;
+                    this.OnPropertyChanged();
+                }
+            }
+        }
+
+        protected string? _DateParution;
+        public string? DateParution
+        {
+            get => _DateParution;
+            set
+            {
+                if (_DateParution != value)
+                {
+                    _DateParution = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        protected ObservableCollection<CollectionVM> _Collections = new ObservableCollection<CollectionVM>();
+        public ObservableCollection<CollectionVM> Collections
+        {
+            get => _Collections;
+            set
+            {
+                if (_Collections != value)
+                {
+                    _Collections = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        protected string? _CollectionsStringList;
+        [JsonIgnore]
+        public string? CollectionsStringList
+        {
+            get => _CollectionsStringList;
+            set
+            {
+                if (_CollectionsStringList != value)
+                {
+                    _CollectionsStringList = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        protected ObservableCollection<ContactVM> _Editeurs = new ObservableCollection<ContactVM>();
+        public ObservableCollection<ContactVM> Editeurs
+        {
+            get => _Editeurs;
+            set
+            {
+                if (_Editeurs != value)
+                {
+                    _Editeurs = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        protected string? _EditeursStringList;
+        [JsonIgnore]
+        public string? EditeursStringList
+        {
+            get => _EditeursStringList;
+            set
+            {
+                if (_EditeursStringList != value)
+                {
+                    _EditeursStringList = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        protected string? _Pays;
+        public string? Pays
+        {
+            get => _Pays;
+            set
+            {
+                if (_Pays != value)
+                {
+                    _Pays = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        protected string? _Langue;
+        public string? Langue
+        {
+            get => _Langue;
+            set
+            {
+                if (_Langue != value)
+                {
+                    _Langue = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+        #endregion
+
+        #region Description
+        protected string? _Resume;
+
+        [DisplayName("Résumé")]
+        public string? Resume
+        {
+            get => _Resume;
+            set
+            {
+                if (_Resume != value)
+                {
+                    _Resume = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        protected string? _Notes;
+        public string? Notes
+        {
+            get => _Notes;
+            set
+            {
+                if (_Notes != value)
+                {
+                    _Notes = value;
+                    OnPropertyChanged();
+                }
+            }
+        } 
+        #endregion
+
 
         //public LivreDescriptionVM Description { get; set; } = new LivreDescriptionVM();
         //public LivreClassificationAgeVM ClassificationAge { get; set; } = new LivreClassificationAgeVM();
