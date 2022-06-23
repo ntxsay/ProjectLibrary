@@ -2,7 +2,7 @@
 using LibApi.Helpers;
 using LibApi.Models.Local.SQLite;
 using LibApi.Services.Libraries;
-using LibApi.ViewModels.Books;
+using LibApi.Services.Books;
 using LibShared;
 using LibShared.ViewModels.Libraries;
 using System;

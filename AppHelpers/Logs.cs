@@ -7,11 +7,11 @@ namespace AppHelpers
 {
 	public class Logs
     {
-        public static void Log(string className, string methodName, Exception exception)
+        public static void Log(string className, [CallerMemberName] string? methodName = null, Exception? exception = null)
         {
             try
             {
-                Debug.WriteLine($"{className}.{methodName} : {exception.Message}{(exception.InnerException?.Message == null ? string.Empty : "\nInner Exception : " + exception.InnerException?.Message) }");
+                Debug.WriteLine($"{className}.{methodName} : {exception?.Message}{(exception?.InnerException?.Message == null ? string.Empty : "\nInner Exception : " + exception.InnerException?.Message) }");
             }
             catch (Exception ex)
             {

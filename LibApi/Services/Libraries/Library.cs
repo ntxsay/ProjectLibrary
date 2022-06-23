@@ -14,6 +14,7 @@ using LibApi.Services.Collections;
 using AppHelpers.Dates;
 using LibApi.Services.Categories;
 using LibShared.ViewModels.Categories;
+using LibApi.Services.Books;
 
 namespace LibApi.Services.Libraries
 {
@@ -898,6 +899,79 @@ namespace LibApi.Services.Libraries
         }
         #endregion
 
+        #region Livres
+        /// <summary>
+        /// Ajoute une nouvelle catégorie à la bibliothèque.
+        /// </summary>
+        /// <param name="name">Nom de la collection</param>
+        /// <param name="description">Description de la collection</param>
+        /// <remarks>Si la collection existe, la collection existante sera retournée.</remarks>
+        /// <returns></returns>
+        public async Task<Book?> CreateBookAsync(string title, string lang, string format, string dateParution, string notes, string? description = null, bool openIfExist = false)
+        {
+            try
+            {
+                if (IsDeleted)
+                {
+                    throw new InvalidOperationException($"La bibliothèque {Name} a déjà été supprimée.");
+                }
+
+                if (title.IsStringNullOrEmptyOrWhiteSpace())
+                {
+                    throw new ArgumentNullException(nameof(title), "Le nom de la catégorie ne peut pas être nulle, vide ou ne contenir que des espaces blancs.");
+                }
+
+                var existingId = await Book.IsBookExistAsync(title, lang, format);
+                if (existingId != null)
+                {
+                    Logs.Log(className: nameof(Library), message: $"Le livre \"{title}\" existe déjà.");
+                    if (openIfExist)
+                    {
+                        var existingItem = await context.Tbooks.SingleOrDefaultAsync(s => s.Id == existingId);
+                        if (existingItem != null)
+                        {
+                            return Book.ConvertToViewModel(existingItem);
+                        }
+
+                        throw new Exception($"Impossible de récupérer le livre existant.");
+                    }
+                    else
+                    {
+                        throw new InvalidOperationException($"Le livre \"{title}\" existe déjà.");
+                    }
+                }
+
+                var _dateAjout = DateTime.UtcNow;
+                var _guid = System.Guid.NewGuid();
+                var _dateParution = DateHelpers.Converter.StringDateToStringDate(dateParution, '/', out _, out _,out _, false);
+
+                var record = new Tbook()
+                {
+                    IdLibrary = Id,
+                    Guid = _guid.ToString(),
+                    DateAjout = _dateAjout.ToString(),
+                    DateEdition = null,
+                    DateParution = _dateParution,
+                    MainTitle = title.Trim(),
+                    CountOpening = 0,
+                    Resume = description,
+                    Notes = notes?.Trim(),
+                    //Pays = viewModel.Publication?.Pays,
+                    Langue = lang?.Trim(),
+                };
+
+                await context.Tbooks.AddAsync(record);
+                await context.SaveChangesAsync();
+
+                return Book.ConvertToViewModel(record);
+            }
+            catch (Exception ex)
+            {
+                Logs.Log(className: nameof(Library), exception: ex);
+                return null;
+            }
+        }
+
 
         /// <summary>
         /// Compte le nombre de livres dans cette bibliothèque
@@ -913,7 +987,6 @@ namespace LibApi.Services.Libraries
                     throw new NotSupportedException($"La bibliothèque {Name} a déjà été supprimée.");
                 }
 
-                
                 return await context.Tbooks.CountAsync(w => w.IdLibrary == Id, cancellationToken);
             }
             catch (Exception ex)
@@ -922,6 +995,9 @@ namespace LibApi.Services.Libraries
                 return 0;
             }
         }
+
+        #endregion
+
 
         /// <summary>
         /// Convertit un model en Model de vue

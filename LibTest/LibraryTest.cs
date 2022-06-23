@@ -3,6 +3,7 @@ using AppHelpers;
 using LibApi.Services.Collections;
 using LibApi.Services.Libraries;
 using LibApi.Services.Categories;
+using LibApi.Services.Books;
 
 namespace LibTest
 {
@@ -234,6 +235,20 @@ namespace LibTest
 
             var tree = await library.GetCategoriesTreeAsync();
             Assert.NotEmpty(tree);
+        }
+
+        [Fact]
+        public async void NewBook()
+        {
+            Library? library = await Library.CreateAsync("Ma Noo", null, true);
+            if (library == null)
+            {
+                Assert.NotNull(library);
+                return;
+            }
+
+            Book? book = await library.CreateBookAsync("Mon livre", "Francais", "Broché", "22/09/2020", "uu", "hhh", true);
+            Assert.NotNull(book);
         }
     }
 

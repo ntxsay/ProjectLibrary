@@ -166,6 +166,67 @@ namespace AppHelpers.Dates
             #endregion
 
             #region String
+            public static string StringDateToStringDate(string value, char separator, out string? day, out string? month, out string? year, bool isMonthString = true)
+            {
+                try
+                {
+                    var splitString = value.Split(separator, StringSplitOptions.RemoveEmptyEntries);
+                    if (splitString != null && splitString.Length > 0)
+                    {
+                        if (splitString.Length == 1)
+                        {
+                            day = null;
+                            month = null;
+                            year = splitString[0] != "--" ? splitString[0] : null;
+                            return $"--/--/{year}";
+                        }
+                        else if (splitString.Length == 2)
+                        {
+                            day = null;
+                            if (isMonthString)
+                            {
+                                month = splitString[0] != "--" ? ChooseMonth().ToList()[Convert.ToInt32(splitString[0])] : null;
+                            }
+                            else
+                            {
+                                month = splitString[0] != "--" ? splitString[0] : null;
+                            }
+                            year = splitString[1];
+                            return $"--/{month}/{year}";
+                        }
+                        else if (splitString.Length == 3)
+                        {
+                            day = splitString[0] != "--" ? splitString[0] : null;
+
+                            if (isMonthString)
+                            {
+                                month = splitString[1] != "--" ? ChooseMonth().ToList()[Convert.ToInt32(splitString[1])] : null;
+                            }
+                            else
+                            {
+                                month = splitString[1] != "--" ? splitString[1] : null;
+                            }
+
+                            year = splitString[2] != "--" ? splitString[2] : null;
+
+                            return $"{day ?? "--"}/{month ?? "--"}/{year ?? "--"}";
+                        }
+                    }
+
+                    day = null;
+                    month = null;
+                    year = null;
+                    return "--/--/--";
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine(ex.Message);
+                    day = null;
+                    month = null;
+                    year = null;
+                    return "--/--/--";
+                }
+            }
 
             public static string? TimeSpanToStringDuration(TimeSpan value)
             {
