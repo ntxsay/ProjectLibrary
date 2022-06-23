@@ -34,32 +34,17 @@ namespace LibShared.ViewModels.Books
             }
         }
 
-        protected ObservableCollection<string> _TitresOeuvre = new ObservableCollection<string>();
+        protected ObservableCollection<string> _OtherTitles = new ObservableCollection<string>();
 
         [DisplayName("Autre(s) titre(s)")]
-        public ObservableCollection<string> TitresOeuvre
+        public ObservableCollection<string> OtherTitles
         {
-            get => _TitresOeuvre;
+            get => _OtherTitles;
             set
             {
-                if (_TitresOeuvre != value)
+                if (_OtherTitles != value)
                 {
-                    _TitresOeuvre = value;
-                    OnPropertyChanged();
-                }
-            }
-        }
-
-        protected string? _TitresOeuvreStringList;
-        [JsonIgnore]
-        public string? TitresOeuvreStringList
-        {
-            get => _TitresOeuvreStringList;
-            set
-            {
-                if (_TitresOeuvreStringList != value)
-                {
-                    _TitresOeuvreStringList = value;
+                    _OtherTitles = value;
                     OnPropertyChanged();
                 }
             }
@@ -74,21 +59,6 @@ namespace LibShared.ViewModels.Books
                 if (_Auteurs != value)
                 {
                     _Auteurs = value;
-                    OnPropertyChanged();
-                }
-            }
-        }
-
-        protected string? _AuteursStringList;
-        [JsonIgnore]
-        public string? AuteursStringList
-        {
-            get => _AuteursStringList;
-            set
-            {
-                if (_AuteursStringList != value)
-                {
-                    _AuteursStringList = value;
                     OnPropertyChanged();
                 }
             }
@@ -151,20 +121,6 @@ namespace LibShared.ViewModels.Books
                 }
             }
         }
-
-        //private ObservableCollection<CategorieLivreVM> _Categories = new ObservableCollection<CategorieLivreVM>();
-        //public ObservableCollection<CategorieLivreVM> Categories
-        //{
-        //    get => _Categories;
-        //    set
-        //    {
-        //        if (_Categories != value)
-        //        {
-        //            _Categories = value;
-        //            OnPropertyChanged();
-        //        }
-        //    }
-        //}
 
         protected long _NbExemplaires;
         public long NbExemplaires
@@ -251,35 +207,6 @@ namespace LibShared.ViewModels.Books
             }
         }
 
-        protected ObservableCollection<CollectionVM> _Collections = new ObservableCollection<CollectionVM>();
-        public ObservableCollection<CollectionVM> Collections
-        {
-            get => _Collections;
-            set
-            {
-                if (_Collections != value)
-                {
-                    _Collections = value;
-                    OnPropertyChanged();
-                }
-            }
-        }
-
-        protected string? _CollectionsStringList;
-        [JsonIgnore]
-        public string? CollectionsStringList
-        {
-            get => _CollectionsStringList;
-            set
-            {
-                if (_CollectionsStringList != value)
-                {
-                    _CollectionsStringList = value;
-                    OnPropertyChanged();
-                }
-            }
-        }
-
         protected ObservableCollection<ContactVM> _Editeurs = new ObservableCollection<ContactVM>();
         public ObservableCollection<ContactVM> Editeurs
         {
@@ -289,21 +216,6 @@ namespace LibShared.ViewModels.Books
                 if (_Editeurs != value)
                 {
                     _Editeurs = value;
-                    OnPropertyChanged();
-                }
-            }
-        }
-
-        protected string? _EditeursStringList;
-        [JsonIgnore]
-        public string? EditeursStringList
-        {
-            get => _EditeursStringList;
-            set
-            {
-                if (_EditeursStringList != value)
-                {
-                    _EditeursStringList = value;
                     OnPropertyChanged();
                 }
             }

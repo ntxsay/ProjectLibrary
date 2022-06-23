@@ -38,29 +38,15 @@ namespace LibApi.Services.Books
             }
         }
 
-
         [DisplayName("Autre(s) titre(s)")]
-        public new ObservableCollection<string> TitresOeuvre
+        public new ObservableCollection<string> OtherTitles
         {
-            get => _TitresOeuvre;
+            get => _OtherTitles;
             private set
             {
-                if (_TitresOeuvre != value)
+                if (_OtherTitles != value)
                 {
-                    _TitresOeuvre = value;
-                    OnPropertyChanged();
-                }
-            }
-        }
-
-        public new string? TitresOeuvreStringList
-        {
-            get => _TitresOeuvreStringList;
-            private set
-            {
-                if (_TitresOeuvreStringList != value)
-                {
-                    _TitresOeuvreStringList = value;
+                    _OtherTitles = value;
                     OnPropertyChanged();
                 }
             }
@@ -74,19 +60,6 @@ namespace LibApi.Services.Books
                 if (_Auteurs != value)
                 {
                     _Auteurs = value;
-                    OnPropertyChanged();
-                }
-            }
-        }
-
-        public new  string? AuteursStringList
-        {
-            get => _AuteursStringList;
-            private set
-            {
-                if (_AuteursStringList != value)
-                {
-                    _AuteursStringList = value;
                     OnPropertyChanged();
                 }
             }
@@ -171,19 +144,6 @@ namespace LibApi.Services.Books
             }
         }
 
-        public new string? CollectionsStringList
-        {
-            get => _CollectionsStringList;
-            private set
-            {
-                if (_CollectionsStringList != value)
-                {
-                    _CollectionsStringList = value;
-                    OnPropertyChanged();
-                }
-            }
-        }
-
         public new ObservableCollection<ContactVM> Editeurs
         {
             get => _Editeurs;
@@ -192,19 +152,6 @@ namespace LibApi.Services.Books
                 if (_Editeurs != value)
                 {
                     _Editeurs = value;
-                    OnPropertyChanged();
-                }
-            }
-        }
-
-        public new string? EditeursStringList
-        {
-            get => _EditeursStringList;
-            private set
-            {
-                if (_EditeursStringList != value)
-                {
-                    _EditeursStringList = value;
                     OnPropertyChanged();
                 }
             }
@@ -389,6 +336,56 @@ namespace LibApi.Services.Books
             }
         }
 
+        public async Task<bool> AddOrUpdateOtherTitles(string[] values)
+        {
+            try
+            {
+                if (IsDeleted)
+                {
+                    throw new InvalidOperationException($"Le livre {MainTitle} a déjà été supprimée.");
+                }
+
+                //S'il n'y a pas de nouveau nom et que la modification de la description est ignoré, alors génère une erreur.
+                if (values == null)
+                {
+                    throw new ArgumentNullException(nameof(values), "le paramètre ne doit pas être null.");
+                }
+
+                Tbook? record = await context.Tbooks.SingleOrDefaultAsync(s => s.Id == Id);
+                if (record == null)
+                {
+                    throw new NullReferenceException($"Le livre n'existe pas avec l'id \"{Id}\".");
+                }
+
+                var recordTitles = await context.TbookOtherTitles.Where(a => a.IdBook == record.Id).ToListAsync();
+                if (recordTitles.Any())
+                {
+                    context.TbookOtherTitles.RemoveRange(recordTitles);
+                }
+
+                if (values.Any())
+                {
+                    var valueRange = values.Where(w => w != null).Select(s => new TbookOtherTitle()
+                    {
+                        IdBook = record.Id,
+                        Title = s
+                    }).ToList();
+                    await context.TbookOtherTitles.AddRangeAsync(valueRange);
+                }
+
+                await context.SaveChangesAsync();
+                OtherTitles = new ObservableCollection<string>(values.Where(w => w != null));
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Logs.Log(className: nameof(Book), exception: ex);
+                return false;
+            }
+        }
+
+
         /// <summary>
         /// Supprime la bibliothèque de la base de données
         /// </summary>
@@ -399,23 +396,75 @@ namespace LibApi.Services.Books
             {
                 if (IsDeleted)
                 {
-                    throw new NotSupportedException($"La bibliothèque {Name} a déjà été supprimée.");
+                    throw new InvalidOperationException($"Le livre {MainTitle} a déjà été supprimée.");
                 }
 
-                Tlibrary? tlibrary = await context.Tlibraries.SingleOrDefaultAsync(s => s.Id == Id);
-                if (tlibrary == null)
+                Tbook? record = await context.Tbooks.SingleOrDefaultAsync(a => a.Id == Id);
+                if (record == null)
                 {
-                    throw new ArgumentNullException(nameof(Tlibrary), $"La bibliothèque n'existe pas avec l'id \"{Id}\".");
+                    throw new ArgumentNullException(nameof(Tlibrary), $"Le livre n'existe pas avec l'id \"{Id}\".");
                 }
 
-                List<Tcollection>? tcollections = await context.Tcollections.Where(s => s.IdLibrary == Id).ToListAsync();
-                if (tcollections.Any())
+                //Titles
+                var recordTitles = await context.TbookOtherTitles.Where(a => a.IdBook == record.Id).ToListAsync();
+                if (recordTitles.Any())
                 {
-                    context.Tcollections.RemoveRange(tcollections);
+                    context.TbookOtherTitles.RemoveRange(recordTitles);
                 }
 
-                context.Tlibraries.Remove(tlibrary);
-                _ = await context.SaveChangesAsync();
+                //Identification
+                TbookIdentification? recordIdentification = await context.TbookIdentifications.SingleOrDefaultAsync(a => a.Id == record.Id);
+                if (recordIdentification != null)
+                {
+                    context.TbookIdentifications.Remove(recordIdentification);
+                }
+
+                //Classification
+                TbookClassification? recordClassification = await context.TbookClassifications.SingleOrDefaultAsync(a => a.Id == record.Id);
+                if (recordClassification != null)
+                {
+                    context.TbookClassifications.Remove(recordClassification);
+                }
+
+                //Format
+                TbookFormat? recordFormat = await context.TbookFormats.SingleOrDefaultAsync(a => a.Id == record.Id);
+                if (recordFormat != null)
+                {
+                    context.TbookFormats.Remove(recordFormat);
+                }
+
+                //Collection connecto
+                var recordCollection = await context.TbookCollections.Where(a => a.IdBook == record.Id).ToListAsync();
+                if (recordCollection.Any())
+                {
+                    context.TbookCollections.RemoveRange(recordCollection);
+                }
+
+                //Exemplaries
+                var recordExemplary = await context.TbookExemplaries.Where(a => a.IdBook == record.Id).ToListAsync();
+                if (recordExemplary.Any())
+                {
+                    foreach (var exemplary in recordExemplary)
+                    {
+                        //Pret
+                        var recordPrets = await context.TbookPrets.Where(a => a.IdBookExemplary == exemplary.Id).ToListAsync();
+                        if (recordPrets != null)
+                        {
+                            context.TbookPrets.RemoveRange(recordPrets);
+                        }
+
+                        //Etats
+                        var recordEtats = await context.TbookEtats.Where(a => a.IdBookExemplary == exemplary.Id).ToListAsync();
+                        if (recordEtats != null)
+                        {
+                            context.TbookEtats.RemoveRange(recordEtats);
+                        }
+                    }
+                    context.TbookExemplaries.RemoveRange(recordExemplary);
+                }
+
+                context.Tbooks.Remove(record);
+                await context.SaveChangesAsync();
 
                 IsDeleted = true;
                 return true;
