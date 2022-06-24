@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace LibShared
 {
+    #region Enums
     public enum GroupBy : byte
     {
         None,
@@ -55,4 +56,31 @@ namespace LibShared
         Translator = 3,
         Illustrator = 4
     }
+
+    public enum BookFormat : byte
+    {
+        Relie,
+        Broche,
+        Cartonne,
+        Poche,
+        Audio,
+        Ebook,
+    }
+    #endregion
+
+    #region List
+    public class LibraryModelList
+    {
+        public static Dictionary<byte, string> BookFormatDictionary => new ()
+        {
+            { (byte)BookFormat.Relie, "Relié"},
+            { (byte)BookFormat.Broche, "Broché"},
+            { (byte)BookFormat.Cartonne, "Cartonné"},
+            { (byte)BookFormat.Poche, "Poche"},
+            { (byte)BookFormat.Audio, "Audio"},
+            { (byte)BookFormat.Ebook, "Ebook"},
+        };
+    }
+   
+    #endregion
 }

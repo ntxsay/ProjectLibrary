@@ -918,52 +918,10 @@ namespace LibApi.Services.Libraries
 
                 if (title.IsStringNullOrEmptyOrWhiteSpace())
                 {
-                    throw new ArgumentNullException(nameof(title), "Le nom de la catégorie ne peut pas être nulle, vide ou ne contenir que des espaces blancs.");
+                    throw new ArgumentNullException(nameof(title), "Le nom du livre ne peut pas être nul, vide ou ne contenir que des espaces blancs.");
                 }
 
-                var existingId = await Book.IsBookExistAsync(title, lang, format);
-                if (existingId != null)
-                {
-                    Logs.Log(className: nameof(Library), message: $"Le livre \"{title}\" existe déjà.");
-                    if (openIfExist)
-                    {
-                        var existingItem = await context.Tbooks.SingleOrDefaultAsync(s => s.Id == existingId);
-                        if (existingItem != null)
-                        {
-                            return Book.ConvertToViewModel(existingItem);
-                        }
-
-                        throw new Exception($"Impossible de récupérer le livre existant.");
-                    }
-                    else
-                    {
-                        throw new InvalidOperationException($"Le livre \"{title}\" existe déjà.");
-                    }
-                }
-
-                var _dateAjout = DateTime.UtcNow;
-                var _guid = System.Guid.NewGuid();
-                var _dateParution = DateHelpers.Converter.StringDateToStringDate(dateParution, '/', out _, out _,out _, false);
-
-                var record = new Tbook()
-                {
-                    IdLibrary = Id,
-                    Guid = _guid.ToString(),
-                    DateAjout = _dateAjout.ToString(),
-                    DateEdition = null,
-                    DateParution = _dateParution,
-                    MainTitle = title.Trim(),
-                    CountOpening = 0,
-                    Resume = description,
-                    Notes = notes?.Trim(),
-                    //Pays = viewModel.Publication?.Pays,
-                    Langue = lang?.Trim(),
-                };
-
-                await context.Tbooks.AddAsync(record);
-                await context.SaveChangesAsync();
-
-                return Book.ConvertToViewModel(record);
+                return await Book.CreateAsync(Id, title, lang, format, dateParution, notes, description, openIfExist);
             }
             catch (Exception ex)
             {

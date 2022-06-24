@@ -150,6 +150,92 @@ namespace LibShared.ViewModels.Books
             }
         }
 
+        #region Format
+        protected string? _Format;
+        public string? Format
+        {
+            get => _Format;
+            set
+            {
+                if (_Format != value)
+                {
+                    _Format = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        protected short? _NbOfPages = 0;
+        public short? NbOfPages
+        {
+            get => _NbOfPages;
+            set
+            {
+                if (_NbOfPages != value)
+                {
+                    _NbOfPages = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        protected double? _Hauteur;
+        public double? Hauteur
+        {
+            get => _Hauteur;
+            set
+            {
+                if (_Hauteur != value)
+                {
+                    _Hauteur = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        protected double? _Largeur;
+        public double? Largeur
+        {
+            get => _Largeur;
+            set
+            {
+                if (_Largeur != value)
+                {
+                    _Largeur = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        protected double? _Epaisseur;
+        public double? Epaisseur
+        {
+            get => _Epaisseur;
+            set
+            {
+                if (_Epaisseur != value)
+                {
+                    _Epaisseur = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        protected double? _Poids;
+        public double? Poids
+        {
+            get => _Poids;
+            set
+            {
+                if (_Poids != value)
+                {
+                    _Poids = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+        #endregion
+
         #region Publication
         protected string? _DayParution;
         public string? DayParution
