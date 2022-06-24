@@ -901,13 +901,40 @@ namespace LibApi.Services.Libraries
 
         #region Livres
         /// <summary>
+        /// Récupère tous les libres de la bibliothèque actuelle
+        /// </summary>
+        /// <returns></returns>
+        public async Task<IEnumerable<Book>> GetAllBooksAsync()
+        {
+            try
+            {
+                if (IsDeleted)
+                {
+                    throw new InvalidOperationException($"La bibliothèque {Name} a déjà été supprimée.");
+                }
+
+                var modelList = await context.Tbooks.Where(w => w.IdLibrary == Id).ToListAsync();
+                if (modelList == null || !modelList.Any())
+                {
+                    return Enumerable.Empty<Book>();
+                }
+
+                return modelList.Select(s => Book.ConvertToViewModel(s))!;
+            }
+            catch (Exception ex)
+            {
+                Logs.Log(className: nameof(Library), exception:ex);
+                return Enumerable.Empty<Book>();
+            }
+        }
+        /// <summary>
         /// Ajoute une nouvelle catégorie à la bibliothèque.
         /// </summary>
         /// <param name="name">Nom de la collection</param>
         /// <param name="description">Description de la collection</param>
         /// <remarks>Si la collection existe, la collection existante sera retournée.</remarks>
         /// <returns></returns>
-        public async Task<Book?> CreateBookAsync(string title, string? lang = null, string? format = null, string? dateParution = null, string? notes = null, string? description = null, bool openIfExist = false)
+        public async Task<Book?> AddBookAsync(string title, string? lang = null, BookFormat? format = null, string? dateParution = null, string? notes = null, string? description = null, bool openIfExist = false)
         {
             try
             {

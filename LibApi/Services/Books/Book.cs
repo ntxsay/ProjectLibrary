@@ -306,7 +306,7 @@ namespace LibApi.Services.Books
         /// <param name="description">Description de la collection</param>
         /// <remarks>Si la collection existe, la collection existante sera retournée.</remarks>
         /// <returns></returns>
-        public static async Task<Book?> CreateAsync(long idLibrary, string title, string? lang = null, string? format = null, string? dateParution = null, string? notes = null, string? description = null, bool openIfExist = false)
+        public static async Task<Book?> CreateAsync(long idLibrary, string title, string? lang = null, BookFormat? format = null, string? dateParution = null, string? notes = null, string? description = null, bool openIfExist = false)
         {
             try
             {
@@ -316,7 +316,7 @@ namespace LibApi.Services.Books
                 }
 
                 using LibrarySqLiteDbContext context = new();
-                var existingId = await Book.IsBookExistAsync(title, lang, format);
+                var existingId = await Book.IsBookExistAsync(title, lang, LibraryModelList.BookFormatDictionary.GetValueOrDefault((byte)format));
                 if (existingId != null)
                 {
                     Logs.Log(className: nameof(Book), message: $"Le livre \"{title}\" existe déjà.");
@@ -338,7 +338,7 @@ namespace LibApi.Services.Books
 
                 var _dateAjout = DateTime.UtcNow;
                 var _guid = System.Guid.NewGuid();
-                var _dateParution = DateHelpers.Converter.StringDateToStringDate(dateParution, '/', out _, out _, out _, false);
+                var _dateParution = dateParution.IsStringNullOrEmptyOrWhiteSpace() ? null : DateHelpers.Converter.StringDateToStringDate(dateParution, '/', out _, out _, out _, false);
 
                 var record = new Tbook()
                 {
@@ -372,12 +372,11 @@ namespace LibApi.Services.Books
         /// </summary>
         /// <param name="title"></param>
         /// <param name="lang"></param>
-        /// <param name="format"></param>
         /// <param name="dateParution"></param>
         /// <param name="notes"></param>
         /// <param name="description"></param>
         /// <returns></returns>
-        public async Task<bool> UpdateAsync(string? title = null, string? lang = null, string? format = null, string? dateParution = null, string? notes = null, string? description = null)
+        public async Task<bool> UpdateAsync(string? title = null, string? lang = null, string? dateParution = null, string? notes = null, string? description = null)
         {
             try
             {
@@ -387,7 +386,7 @@ namespace LibApi.Services.Books
                 }
 
                 //S'il n'y a pas de nouveau nom et que la modification de la description est ignoré, alors génère une erreur.
-                if (title.IsStringNullOrEmptyOrWhiteSpace() && lang == null && format == null && dateParution == null && notes == null && description == null)
+                if (title.IsStringNullOrEmptyOrWhiteSpace() && lang == null && dateParution == null && notes == null && description == null)
                 {
                     throw new InvalidOperationException("Au moins un paramètre doit être renseigné.");
                 }
@@ -400,7 +399,7 @@ namespace LibApi.Services.Books
 
                 if (!title.IsStringNullOrEmptyOrWhiteSpace())
                 {
-                    long? existingId = await Book.IsBookExistAsync(title, lang, format, true, Id)!;
+                    long? existingId = await IsBookExistAsync(title, lang, Format, true, Id)!;
                     if (existingId != null)
                     {
                         Logs.Log(className:nameof(Book), message: "Ce livre existe déjà");
@@ -415,12 +414,6 @@ namespace LibApi.Services.Books
                 {
                     record.Langue = lang?.Trim();
                 }
-
-                ////La mise à jour de la description n'est pas ignorée si elle est différent de null.
-                //if (format != null)
-                //{
-                //    record.Resume = format?.Trim();
-                //}
 
                 //La mise à jour de la description n'est pas ignorée si elle est différent de null.
                 if (dateParution != null)
@@ -580,71 +573,66 @@ namespace LibApi.Services.Books
                         tbookFormat.Format = LibraryModelList.BookFormatDictionary.GetValueOrDefault((byte)format);
                     }
 
-                    if (nbPages != null && nbPages <= 0)
+                    if (nbPages != null)
                     {
-                        tbookFormat.NbOfPages = nbPages;
+                        tbookFormat.NbOfPages = nbPages < 0 ? null : nbPages;
                     }
 
-                    if (largeur != null && largeur <= 0)
+                    if (largeur != null)
                     {
-                        tbookFormat.Largeur = largeur;
+                        tbookFormat.Largeur = largeur < 0 ? null : largeur;
                     }
 
-                    if (hauteur != null && hauteur <= 0)
+                    if (hauteur != null)
                     {
-                        tbookFormat.Hauteur = hauteur;
+                        tbookFormat.Hauteur = hauteur < 0 ? null : hauteur;
                     }
 
-                    if (epaisseur != null && epaisseur <= 0)
+                    if (epaisseur != null)
                     {
-                        tbookFormat.Epaisseur = epaisseur;
+                        tbookFormat.Epaisseur = epaisseur < 0 ? null : epaisseur;
                     }
 
-                    if (weight != null && weight <= 0)
+                    if (weight != null)
                     {
-                        tbookFormat.Weight = weight;
+                        tbookFormat.Weight = weight < 0 ? null : weight;
                     }
 
                     context.TbookFormats.Update(tbookFormat);
                     await context.SaveChangesAsync();
                 }
 
-                if (tbookFormat != null)
+                if (format != null)
                 {
-                    if (format != null)
-                    {
-                        Format = tbookFormat.Format;
-                    }
-
-                    if (nbPages != null && nbPages <= 0)
-                    {
-                        NbOfPages = Convert.ToInt16(tbookFormat.NbOfPages);
-                    }
-
-                    if (largeur != null && largeur <= 0)
-                    {
-                        Largeur = tbookFormat.Largeur;
-                    }
-
-                    if (hauteur != null && hauteur <= 0)
-                    {
-                        Hauteur = tbookFormat.Hauteur;
-                    }
-
-                    if (epaisseur != null && epaisseur <= 0)
-                    {
-                        Epaisseur = tbookFormat.Epaisseur;
-                    }
-
-                    if (weight != null && weight <= 0)
-                    {
-                        Poids = tbookFormat.Weight;
-                    }
-
-                    return true;
+                    Format = tbookFormat.Format;
                 }
 
-                return false;
+                if (nbPages != null)
+                {
+                    NbOfPages = Convert.ToInt16(tbookFormat.NbOfPages);
+                }
+
+                if (largeur != null)
+                {
+                    Largeur = tbookFormat.Largeur;
+                }
+
+                if (hauteur != null)
+                {
+                    Hauteur = tbookFormat.Hauteur;
+                }
+
+                if (epaisseur != null)
+                {
+                    Epaisseur = tbookFormat.Epaisseur;
+                }
+
+                if (weight != null)
+                {
+                    Poids = tbookFormat.Weight;
+                }
+
+                return true;
             }
             catch (Exception ex)
             {
@@ -808,6 +796,10 @@ namespace LibApi.Services.Books
                     DateEdition = DateHelpers.Converter.GetNullableDateFromString(model.DateEdition)?.ToLocalTime(),
                     MainTitle = model.MainTitle,
                     CountOpening = model.CountOpening,
+                    Langue = model.Langue,
+                    Notes = model.Notes,
+                    Resume = model.Resume,
+
                 };
 
                 return viewModel;

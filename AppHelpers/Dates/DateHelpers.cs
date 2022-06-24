@@ -170,6 +170,11 @@ namespace AppHelpers.Dates
             {
                 try
                 {
+                    if (value.IsStringNullOrEmptyOrWhiteSpace())
+                    {
+                        throw new ArgumentNullException(nameof(value));
+                    }
+
                     var splitString = value.Split(separator, StringSplitOptions.RemoveEmptyEntries);
                     if (splitString != null && splitString.Length > 0)
                     {

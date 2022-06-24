@@ -40,7 +40,7 @@ public partial class StringHelpers
     {
         try
         {
-            if (values == null || values.Count() == 0)
+            if (values == null || !values.Any())
             {
                 return Enumerable.Empty<string>();
             }
