@@ -433,7 +433,7 @@ namespace LibApi.Services.Books
                     record.Resume = description?.Trim();
                 }
 
-                DateTime dateEdition = DateTime.Now;
+                DateTime dateEdition = DateTime.UtcNow;
                 record.DateEdition = dateEdition.ToString();
 
                 context.Tbooks.Update(record);
