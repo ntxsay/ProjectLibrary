@@ -68,6 +68,27 @@ namespace LibWebApi.Controllers
             return await library.GetAllBooksAsync();
         }
 
+        [Route("books/single")]
+        [HttpGet]
+        public async Task<BookVM?> GetSingleBookAsync([FromQuery] long idLibrary, [FromQuery] string title, [FromQuery] string? lang = null, [FromQuery] BookFormat? format = null)
+        {
+            if (title.IsStringNullOrEmptyOrWhiteSpace())
+            {
+                _logger.LogWarning("Le titre du livre ne peut pas être null, vide ou ne contenir que des espaces blancs.");
+                return null;
+            }
+
+            using Library? library = await Library.GetSingleAsync(idLibrary);
+            if (library == null)
+            {
+                _logger.LogWarning("Le livre n'a pas pu être trouvé.");
+                return null;
+            }
+
+            using Book? book = await library.GetSingleBookAsync(title, lang, format);
+            return book;
+        }
+
         [Route("create/view-model")]
         [HttpPost]
         public async Task<LibraryVM?> CreateFromVMAsync(LibraryVM viewModel)

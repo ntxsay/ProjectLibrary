@@ -316,7 +316,7 @@ namespace LibApi.Services.Books
                 }
 
                 using LibrarySqLiteDbContext context = new();
-                var existingId = await Book.IsBookExistAsync(title, lang, LibraryModelList.BookFormatDictionary.GetValueOrDefault((byte)format));
+                var existingId = await Book.IsBookExistAsync(title, lang, format);
                 if (existingId != null)
                 {
                     Logs.Log(className: nameof(Book), message: $"Le livre \"{title}\" existe déjà.");
@@ -325,6 +325,7 @@ namespace LibApi.Services.Books
                         var existingItem = await context.Tbooks.SingleOrDefaultAsync(s => s.Id == existingId);
                         if (existingItem != null)
                         {
+                            await Book.CompleteBookAsync(context, existingItem);
                             return ConvertToViewModel(existingItem);
                         }
 
@@ -358,6 +359,7 @@ namespace LibApi.Services.Books
                 await context.Tbooks.AddAsync(record);
                 await context.SaveChangesAsync();
 
+                await Book.CompleteBookAsync(context, record);
                 return ConvertToViewModel(record);
             }
             catch (Exception ex)
@@ -399,7 +401,7 @@ namespace LibApi.Services.Books
 
                 if (!title.IsStringNullOrEmptyOrWhiteSpace())
                 {
-                    long? existingId = await IsBookExistAsync(title, lang, Format, true, Id)!;
+                    long? existingId = await IsBookExistAsync(title, lang, (BookFormat)LibraryModelList.BookFormatDictionary.SingleOrDefault(s => s.Value == Format).Key, true, Id)!;
                     if (existingId != null)
                     {
                         Logs.Log(className:nameof(Book), message: "Ce livre existe déjà");
@@ -733,7 +735,7 @@ namespace LibApi.Services.Books
         }
         #endregion
 
-        internal static async Task<long?> IsBookExistAsync(string mainTitle, string lang, string format, bool isEdit = false, long? modelId = null)
+        internal static async Task<long?> IsBookExistAsync(string mainTitle, string? lang, BookFormat? format, bool isEdit = false, long? modelId = null)
         {
             try
             {
@@ -761,7 +763,14 @@ namespace LibApi.Services.Books
                     foreach (var item in existingItemList)
                     {
                         item.TbookFormat = await context.TbookFormats.SingleOrDefaultAsync(c => c.Id == item.Id);
-                        if (item.TbookFormat?.Format?.ToLower() == format && item.Langue?.ToLower() == lang)
+                        string? _format = null;
+
+                        if (format != null)
+                        {
+                            _format = LibraryModelList.BookFormatDictionary.GetValueOrDefault((byte)format);
+                        }
+
+                        if (item.TbookFormat?.Format?.ToLower() == _format && item.Langue?.ToLower() == lang)
                         {
                             return item.Id;
                         }
@@ -777,12 +786,33 @@ namespace LibApi.Services.Books
             }
         }
 
+        internal static async Task CompleteBookAsync(LibrarySqLiteDbContext context, Tbook model)
+        {
+            try
+            {
+                if (context == null || model == null)
+                {
+                    return;
+                }
+
+                model.TbookClassification = await context.TbookClassifications.SingleOrDefaultAsync(s => s.Id == model.Id)!;
+                model.TbookFormat = await context.TbookFormats.SingleOrDefaultAsync(s => s.Id == model.Id)!;
+                model.TbookIdentification = await context.TbookIdentifications.SingleOrDefaultAsync(s => s.Id == model.Id)!;
+                //Facultatif
+                //model.TbookCollections = await context.TbookCollections.Where(w => w.IdBook == model.Id).ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                Logs.Log(className: nameof(Book), exception: ex);
+                return;
+            }
+        }
+
         public static Book? ConvertToViewModel(Tbook model)
         {
             try
             {
                 if (model == null) return null;
-
 
                 var isGuidCorrect = Guid.TryParse(model.Guid, out Guid guid);
                 if (isGuidCorrect == false) return null;

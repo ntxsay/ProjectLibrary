@@ -1,4 +1,5 @@
-﻿using System;
+﻿using LibUwp.Code.Api;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -25,6 +26,13 @@ namespace LibUwp
         public MainPage()
         {
             this.InitializeComponent();
+            this.Loaded += MainPage_Loaded;
+        }
+
+        private async void MainPage_Loaded(object sender, RoutedEventArgs e)
+        {
+            LibraryApi libraryApi = new LibraryApi();
+            await libraryApi.GetWeatherAsync();
         }
     }
 }

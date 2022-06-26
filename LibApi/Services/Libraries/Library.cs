@@ -919,6 +919,7 @@ namespace LibApi.Services.Libraries
                     return Enumerable.Empty<Book>();
                 }
 
+                modelList.ForEach(async fe => await Book.CompleteBookAsync(context, fe));
                 return modelList.Select(s => Book.ConvertToViewModel(s))!;
             }
             catch (Exception ex)
@@ -927,12 +928,47 @@ namespace LibApi.Services.Libraries
                 return Enumerable.Empty<Book>();
             }
         }
+
+        public async Task<Book?> GetSingleBookAsync(string titleName, string? lang = null, BookFormat? format = null)
+        {
+            try
+            {
+                if (IsDeleted)
+                {
+                    throw new InvalidOperationException($"La bibliothèque {Name} a déjà été supprimée.");
+                }
+
+                if (titleName.IsStringNullOrEmptyOrWhiteSpace())
+                {
+                    throw new ArgumentNullException($"Le nom du livre ne doit pas être null, vide ou ne contenir que des espaces blancs.");
+                }
+
+                long? existingBookId = await Book.IsBookExistAsync(titleName, lang, format);
+                if (existingBookId == null)
+                {
+                    throw new NullReferenceException($"Le livre n'existe pas avec le nom \"{titleName}\".");
+                }
+
+                Tbook? record = await context.Tbooks.SingleOrDefaultAsync(s => s.Id == (long)existingBookId && s.IdLibrary == Id);
+                if (record == null)
+                {
+                    throw new NullReferenceException($"Le livre n'existe pas avec le nom \"{titleName}\".");
+                }
+
+                await Book.CompleteBookAsync(context, record);
+                return Book.ConvertToViewModel(record);
+            }
+            catch (Exception ex)
+            {
+                Logs.Log(nameof(Library), nameof(GetSingleCollectionAsync), ex);
+                return null;
+            }
+        }
+
+
         /// <summary>
-        /// Ajoute une nouvelle catégorie à la bibliothèque.
+        /// Ajoute un livre à la bibliothèque.
         /// </summary>
-        /// <param name="name">Nom de la collection</param>
-        /// <param name="description">Description de la collection</param>
-        /// <remarks>Si la collection existe, la collection existante sera retournée.</remarks>
         /// <returns></returns>
         public async Task<Book?> AddBookAsync(string title, string? lang = null, BookFormat? format = null, string? dateParution = null, string? notes = null, string? description = null, bool openIfExist = false)
         {
