@@ -11,6 +11,7 @@ using AppHelpers;
 using AppHelpers.Dates;
 using AppHelpers.Strings;
 using LibApi.Models.Local.SQLite;
+using LibApi.Services.Categories;
 using LibShared;
 using LibShared.ViewModels.Books;
 using LibShared.ViewModels.Collections;
@@ -564,6 +565,97 @@ namespace LibApi.Services.Books
             }
         }
 
+        /// <summary>
+        /// Supprime la bibliothèque de la base de données
+        /// </summary>
+        /// <returns></returns>
+        public async Task<bool> DeleteAsync()
+        {
+            try
+            {
+                if (IsDeleted)
+                {
+                    throw new InvalidOperationException($"Le livre {MainTitle} a déjà été supprimée.");
+                }
+
+                Tbook? record = await context.Tbooks.SingleOrDefaultAsync(a => a.Id == Id);
+                if (record == null)
+                {
+                    throw new ArgumentNullException(nameof(Tlibrary), $"Le livre n'existe pas avec l'id \"{Id}\".");
+                }
+
+                //Titles
+                var recordTitles = await context.TbookOtherTitles.Where(a => a.IdBook == record.Id).ToListAsync();
+                if (recordTitles.Any())
+                {
+                    context.TbookOtherTitles.RemoveRange(recordTitles);
+                }
+
+                //Identification
+                TbookIdentification? recordIdentification = await context.TbookIdentifications.SingleOrDefaultAsync(a => a.Id == record.Id);
+                if (recordIdentification != null)
+                {
+                    context.TbookIdentifications.Remove(recordIdentification);
+                }
+
+                //Classification
+                TbookClassification? recordClassification = await context.TbookClassifications.SingleOrDefaultAsync(a => a.Id == record.Id);
+                if (recordClassification != null)
+                {
+                    context.TbookClassifications.Remove(recordClassification);
+                }
+
+                //Format
+                TbookFormat? recordFormat = await context.TbookFormats.SingleOrDefaultAsync(a => a.Id == record.Id);
+                if (recordFormat != null)
+                {
+                    context.TbookFormats.Remove(recordFormat);
+                }
+
+                //Collection connecto
+                var recordCollection = await context.TbookCollections.Where(a => a.IdBook == record.Id).ToListAsync();
+                if (recordCollection.Any())
+                {
+                    context.TbookCollections.RemoveRange(recordCollection);
+                }
+
+                //Exemplaries
+                var recordExemplary = await context.TbookExemplaries.Where(a => a.IdBook == record.Id).ToListAsync();
+                if (recordExemplary.Any())
+                {
+                    foreach (var exemplary in recordExemplary)
+                    {
+                        //Pret
+                        var recordPrets = await context.TbookPrets.Where(a => a.IdBookExemplary == exemplary.Id).ToListAsync();
+                        if (recordPrets != null)
+                        {
+                            context.TbookPrets.RemoveRange(recordPrets);
+                        }
+
+                        //Etats
+                        var recordEtats = await context.TbookEtats.Where(a => a.IdBookExemplary == exemplary.Id).ToListAsync();
+                        if (recordEtats != null)
+                        {
+                            context.TbookEtats.RemoveRange(recordEtats);
+                        }
+                    }
+                    context.TbookExemplaries.RemoveRange(recordExemplary);
+                }
+
+                context.Tbooks.Remove(record);
+                await context.SaveChangesAsync();
+
+                IsDeleted = true;
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Logs.Log(className: nameof(Book), exception: ex);
+                return false;
+            }
+        }
+        #endregion
+
         public async Task<bool> AddOrUpdateOtherTitles(string[] values)
         {
             try
@@ -745,7 +837,7 @@ namespace LibApi.Services.Books
                         Isbn10 = isbn10 ?? null,
                         Isbn13 = isbn13 ?? null,
                         Issn = issn ?? null,
-                        Asin = asin ?? null ,
+                        Asin = asin ?? null,
                         Cotation = cotation ?? null,
                         CodeBarre = codeBarre ?? null,
                     };
@@ -1063,107 +1155,147 @@ namespace LibApi.Services.Books
                 Logs.Log(className: nameof(Book), exception: ex);
                 return false;
             }
-        } 
+        }
         #endregion
 
-
-        /// <summary>
-        /// Supprime la bibliothèque de la base de données
-        /// </summary>
-        /// <returns></returns>
-        public async Task<bool> DeleteAsync()
+        public async Task<bool> AddToCategory(Category category)
         {
             try
             {
-                if (IsDeleted)
+                if (category == null)
                 {
-                    throw new InvalidOperationException($"Le livre {MainTitle} a déjà été supprimée.");
+                    throw new ArgumentNullException(nameof(category), $"La catégorie ne doit pas être null.");
                 }
 
-                Tbook? record = await context.Tbooks.SingleOrDefaultAsync(a => a.Id == Id);
+                if (category.IdLibrary != IdLibrary)
+                {
+                    throw new InvalidOperationException($"Impossible d'ajouter ce livre à une catégorie provenant d'une autre bibliothèque.");
+                }
+
+                Tbook? record = await context.Tbooks.SingleOrDefaultAsync(w => w.Id == Id);
                 if (record == null)
                 {
-                    throw new ArgumentNullException(nameof(Tlibrary), $"Le livre n'existe pas avec l'id \"{Id}\".");
+                    throw new NullReferenceException($"Le livre n'existe pas avec l'id \"{Id}\".");
                 }
 
-                //Titles
-                var recordTitles = await context.TbookOtherTitles.Where(a => a.IdBook == record.Id).ToListAsync();
-                if (recordTitles.Any())
-                {
-                    context.TbookOtherTitles.RemoveRange(recordTitles);
-                }
+                DateTime dateEdition = DateTime.UtcNow;
+                record.DateEdition = dateEdition.ToString();
+                record.IdCategorie = category.Id;
+                
+                context.Tbooks.Update(record);
+                _ = await context.SaveChangesAsync();
 
-                //Identification
-                TbookIdentification? recordIdentification = await context.TbookIdentifications.SingleOrDefaultAsync(a => a.Id == record.Id);
-                if (recordIdentification != null)
-                {
-                    context.TbookIdentifications.Remove(recordIdentification);
-                }
-
-                //Classification
-                TbookClassification? recordClassification = await context.TbookClassifications.SingleOrDefaultAsync(a => a.Id == record.Id);
-                if (recordClassification != null)
-                {
-                    context.TbookClassifications.Remove(recordClassification);
-                }
-
-                //Format
-                TbookFormat? recordFormat = await context.TbookFormats.SingleOrDefaultAsync(a => a.Id == record.Id);
-                if (recordFormat != null)
-                {
-                    context.TbookFormats.Remove(recordFormat);
-                }
-
-                //Collection connecto
-                var recordCollection = await context.TbookCollections.Where(a => a.IdBook == record.Id).ToListAsync();
-                if (recordCollection.Any())
-                {
-                    context.TbookCollections.RemoveRange(recordCollection);
-                }
-
-                //Exemplaries
-                var recordExemplary = await context.TbookExemplaries.Where(a => a.IdBook == record.Id).ToListAsync();
-                if (recordExemplary.Any())
-                {
-                    foreach (var exemplary in recordExemplary)
-                    {
-                        //Pret
-                        var recordPrets = await context.TbookPrets.Where(a => a.IdBookExemplary == exemplary.Id).ToListAsync();
-                        if (recordPrets != null)
-                        {
-                            context.TbookPrets.RemoveRange(recordPrets);
-                        }
-
-                        //Etats
-                        var recordEtats = await context.TbookEtats.Where(a => a.IdBookExemplary == exemplary.Id).ToListAsync();
-                        if (recordEtats != null)
-                        {
-                            context.TbookEtats.RemoveRange(recordEtats);
-                        }
-                    }
-                    context.TbookExemplaries.RemoveRange(recordExemplary);
-                }
-
-                context.Tbooks.Remove(record);
-                await context.SaveChangesAsync();
-
-                IsDeleted = true;
                 return true;
             }
             catch (Exception ex)
             {
-                Logs.Log(className: nameof(Book), exception: ex);
+                Logs.Log(className:nameof(Book), exception:ex);
                 return false;
             }
         }
-        #endregion
+
+        public async Task<Category?> GetCategorieAsync()
+        {
+            try
+            {
+                TlibraryCategorie? tlibraryCategorie = await context.TlibraryCategories.SingleOrDefaultAsync(w => w.Id == Id && w.IdLibrary == IdLibrary);
+                if (tlibraryCategorie != null)
+                {
+                    return Category.ConvertToViewModel(tlibraryCategorie);
+                }
+
+                return null;
+            }
+            catch (Exception ex)
+            {
+                Logs.Log(className: nameof(Book), exception: ex);
+                return null;
+            }
+        }
+
+        #region Static methods
+        public static async Task<IEnumerable<Book>> AllAsync()
+        {
+            try
+            {
+                using LibrarySqLiteDbContext context = new();
+                var modelList = await context.Tbooks.ToListAsync();
+                if (modelList == null || !modelList.Any())
+                {
+                    return Enumerable.Empty<Book>();
+                }
+
+                modelList.ForEach(async fe => await CompleteBookAsync(context, fe));
+                return modelList.Select(s => ConvertToViewModel(s)).Where(w => w != null)!;
+            }
+            catch (Exception ex)
+            {
+                Logs.Log(className: nameof(Book), exception: ex);
+                return Enumerable.Empty<Book>();
+            }
+        }
+
+        public static async Task<Book?> SingleAsync(long id)
+        {
+            try
+            {
+                using LibrarySqLiteDbContext context = new();
+                Tbook? record = await context.Tbooks.SingleOrDefaultAsync(s => s.Id == id);
+                if (record == null)
+                {
+                    throw new NullReferenceException($"Le livre n'existe pas avec l'id \"{id}\".");
+                }
+
+                await CompleteBookAsync(context, record);
+                return ConvertToViewModel(record);
+            }
+            catch (Exception ex)
+            {
+                Logs.Log(className: nameof(Book), exception: ex);
+                return null;
+            }
+        }
+
+        public static async Task<Book?> FirstAsync(string titleName, string? lang = null, BookFormat? format = null)
+        {
+            try
+            {
+                using LibrarySqLiteDbContext context = new();
+
+                if (titleName.IsStringNullOrEmptyOrWhiteSpace())
+                {
+                    throw new ArgumentNullException(nameof(titleName), $"Le nom du livre ne doit pas être null, vide ou ne contenir que des espaces blancs.");
+                }
+
+                long? existingBookId = await GetIdIfExistAsync(titleName, lang, format == null ? null : LibraryModelList.BookFormatDictionary.GetValueOrDefault((byte)format));
+                if (existingBookId == null)
+                {
+                    throw new NullReferenceException($"Le livre n'existe pas avec le nom \"{titleName}\".");
+                }
+
+                Tbook? record = await context.Tbooks.FirstOrDefaultAsync(s => s.Id == (long)existingBookId);
+                if (record == null)
+                {
+                    throw new NullReferenceException($"Le livre n'existe pas avec le nom \"{titleName}\".");
+                }
+
+                await CompleteBookAsync(context, record);
+                return ConvertToViewModel(record);
+            }
+            catch (Exception ex)
+            {
+                Logs.Log(className: nameof(Book), exception: ex);
+                return null;
+            }
+        }
+
 
         public static async Task<long?> GetIdIfExistAsync(string mainTitle, string? lang, string? format, bool isEdit = false, long? modelId = null)
         {
             try
             {
                 using LibrarySqLiteDbContext context = new();
-                List<Tbook> existingItemList = new ();
+                List<Tbook> existingItemList = new();
 
                 if (mainTitle.IsStringNullOrEmptyOrWhiteSpace())
                 {
@@ -1233,7 +1365,7 @@ namespace LibApi.Services.Books
                 var isGuidCorrect = Guid.TryParse(model.Guid, out Guid guid);
                 if (isGuidCorrect == false) return null;
 
-                Book viewModel = new ()
+                Book viewModel = new()
                 {
                     Id = model.Id,
                     IdLibrary = model.IdLibrary,
@@ -1279,10 +1411,12 @@ namespace LibApi.Services.Books
             }
             catch (Exception ex)
             {
-                Logs.Log(className:nameof(Book), exception:ex);
+                Logs.Log(className: nameof(Book), exception: ex);
                 return null;
             }
-        }
+        } 
+        #endregion
+
         public void Dispose()
         {
             context.Dispose();
