@@ -166,7 +166,7 @@ namespace AppHelpers.Dates
             #endregion
 
             #region String
-            public static string StringDateToStringDate(string value, char separator, out string? day, out string? month, out string? year, bool isMonthString = true)
+            public static string StringDateToStringDate(string? value, char separator, out int? day, out int? month, out int? year)
             {
                 try
                 {
@@ -178,43 +178,12 @@ namespace AppHelpers.Dates
                     var splitString = value.Split(separator, StringSplitOptions.RemoveEmptyEntries);
                     if (splitString != null && splitString.Length > 0)
                     {
-                        if (splitString.Length == 1)
+                        if (splitString.Length == 3)
                         {
-                            day = null;
-                            month = null;
-                            year = splitString[0] != "--" ? splitString[0] : null;
-                            return $"--/--/{year}";
-                        }
-                        else if (splitString.Length == 2)
-                        {
-                            day = null;
-                            if (isMonthString)
-                            {
-                                month = splitString[0] != "--" ? ChooseMonth().ToList()[Convert.ToInt32(splitString[0])] : null;
-                            }
-                            else
-                            {
-                                month = splitString[0] != "--" ? splitString[0] : null;
-                            }
-                            year = splitString[1];
-                            return $"--/{month}/{year}";
-                        }
-                        else if (splitString.Length == 3)
-                        {
-                            day = splitString[0] != "--" ? splitString[0] : null;
-
-                            if (isMonthString)
-                            {
-                                month = splitString[1] != "--" ? ChooseMonth().ToList()[Convert.ToInt32(splitString[1])] : null;
-                            }
-                            else
-                            {
-                                month = splitString[1] != "--" ? splitString[1] : null;
-                            }
-
-                            year = splitString[2] != "--" ? splitString[2] : null;
-
-                            return $"{day ?? "--"}/{month ?? "--"}/{year ?? "--"}";
+                            day = splitString[0] != "--" ? Convert.ToInt32(splitString[0]) : null;
+                            month = splitString[1] != "--" ? Convert.ToInt32(splitString[1]) : null;
+                            year = splitString[2] != "--" ? Convert.ToInt32(splitString[2]) : null;
+                            return $"{day?.ToString() ?? "--"}/{month?.ToString() ?? "--"}/{year?.ToString() ?? "--"}";
                         }
                     }
 

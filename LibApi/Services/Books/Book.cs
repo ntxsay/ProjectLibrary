@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Globalization;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -93,6 +94,99 @@ namespace LibApi.Services.Books
             }
         }
 
+        #region Identification
+        public new string? Cotation
+        {
+            get => _Cotation;
+            private set
+            {
+                if (_Cotation != value)
+                {
+                    _Cotation = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public new string? ASIN
+        {
+            get => _ASIN;
+            private set
+            {
+                if (_ASIN != value)
+                {
+                    _ASIN = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public new string? ISSN
+        {
+            get => _ISSN;
+            private set
+            {
+                if (_ISSN != value)
+                {
+                    _ISSN = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public new string? ISBN
+        {
+            get => _ISBN;
+            private set
+            {
+                if (_ISBN != value)
+                {
+                    _ISBN = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public new string? ISBN10
+        {
+            get => _ISBN10;
+            private set
+            {
+                if (_ISBN10 != value)
+                {
+                    _ISBN10 = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public new string? ISBN13
+        {
+            get => _ISBN13;
+            private set
+            {
+                if (_ISBN13 != value)
+                {
+                    _ISBN13 = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public new string? CodeBarre
+        {
+            get => _CodeBarre;
+            private set
+            {
+                if (_CodeBarre != value)
+                {
+                    _CodeBarre = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+        #endregion
+
         #region Format
         public new string? Format
         {
@@ -173,9 +267,8 @@ namespace LibApi.Services.Books
         }
         #endregion
 
-
         #region Publication
-        public new string? DayParution
+        public new int? DayParution
         {
             get => this._DayParution;
             private set
@@ -188,7 +281,7 @@ namespace LibApi.Services.Books
             }
         }
 
-        public new string? MonthParution
+        public new int? MonthParution
         {
             get => this._MonthParution;
             private set
@@ -201,7 +294,7 @@ namespace LibApi.Services.Books
             }
         }
 
-        public new string? YearParution
+        public new int? YearParution
         {
             get => this._YearParution;
             private set
@@ -300,6 +393,8 @@ namespace LibApi.Services.Books
 
         readonly LibrarySqLiteDbContext context = new();
 
+        public string Dimensions => $"{Hauteur?.ToString() ?? "?"} cm × {Largeur?.ToString() ?? "?"} cm × {Epaisseur?.ToString() ?? "?"} cm";
+
         #region CRUD
         /// <summary>
         /// Ajoute un nouveau livre dans une bibliothèque.
@@ -308,7 +403,7 @@ namespace LibApi.Services.Books
         /// <param name="description">Description de la collection</param>
         /// <remarks>Si la collection existe, la collection existante sera retournée.</remarks>
         /// <returns></returns>
-        public static async Task<Book?> CreateAsync(long idLibrary, string title, string? lang = null, BookFormat? format = null, string? dateParution = null, string? notes = null, string? description = null, bool openIfExist = false)
+        public static async Task<Book?> CreateAsync(long idLibrary, string title, string? lang = null, BookFormat? format = null, string? notes = null, string? description = null, bool openIfExist = false)
         {
             try
             {
@@ -341,7 +436,6 @@ namespace LibApi.Services.Books
 
                 var _dateAjout = DateTime.UtcNow;
                 var _guid = System.Guid.NewGuid();
-                var _dateParution = dateParution.IsStringNullOrEmptyOrWhiteSpace() ? null : DateHelpers.Converter.StringDateToStringDate(dateParution, '/', out _, out _, out _, false);
 
                 var record = new Tbook()
                 {
@@ -349,7 +443,6 @@ namespace LibApi.Services.Books
                     Guid = _guid.ToString(),
                     DateAjout = _dateAjout.ToString(),
                     DateEdition = null,
-                    DateParution = _dateParution,
                     MainTitle = title.Trim(),
                     CountOpening = 0,
                     Resume = description,
@@ -361,7 +454,7 @@ namespace LibApi.Services.Books
                 await context.Tbooks.AddAsync(record);
                 await context.SaveChangesAsync();
 
-                await Book.CompleteBookAsync(context, record);
+                await CompleteBookAsync(context, record);
                 return ConvertToViewModel(record);
             }
             catch (Exception ex)
@@ -380,7 +473,7 @@ namespace LibApi.Services.Books
         /// <param name="notes"></param>
         /// <param name="description"></param>
         /// <returns></returns>
-        public async Task<bool> UpdateAsync(string? title = null, string? lang = null, string? dateParution = null, string? notes = null, string? description = null)
+        public async Task<bool> UpdateAsync(string? title, string? lang, string? notes, string? description)
         {
             try
             {
@@ -390,7 +483,7 @@ namespace LibApi.Services.Books
                 }
 
                 //S'il n'y a pas de nouveau nom et que la modification de la description est ignoré, alors génère une erreur.
-                if (title.IsStringNullOrEmptyOrWhiteSpace() && lang == null && dateParution == null && notes == null && description == null)
+                if (title.IsStringNullOrEmptyOrWhiteSpace() && lang == null && notes == null && description == null)
                 {
                     throw new InvalidOperationException("Au moins un paramètre doit être renseigné.");
                 }
@@ -417,12 +510,6 @@ namespace LibApi.Services.Books
                 if (lang != null)
                 {
                     record.Langue = lang?.Trim();
-                }
-
-                //La mise à jour de la description n'est pas ignorée si elle est différent de null.
-                if (dateParution != null)
-                {
-                    record.DateParution = dateParution?.Trim();
                 }
 
                 //La mise à jour de la description n'est pas ignorée si elle est différent de null.
@@ -454,12 +541,6 @@ namespace LibApi.Services.Books
                 if (lang != null)
                 {
                     Langue = record.Langue;
-                }
-
-                //La mise à jour de la description n'est pas ignorée si elle est différent de null.
-                if (dateParution != null)
-                {
-                    DateParution = record.DateParution;
                 }
 
                 //La mise à jour de la description n'est pas ignorée si elle est différent de null.
@@ -547,12 +628,6 @@ namespace LibApi.Services.Books
                     throw new InvalidOperationException("Au moins un paramètre doit être renseigné.");
                 }
 
-                Tbook? record = await context.Tbooks.SingleOrDefaultAsync(s => s.Id == Id);
-                if (record == null)
-                {
-                    throw new NullReferenceException($"Le livre n'existe pas avec l'id \"{Id}\".");
-                }
-
                 TbookFormat? tbookFormat = await context.TbookFormats.SingleOrDefaultAsync(s => s.Id == Id);
                 if (tbookFormat == null)
                 {
@@ -560,11 +635,11 @@ namespace LibApi.Services.Books
                     {
                         Id = Id,
                         Format = format == null ? null : LibraryModelList.BookFormatDictionary.GetValueOrDefault((byte)format),
-                        NbOfPages = nbPages == null || nbPages < 0 ? null : nbPages,
-                        Largeur = largeur == null || largeur < 0 ? null : largeur,
-                        Hauteur = hauteur == null || hauteur < 0 ? null : hauteur,
-                        Epaisseur = epaisseur == null || epaisseur < 0 ? null : epaisseur,
-                        Weight = weight == null || weight < 0 ? null : weight,
+                        NbOfPages = nbPages is null or < 0 ? null : nbPages,
+                        Largeur = largeur is null or < 0 ? null : largeur,
+                        Hauteur = hauteur is null or < 0 ? null : hauteur,
+                        Epaisseur = epaisseur is null or < 0 ? null : epaisseur,
+                        Weight = weight is null or < 0 ? null : weight,
                     };
 
                     await context.TbookFormats.AddAsync(tbookFormat);
@@ -645,6 +720,204 @@ namespace LibApi.Services.Books
             }
         }
 
+        public async Task<bool> AddOrUpdateIdentificationAsync(string? isbn = null, string? isbn10 = null, string? isbn13 = null, string? issn = null, string? asin = null, string? cotation = null, string? codeBarre = null)
+        {
+            try
+            {
+                if (IsDeleted)
+                {
+                    throw new InvalidOperationException($"Le livre {MainTitle} a déjà été supprimé.");
+                }
+
+                //S'il n'y a pas de nouveau nom et que la modification de la description est ignoré, alors génère une erreur.
+                if (isbn == null && isbn10 == null && isbn13 == null && issn == null && asin == null && cotation == null && codeBarre == null)
+                {
+                    throw new InvalidOperationException("Au moins un paramètre doit être renseigné.");
+                }
+
+                TbookIdentification? tbookIdentification = await context.TbookIdentifications.SingleOrDefaultAsync(s => s.Id == Id);
+                if (tbookIdentification == null)
+                {
+                    tbookIdentification = new TbookIdentification()
+                    {
+                        Id = Id,
+                        Isbn = isbn ?? null,
+                        Isbn10 = isbn10 ?? null,
+                        Isbn13 = isbn13 ?? null,
+                        Issn = issn ?? null,
+                        Asin = asin ?? null ,
+                        Cotation = cotation ?? null,
+                        CodeBarre = codeBarre ?? null,
+                    };
+
+                    await context.TbookIdentifications.AddAsync(tbookIdentification);
+                    await context.SaveChangesAsync();
+                }
+                else
+                {
+                    if (isbn != null)
+                    {
+                        tbookIdentification.Isbn = isbn;
+                    }
+
+                    if (isbn10 != null)
+                    {
+                        tbookIdentification.Isbn10 = isbn10;
+                    }
+
+                    if (isbn13 != null)
+                    {
+                        tbookIdentification.Isbn13 = isbn13;
+                    }
+
+                    if (issn != null)
+                    {
+                        tbookIdentification.Issn = issn;
+                    }
+
+                    if (asin != null)
+                    {
+                        tbookIdentification.Asin = asin;
+                    }
+
+                    if (cotation != null)
+                    {
+                        tbookIdentification.Cotation = cotation;
+                    }
+
+                    if (codeBarre != null)
+                    {
+                        tbookIdentification.CodeBarre = codeBarre;
+                    }
+
+                    context.TbookIdentifications.Update(tbookIdentification);
+                    await context.SaveChangesAsync();
+                }
+
+                if (isbn != null)
+                {
+                    ISBN = tbookIdentification.Isbn;
+                }
+
+                if (isbn10 != null)
+                {
+                    ISBN10 = tbookIdentification.Isbn10;
+                }
+
+                if (isbn13 != null)
+                {
+                    ISBN13 = tbookIdentification.Isbn13;
+                }
+
+                if (issn != null)
+                {
+                    ISSN = tbookIdentification.Issn;
+                }
+
+                if (asin != null)
+                {
+                    ASIN = tbookIdentification.Asin;
+                }
+
+                if (cotation != null)
+                {
+                    Cotation = tbookIdentification.Cotation;
+                }
+
+                if (codeBarre != null)
+                {
+                    CodeBarre = tbookIdentification.CodeBarre;
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Logs.Log(className: nameof(Book), exception: ex);
+                return false;
+            }
+        }
+
+        public async Task<bool> AddOrUpdateDateParution(int? day, int? month, int? year)
+        {
+            try
+            {
+                if (IsDeleted)
+                {
+                    throw new InvalidOperationException($"Le livre {MainTitle} a déjà été supprimée.");
+                }
+
+                //S'il n'y a pas de nouveau nom et que la modification de la description est ignoré, alors génère une erreur.
+                if (day == null && month == null && year == null)
+                {
+                    throw new InvalidOperationException("Au moins un paramètre doit être renseigné.");
+                }
+
+                if (day is not null and > 0 && (month is not null and <= 0 || MonthParution is null or <= 0))
+                {
+                    throw new InvalidOperationException($"Le mois doit être spécifié avant de valider le jour.");
+                }
+
+                if (month is not null and > 0 && (year is not null and <= 0 || YearParution is null or <= 0))
+                {
+                    throw new InvalidOperationException($"L'année doit être spécifiée avant de valider le mois.");
+                }
+
+                string _date;
+                if (day != null && month != null && year != null)
+                {
+                    var isDateCorrect = DateTime.TryParseExact($"{day:00}/{month:00}/{year:0000}", "dd/MM/yyyy", new CultureInfo("fr-FR"), DateTimeStyles.AssumeLocal, out DateTime date);
+                    if (!isDateCorrect)
+                    {
+                        throw new Exception($"La date de parution n'est pas valide..");
+                    }
+                    else
+                    {
+                        _date = date.ToString("dd/MM/yyyy");
+                    }
+                }
+                else
+                {
+                    string date = $"{(day is not null and > 0 ? day.ToString() : (DayParution is not null and > 0 ? DayParution.ToString() : "--"))}/{(month is not null and > 0 ? month.ToString() : (MonthParution is not null and > 0 ? MonthParution.ToString() : "--"))}/{(year is not null and > 0 ? year.ToString() : (YearParution is not null and > 0 ? YearParution.ToString() : "--"))}";
+                    _date = date;
+                }
+
+                Tbook? record = await context.Tbooks.SingleOrDefaultAsync(s => s.Id == Id);
+                if (record == null)
+                {
+                    throw new NullReferenceException($"Le livre n'existe pas avec l'id \"{Id}\".");
+                }
+
+                record.DateParution = _date;
+                context.Tbooks.Update(record);
+                await context.SaveChangesAsync();
+
+                if (day != null)
+                {
+                    DayParution = day <= 0 ? null : day;
+                }
+
+                if (month != null)
+                {
+                    MonthParution = month <= 0 ? null : month;
+                }
+
+                if (year != null)
+                {
+                    YearParution = year <= 0 ? null : year;
+                }
+
+                DateParution = _date;
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Logs.Log(className: nameof(Book), exception: ex);
+                return false;
+            }
+        }
+
+        #region Collections
         public async Task<IEnumerable<Collections.Collection>> GetCollectionsAsync()
         {
             try
@@ -663,7 +936,7 @@ namespace LibApi.Services.Books
                 List<TbookCollection>? values = await context.TbookCollections.Where(a => a.IdBook == Id).ToListAsync();
                 if (values != null && values.Any())
                 {
-                    List<Tcollection> collections = new ();
+                    List<Tcollection> collections = new();
                     List<long> idCollections = values.Select(a => a.Id).ToList();
                     foreach (var idCollection in idCollections)
                     {
@@ -673,7 +946,7 @@ namespace LibApi.Services.Books
 
                     if (collections.Any())
                     {
-                        return collections.Select(s => Collections.Collection.ConvertToViewModel(s)).Where(w => w !=null);
+                        return collections.Select(s => Collections.Collection.ConvertToViewModel(s)).Where(w => w != null);
                     }
                 }
                 return Enumerable.Empty<Collections.Collection>();
@@ -790,7 +1063,8 @@ namespace LibApi.Services.Books
                 Logs.Log(className: nameof(Book), exception: ex);
                 return false;
             }
-        }
+        } 
+        #endregion
 
 
         /// <summary>
@@ -912,13 +1186,6 @@ namespace LibApi.Services.Books
                     foreach (var item in existingItemList)
                     {
                         item.TbookFormat = await context.TbookFormats.SingleOrDefaultAsync(c => c.Id == item.Id);
-                        //string? _format = null;
-
-                        //if (format != null)
-                        //{
-                        //    _format = LibraryModelList.BookFormatDictionary.GetValueOrDefault((byte)format);
-                        //}
-
                         if (item.TbookFormat?.Format?.ToLower() == format && item.Langue?.ToLower() == lang)
                         {
                             return item.Id;
@@ -980,6 +1247,33 @@ namespace LibApi.Services.Books
                     Resume = model.Resume,
 
                 };
+
+                if (model.TbookIdentification != null)
+                {
+                    viewModel.ISBN = model.TbookIdentification.Isbn;
+                    viewModel.ISBN10 = model.TbookIdentification.Isbn10;
+                    viewModel.ISBN13 = model.TbookIdentification.Isbn13;
+                    viewModel.ISSN = model.TbookIdentification.Issn;
+                    viewModel.ASIN = model.TbookIdentification.Asin;
+                    viewModel.CodeBarre = model.TbookIdentification.CodeBarre;
+                    viewModel.Cotation = model.TbookIdentification.Cotation;
+                }
+
+                if (model.TbookFormat != null)
+                {
+                    viewModel.Format = model.TbookFormat.Format;
+                    viewModel.NbOfPages = model.TbookFormat.NbOfPages is null or < short.MaxValue ? null : (short)model.TbookFormat.NbOfPages;
+                    viewModel.Hauteur = model.TbookFormat.Hauteur ?? 0;
+                    viewModel.Epaisseur = model.TbookFormat?.Epaisseur ?? 0;
+                    viewModel.Largeur = model.TbookFormat?.Largeur ?? 0;
+                    viewModel.Poids = model.TbookFormat?.Weight ?? 0;
+                }
+
+                var dateParution = DateHelpers.Converter.StringDateToStringDate(model.DateParution, '/', out int? dayParution, out int? monthParution, out int? yearParution);
+                viewModel.DateParution = dateParution;
+                viewModel.DayParution = dayParution;
+                viewModel.MonthParution = monthParution;
+                viewModel.YearParution = yearParution;
 
                 return viewModel;
             }

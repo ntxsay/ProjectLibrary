@@ -941,7 +941,7 @@ namespace LibApi.Services.Libraries
         /// Ajoute un livre à la bibliothèque.
         /// </summary>
         /// <returns></returns>
-        public async Task<Book?> AddBookAsync(string title, string? lang = null, BookFormat? format = null, string? dateParution = null, string? notes = null, string? description = null, bool openIfExist = false)
+        public async Task<Book?> AddBookAsync(string title, string? lang = null, BookFormat? format = null, string? notes = null, string? description = null, bool openIfExist = false)
         {
             try
             {
@@ -955,7 +955,7 @@ namespace LibApi.Services.Libraries
                     throw new ArgumentNullException(nameof(title), "Le nom du livre ne peut pas être nul, vide ou ne contenir que des espaces blancs.");
                 }
 
-                return await Book.CreateAsync(Id, title, lang, format, dateParution, notes, description, openIfExist);
+                return await Book.CreateAsync(Id, title, lang, format, notes, description, openIfExist);
             }
             catch (Exception ex)
             {
