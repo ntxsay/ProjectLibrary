@@ -109,7 +109,7 @@ namespace LibApi.Services.Libraries
             }
             catch (Exception ex)
             {
-                Logs.Log(nameof(Library), nameof(GetAllAsync), ex);
+                Logs.Log(nameof(Library), exception: ex);
                 return Enumerable.Empty<Library>();
             }
         }
@@ -133,7 +133,7 @@ namespace LibApi.Services.Libraries
             }
             catch (Exception ex)
             {
-                Logs.Log(nameof(Library), nameof(GetSingleAsync), ex);
+                Logs.Log(nameof(Library), exception: ex);
                 return null;
             }
         }
@@ -158,7 +158,7 @@ namespace LibApi.Services.Libraries
             }
             catch (Exception ex)
             {
-                Logs.Log(nameof(Library), nameof(GetSingleAsync), ex);
+                Logs.Log(nameof(Library), exception: ex);
                 return null;
             }
         }
@@ -186,7 +186,7 @@ namespace LibApi.Services.Libraries
             }
             catch (Exception ex)
             {
-                Logs.Log(nameof(Library), nameof(DeleteAsync), ex);
+                Logs.Log(nameof(Library), exception: ex);
                 return idsNotDeleted;
             }
         }
@@ -214,7 +214,7 @@ namespace LibApi.Services.Libraries
             }
             catch (Exception ex)
             {
-                Logs.Log(nameof(Library), nameof(DeleteAsync), ex);
+                Logs.Log(nameof(Library), exception: ex);
                 return false;
             }
         }
@@ -233,7 +233,7 @@ namespace LibApi.Services.Libraries
             }
             catch (Exception ex)
             {
-                Logs.Log(nameof(Library), nameof(CountAsync), ex);
+                Logs.Log(nameof(Library), exception: ex);
                 return 0;
             }
         }
@@ -289,7 +289,7 @@ namespace LibApi.Services.Libraries
             }
             catch (Exception ex)
             {
-                Logs.Log(nameof(Library), nameof(CreateAsync), ex);
+                Logs.Log(nameof(Library), exception:ex);
                 return null;
             }
         }
@@ -341,7 +341,7 @@ namespace LibApi.Services.Libraries
             }
             catch (Exception ex)
             {
-                Logs.Log(nameof(Library), nameof(CreateAsync), ex);
+                Logs.Log(nameof(Library), exception: ex);
                 return null;
             }
         }
@@ -419,7 +419,7 @@ namespace LibApi.Services.Libraries
             }
             catch (Exception ex)
             {
-                Logs.Log(nameof(Library), nameof(UpdateAsync), ex);
+                Logs.Log(nameof(Library), exception: ex);
                 return false;
             }
         }
@@ -457,7 +457,7 @@ namespace LibApi.Services.Libraries
             }
             catch (Exception ex)
             {
-                Logs.Log(nameof(Library), nameof(DeleteAsync), ex);
+                Logs.Log(nameof(Library), exception: ex);
                 return false;
             }
         }
@@ -514,7 +514,7 @@ namespace LibApi.Services.Libraries
             }
             catch (Exception ex)
             {
-                Logs.Log(nameof(Library), nameof(AddCollectionAsync), ex);
+                Logs.Log(nameof(Library), exception: ex);
                 return null;
             }
         }
@@ -542,7 +542,7 @@ namespace LibApi.Services.Libraries
             }
             catch (Exception ex)
             {
-                Logs.Log(nameof(Library), nameof(GetAllCollectionsAsync), ex);
+                Logs.Log(nameof(Library), exception: ex);
                 return Enumerable.Empty<Collection>();
             }
         } 
@@ -566,7 +566,7 @@ namespace LibApi.Services.Libraries
             }
             catch (Exception ex)
             {
-                Logs.Log(nameof(Library), nameof(GetSingleCollectionAsync), ex);
+                Logs.Log(nameof(Library), exception: ex);
                 return null;
             }
         }
@@ -595,7 +595,7 @@ namespace LibApi.Services.Libraries
             }
             catch (Exception ex)
             {
-                Logs.Log(nameof(Library), nameof(GetSingleCollectionAsync), ex);
+                Logs.Log(nameof(Library), exception: ex);
                 return null;
             }
         }
@@ -637,7 +637,7 @@ namespace LibApi.Services.Libraries
             }
             catch (Exception ex)
             {
-                Logs.Log(nameof(Library), nameof(GetMultipleCollectionsAsync), ex);
+                Logs.Log(nameof(Library), exception: ex);
                 return Enumerable.Empty<Collection>();
             }
         }
@@ -673,7 +673,7 @@ namespace LibApi.Services.Libraries
             }
             catch (Exception ex)
             {
-                Logs.Log(nameof(Library), nameof(GetMultipleCollectionsAsync), ex);
+                Logs.Log(nameof(Library), exception: ex);
                 return Enumerable.Empty<Collection>();
             }
         }
@@ -730,7 +730,7 @@ namespace LibApi.Services.Libraries
             }
             catch (Exception ex)
             {
-                Logs.Log(nameof(Library), nameof(AddCategoryAsync), ex);
+                Logs.Log(nameof(Library), exception: ex);
                 return null;
             }
         }
@@ -754,7 +754,7 @@ namespace LibApi.Services.Libraries
             }
             catch (Exception ex)
             {
-                Logs.Log(nameof(Library), nameof(GetSingleCategoryAsync), ex);
+                Logs.Log(nameof(Library), exception: ex);
                 return null;
             }
         }
@@ -783,7 +783,7 @@ namespace LibApi.Services.Libraries
             }
             catch (Exception ex)
             {
-                Logs.Log(nameof(Library), nameof(GetSingleCategoryAsync), ex);
+                Logs.Log(nameof(Library), exception: ex);
                 return null;
             }
         }
@@ -825,7 +825,7 @@ namespace LibApi.Services.Libraries
             }
             catch (Exception ex)
             {
-                Logs.Log(nameof(Collection), nameof(GetMultipleCategoriesAsync), ex);
+                Logs.Log(nameof(Library), exception: ex);
                 return Enumerable.Empty<Category>();
             }
         }
@@ -861,7 +861,7 @@ namespace LibApi.Services.Libraries
             }
             catch (Exception ex)
             {
-                Logs.Log(nameof(Library), nameof(GetMultipleCategoriesAsync), ex);
+                Logs.Log(nameof(Library), exception: ex);
                 return Enumerable.Empty<Category>();
             }
         }
@@ -893,7 +893,7 @@ namespace LibApi.Services.Libraries
             }
             catch (Exception ex)
             {
-                Logs.Log(nameof(Library), nameof(GetCategoriesTreeAsync), ex);
+                Logs.Log(nameof(Library), exception: ex);
                 return Enumerable.Empty<Category>();
             }
         }
@@ -924,7 +924,7 @@ namespace LibApi.Services.Libraries
             }
             catch (Exception ex)
             {
-                Logs.Log(className: nameof(Library), exception:ex);
+                Logs.Log(nameof(Library), exception: ex);
                 return Enumerable.Empty<Book>();
             }
         }
@@ -960,7 +960,7 @@ namespace LibApi.Services.Libraries
             }
             catch (Exception ex)
             {
-                Logs.Log(nameof(Library), nameof(GetSingleCollectionAsync), ex);
+                Logs.Log(nameof(Library), exception: ex);
                 return null;
             }
         }
@@ -1012,7 +1012,7 @@ namespace LibApi.Services.Libraries
             }
             catch (Exception ex)
             {
-                Logs.Log(nameof(Library), nameof(CountBooksAsync), ex);
+                Logs.Log(nameof(Library), exception: ex);
                 return 0;
             }
         }
@@ -1048,7 +1048,7 @@ namespace LibApi.Services.Libraries
             }
             catch (Exception ex)
             {
-                Logs.Log(nameof(Library), nameof(ConvertToViewModel), ex);
+                Logs.Log(nameof(Library), exception: ex);
                 return null;
             }
         }
