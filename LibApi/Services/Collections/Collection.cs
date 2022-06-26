@@ -171,7 +171,78 @@ namespace LibApi.Services.Collections
 
         #endregion
 
-        public static Collection? ViewModelConverter(Tcollection model)
+        public static async Task<Collection?> CreateAsync(long idLibrary, CollectionVM viewModel, bool openIfExist = false)
+        {
+            try
+            {
+                if (viewModel == null)
+                {
+                    throw new ArgumentNullException(nameof(viewModel), "Le modèle de vue ne peut pas être null.");
+                }
+
+                if (viewModel.Name.IsStringNullOrEmptyOrWhiteSpace())
+                {
+                    throw new ArgumentNullException(nameof(viewModel.Name), "Le nom de la collection ne peut pas être nulle, vide ou ne contenir que des espaces blancs.");
+                }
+
+                using LibrarySqLiteDbContext context = new();
+
+                Tcollection? existingItem = await context.Tcollections.SingleOrDefaultAsync(c => c.Name.ToLower() == viewModel.Name.Trim().ToLower() && c.IdLibrary == idLibrary);
+                if (existingItem != null)
+                {
+                    Logs.Log(nameof(Collection), message:"Cette collection existe déjà");
+                    if (openIfExist)
+                    {
+                        return ConvertToViewModel(existingItem);
+                    }
+                    else
+                    {
+                        throw new InvalidOperationException($"La collection {viewModel.Name} existe déjà.");
+                    }
+                }
+
+                Tcollection record = new()
+                {
+                    Name = viewModel.Name.Trim(),
+                    IdLibrary = idLibrary,
+                    Description = viewModel.Description?.Trim(),
+                };
+
+                await context.Tcollections.AddAsync(record);
+                await context.SaveChangesAsync();
+
+                return ConvertToViewModel(record);
+            }
+            catch (Exception ex)
+            {
+                Logs.Log(nameof(Collection), exception: ex);
+                return null;
+            }
+        }
+
+        public static async Task<Collection?> CreateAsync(long idLibrary, string name, string? description = null, bool openIfExist = false)
+        {
+            try
+            {
+                if (name.IsStringNullOrEmptyOrWhiteSpace())
+                {
+                    throw new ArgumentNullException(nameof(name), "Le nom de la collection ne peut pas être nulle, vide ou ne contenir que des espaces blancs.");
+                }
+
+                return await CreateAsync(idLibrary, new CollectionVM()
+                {
+                    Name = name.Trim(),
+                    Description = description?.Trim()
+                });
+            }
+            catch (Exception ex)
+            {
+                Logs.Log(nameof(Collection), exception: ex);
+                return null;
+            }
+        }
+
+        public static Collection? ConvertToViewModel(Tcollection model)
         {
             try
             {
@@ -190,7 +261,32 @@ namespace LibApi.Services.Collections
             }
             catch (Exception ex)
             {
-                Logs.Log(nameof(Collection), nameof(ViewModelConverter), ex);
+                Logs.Log(nameof(Collection), nameof(ConvertToViewModel), ex);
+                return null;
+            }
+        }
+
+        public static async Task<long?> GetIdIfExistAsync(long idLibrary, CollectionVM viewModel, bool isEdit = false, long? modelId = null)
+        {
+            try
+            {
+                using LibrarySqLiteDbContext context = new();
+                string? name = viewModel.Name?.Trim()?.ToLower();
+
+                if (!isEdit)
+                {
+                    return (await context.Tcollections.FirstOrDefaultAsync(c => c.IdLibrary == idLibrary && c.Name.ToLower() == name))?.Id ?? null;
+                }
+                else if (isEdit && modelId != null)
+                {
+                    return (await context.Tcollections.FirstOrDefaultAsync(c => c.IdLibrary == idLibrary && c.Id != (long)modelId && c.Name.ToLower() == name))?.Id ?? null;
+                }
+
+                return null;
+            }
+            catch (Exception ex)
+            {
+                Logs.Log(className: nameof(Collection), exception: ex);
                 return null;
             }
         }

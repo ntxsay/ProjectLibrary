@@ -14,7 +14,7 @@ namespace LibShared.ViewModels.Books
     public abstract class BookVM : GenericVM
     {
         [JsonIgnore]
-        public long? IdLibrary { get; set; }
+        public long IdLibrary { get; protected set; }
         public Guid Guid { get; set; } = Guid.NewGuid();
         public long CountOpening { get; set; }
 

@@ -12,6 +12,7 @@ using AppHelpers.Strings;
 using LibApi.Models.Local.SQLite;
 using LibShared;
 using LibShared.ViewModels.Books;
+using LibShared.ViewModels.Collections;
 using LibShared.ViewModels.Contacts;
 using Microsoft.EntityFrameworkCore;
 
@@ -294,6 +295,7 @@ namespace LibApi.Services.Books
             }
         }
         #endregion
+
         #endregion
 
         readonly LibrarySqLiteDbContext context = new();
@@ -316,7 +318,7 @@ namespace LibApi.Services.Books
                 }
 
                 using LibrarySqLiteDbContext context = new();
-                var existingId = await Book.IsBookExistAsync(title, lang, format);
+                var existingId = await GetIdIfExistAsync(title, lang, format == null ? null : LibraryModelList.BookFormatDictionary.GetValueOrDefault((byte)format));
                 if (existingId != null)
                 {
                     Logs.Log(className: nameof(Book), message: $"Le livre \"{title}\" existe déjà.");
@@ -401,7 +403,7 @@ namespace LibApi.Services.Books
 
                 if (!title.IsStringNullOrEmptyOrWhiteSpace())
                 {
-                    long? existingId = await IsBookExistAsync(title, lang, (BookFormat)LibraryModelList.BookFormatDictionary.SingleOrDefault(s => s.Value == Format).Key, true, Id)!;
+                    long? existingId = await GetIdIfExistAsync(title, lang, Format, true, Id)!;
                     if (existingId != null)
                     {
                         Logs.Log(className:nameof(Book), message: "Ce livre existe déjà");
@@ -643,6 +645,153 @@ namespace LibApi.Services.Books
             }
         }
 
+        public async Task<IEnumerable<Collections.Collection>> GetCollectionsAsync()
+        {
+            try
+            {
+                if (IsDeleted)
+                {
+                    throw new InvalidOperationException($"Le livre {MainTitle} a déjà été supprimée.");
+                }
+
+                Tbook? record = await context.Tbooks.SingleOrDefaultAsync(s => s.Id == Id);
+                if (record == null)
+                {
+                    throw new NullReferenceException($"Le livre n'existe pas avec l'id \"{Id}\".");
+                }
+
+                List<TbookCollection>? values = await context.TbookCollections.Where(a => a.IdBook == Id).ToListAsync();
+                if (values != null && values.Any())
+                {
+                    List<Tcollection> collections = new ();
+                    List<long> idCollections = values.Select(a => a.Id).ToList();
+                    foreach (var idCollection in idCollections)
+                    {
+                        var value = await context.Tcollections.SingleOrDefaultAsync(a => a.Id == idCollection);
+                        if (value != null) collections.Add(value);
+                    }
+
+                    if (collections.Any())
+                    {
+                        return collections.Select(s => Collections.Collection.ConvertToViewModel(s)).Where(w => w !=null);
+                    }
+                }
+                return Enumerable.Empty<Collections.Collection>();
+            }
+            catch (Exception ex)
+            {
+                Logs.Log(className: nameof(Book), exception: ex);
+                return Enumerable.Empty<Collections.Collection>();
+            }
+        }
+
+        public async Task<bool> AddCollectionsAsync(CollectionVM[] values)
+        {
+            try
+            {
+                if (IsDeleted)
+                {
+                    throw new InvalidOperationException($"Le livre {MainTitle} a déjà été supprimée.");
+                }
+
+                //S'il n'y a pas de nouveau nom et que la modification de la description est ignoré, alors génère une erreur.
+                if (values == null)
+                {
+                    throw new ArgumentNullException(nameof(values), "le paramètre ne doit pas être null.");
+                }
+
+                foreach (var v in values)
+                {
+                    long? idCollection = await Collections.Collection.GetIdIfExistAsync(IdLibrary, v);
+                    if (idCollection == null)
+                    {
+                        Collections.Collection? nCollection = await Collections.Collection.CreateAsync(IdLibrary, v);
+                        idCollection = nCollection?.Id;
+                    }
+
+                    if (idCollection != null)
+                    {
+                        if (!await context.TbookCollections.AnyAsync(a => a.IdCollection == (long)idCollection && a.IdBook == Id))
+                        {
+                            TbookCollection tbookCollection = new()
+                            {
+                                IdBook = Id,
+                                IdCollection = (long)idCollection,
+                            };
+
+                            await context.TbookCollections.AddAsync(tbookCollection);
+                            await context.SaveChangesAsync();
+                        }
+                    }
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Logs.Log(className: nameof(Book), exception: ex);
+                return false;
+            }
+        }
+
+        public async Task<bool> RemoveCollectionsAsync(CollectionVM[] values)
+        {
+            try
+            {
+                if (IsDeleted)
+                {
+                    throw new InvalidOperationException($"Le livre {MainTitle} a déjà été supprimée.");
+                }
+
+                //S'il n'y a pas de nouveau nom et que la modification de la description est ignoré, alors génère une erreur.
+                if (values == null)
+                {
+                    throw new ArgumentNullException(nameof(values), "le paramètre ne doit pas être null.");
+                }
+
+                return await RemoveCollectionsAsync(values.Select(s => s.Id).ToArray());
+            }
+            catch (Exception ex)
+            {
+                Logs.Log(className: nameof(Book), exception: ex);
+                return false;
+            }
+        }
+
+        public async Task<bool> RemoveCollectionsAsync(long[] idCollections)
+        {
+            try
+            {
+                if (IsDeleted)
+                {
+                    throw new InvalidOperationException($"Le livre {MainTitle} a déjà été supprimée.");
+                }
+
+                //S'il n'y a pas de nouveau nom et que la modification de la description est ignoré, alors génère une erreur.
+                if (idCollections == null)
+                {
+                    throw new ArgumentNullException(nameof(idCollections), "le paramètre ne doit pas être null.");
+                }
+
+                foreach (var id in idCollections)
+                {
+                    List<TbookCollection>? values = await context.TbookCollections.Where(a => a.IdCollection == id && a.IdBook == Id).ToListAsync();
+                    if (values != null && values.Any())
+                    {
+                        context.TbookCollections.RemoveRange(values);
+                        await context.SaveChangesAsync();
+                    }
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Logs.Log(className: nameof(Book), exception: ex);
+                return false;
+            }
+        }
+
 
         /// <summary>
         /// Supprime la bibliothèque de la base de données
@@ -735,7 +884,7 @@ namespace LibApi.Services.Books
         }
         #endregion
 
-        internal static async Task<long?> IsBookExistAsync(string mainTitle, string? lang, BookFormat? format, bool isEdit = false, long? modelId = null)
+        public static async Task<long?> GetIdIfExistAsync(string mainTitle, string? lang, string? format, bool isEdit = false, long? modelId = null)
         {
             try
             {
@@ -763,14 +912,14 @@ namespace LibApi.Services.Books
                     foreach (var item in existingItemList)
                     {
                         item.TbookFormat = await context.TbookFormats.SingleOrDefaultAsync(c => c.Id == item.Id);
-                        string? _format = null;
+                        //string? _format = null;
 
-                        if (format != null)
-                        {
-                            _format = LibraryModelList.BookFormatDictionary.GetValueOrDefault((byte)format);
-                        }
+                        //if (format != null)
+                        //{
+                        //    _format = LibraryModelList.BookFormatDictionary.GetValueOrDefault((byte)format);
+                        //}
 
-                        if (item.TbookFormat?.Format?.ToLower() == _format && item.Langue?.ToLower() == lang)
+                        if (item.TbookFormat?.Format?.ToLower() == format && item.Langue?.ToLower() == lang)
                         {
                             return item.Id;
                         }

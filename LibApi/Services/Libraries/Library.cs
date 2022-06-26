@@ -481,36 +481,7 @@ namespace LibApi.Services.Libraries
                     throw new InvalidOperationException($"La bibliothèque {Name} a déjà été supprimée.");
                 }
 
-                if (name.IsStringNullOrEmptyOrWhiteSpace())
-                {
-                    throw new ArgumentNullException(nameof(name), "Le nom de la collection ne peut pas être nulle, vide ou ne contenir que des espaces blancs.");
-                }
-
-                Tcollection? existingItem = await context.Tcollections.SingleOrDefaultAsync(c => c.Name.ToLower() == name.ToLower() && c.IdLibrary == Id);
-                if (existingItem != null)
-                {
-                    Logs.Log(nameof(Library), nameof(AddCollectionAsync), "Cette collection existe déjà");
-                    if (openIfExist)
-                    {
-                        return Collection.ViewModelConverter(existingItem);
-                    }
-                    else
-                    {
-                        throw new InvalidOperationException($"La collection {name} existe déjà.");
-                    }
-                }
-
-                Tcollection record = new()
-                {
-                    Name = name.Trim(),
-                    IdLibrary = Id,
-                    Description = description?.Trim(),
-                };
-
-                await context.Tcollections.AddAsync(record);
-                await context.SaveChangesAsync();
-
-                return Collection.ViewModelConverter(record);
+                return await Collection.CreateAsync(Id, name, description, openIfExist);
             }
             catch (Exception ex)
             {
@@ -538,7 +509,7 @@ namespace LibApi.Services.Libraries
                     return Enumerable.Empty<Collection>();
                 }
 
-                return modelList.Select(s => Collection.ViewModelConverter(s))!;
+                return modelList.Select(s => Collection.ConvertToViewModel(s))!;
             }
             catch (Exception ex)
             {
@@ -562,7 +533,7 @@ namespace LibApi.Services.Libraries
                     throw new NullReferenceException($"La collection n'existe pas avec l'id \"{idCollection}\".");
                 }
 
-                return Collection.ViewModelConverter(record);
+                return Collection.ConvertToViewModel(record);
             }
             catch (Exception ex)
             {
@@ -591,7 +562,7 @@ namespace LibApi.Services.Libraries
                     throw new NullReferenceException($"La collection n'existe pas avec le nom \"{collectionName}\".");
                 }
 
-                return Collection.ViewModelConverter(record);
+                return Collection.ConvertToViewModel(record);
             }
             catch (Exception ex)
             {
@@ -633,7 +604,7 @@ namespace LibApi.Services.Libraries
                     tcollections.Add(record);
                 }
 
-                return tcollections.Select(s => Collection.ViewModelConverter(s))!;
+                return tcollections.Select(s => Collection.ConvertToViewModel(s))!;
             }
             catch (Exception ex)
             {
@@ -669,7 +640,7 @@ namespace LibApi.Services.Libraries
                     tcollections.Add(record);
                 }
 
-                return tcollections.Select(s => Collection.ViewModelConverter(s))!;
+                return tcollections.Select(s => Collection.ConvertToViewModel(s))!;
             }
             catch (Exception ex)
             {
@@ -943,7 +914,7 @@ namespace LibApi.Services.Libraries
                     throw new ArgumentNullException($"Le nom du livre ne doit pas être null, vide ou ne contenir que des espaces blancs.");
                 }
 
-                long? existingBookId = await Book.IsBookExistAsync(titleName, lang, format);
+                long? existingBookId = await Book.GetIdIfExistAsync(titleName, lang, format == null ? null : LibraryModelList.BookFormatDictionary.GetValueOrDefault((byte)format));
                 if (existingBookId == null)
                 {
                     throw new NullReferenceException($"Le livre n'existe pas avec le nom \"{titleName}\".");
