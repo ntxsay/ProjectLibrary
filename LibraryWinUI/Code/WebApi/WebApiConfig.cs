@@ -11,7 +11,6 @@ namespace LibraryWinUI.Code.WebApi
     internal class WebApiConfig
     {
         protected string baseAPIUrl = "https://localhost:5001/";
-
         protected HttpClient HttpClient()
         {
             try
@@ -26,7 +25,7 @@ namespace LibraryWinUI.Code.WebApi
                     }
                 };
 
-                using var client = new HttpClient(handler);
+                using HttpClient client = new (handler);
                 client.BaseAddress = new Uri(baseAPIUrl);
                 client.DefaultRequestHeaders.Accept.Clear();
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
