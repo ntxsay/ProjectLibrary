@@ -8,15 +8,15 @@
     </TypeIdentifier>
     <Lollipop Position="0.2" Collapsed="true" />
   </Class>
-  <Class Name="LibApi.Services.Collections.Collection" Collapsed="true">
-    <Position X="4.5" Y="0.75" Width="1.5" />
+  <Class Name="LibApi.Services.Collections.Collection">
+    <Position X="4" Y="1.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAgAAAAAAAAAAQAAAAAACgACAAAAYAAAIA=</HashCode>
       <FileName>Services\Collections\Collection.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="LibApi.Services.Books.Book" BaseTypeListCollapsed="true">
-    <Position X="8" Y="0.5" Width="2.75" />
+    <Position X="6" Y="1.5" Width="2.75" />
     <TypeIdentifier>
       <HashCode>AAMiAAAALSVQAAQLIAgQAAIBoYiAASgACBAEAZxCAIA=</HashCode>
       <FileName>Services\Books\Book.cs</FileName>

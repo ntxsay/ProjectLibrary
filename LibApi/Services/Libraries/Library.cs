@@ -659,7 +659,7 @@ namespace LibApi.Services.Libraries
         /// <param name="description">Description de la collection</param>
         /// <remarks>Si la collection existe, la collection existante sera retournée.</remarks>
         /// <returns></returns>
-        public async Task<Category?> AddCategoryAsync(string name, string? description = null, bool openIfExist = false)
+        public async Task<Category?> CreateCategoryAsync(string name, string? description = null, bool openIfExist = false)
         {
             try
             {
@@ -676,7 +676,7 @@ namespace LibApi.Services.Libraries
                 TlibraryCategorie? existingItem = await context.TlibraryCategories.SingleOrDefaultAsync(c => c.Name.ToLower() == name.ToLower() && c.IdLibrary == Id);
                 if (existingItem != null)
                 {
-                    Logs.Log(nameof(Library), nameof(AddCategoryAsync), "Cette catégorie existe déjà");
+                    Logs.Log(className:nameof(Library), message:"Cette catégorie existe déjà");
                     if (openIfExist)
                     {
                         return Category.ConvertToViewModel(existingItem);
@@ -715,13 +715,7 @@ namespace LibApi.Services.Libraries
                     throw new InvalidOperationException($"La bibliothèque {Name} a déjà été supprimée.");
                 }
 
-                TlibraryCategorie? record = await context.TlibraryCategories.SingleOrDefaultAsync(s => s.Id == idCategory && s.IdLibrary == Id);
-                if (record == null)
-                {
-                    throw new NullReferenceException($"La catégorie n'existe pas avec l'id \"{idCategory}\".");
-                }
-
-                return Category.ConvertToViewModel(record);
+                return await Category.SingleAsync(idCategory, Id);
             }
             catch (Exception ex)
             {
@@ -739,18 +733,7 @@ namespace LibApi.Services.Libraries
                     throw new InvalidOperationException($"La bibliothèque {Name} a déjà été supprimée.");
                 }
 
-                if (categoryName.IsStringNullOrEmptyOrWhiteSpace())
-                {
-                    throw new ArgumentNullException($"Le nom de la categorie ne doit pas être nulle, vide ou ne contenir que des espaces blancs.");
-                }
-
-                TlibraryCategorie? record = await context.TlibraryCategories.SingleOrDefaultAsync(s => s.Name.ToLower() == categoryName.Trim().ToLower() && s.IdLibrary == Id);
-                if (record == null)
-                {
-                    throw new NullReferenceException($"La catégorie n'existe pas avec le nom \"{categoryName}\".");
-                }
-
-                return Category.ConvertToViewModel(record);
+                return await Category.FirstAsync(categoryName, Id);
             }
             catch (Exception ex)
             {

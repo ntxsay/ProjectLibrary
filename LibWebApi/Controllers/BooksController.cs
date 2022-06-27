@@ -54,5 +54,26 @@ namespace LibWebApi.Controllers
             using Category? category = await book.GetCategorieAsync();
             return category;
         }
+
+        [Route("single/categorie/add")]
+        [HttpGet]
+        public async Task<bool> AddToCategoryAsync([FromQuery] long idBook, [FromQuery] long idCategory)
+        {
+            using Book? book = await Book.SingleAsync(idBook);
+            if (book == null)
+            {
+                _logger.LogWarning("Le livre n'a pas pu être trouvé.");
+                return false;
+            }
+
+            using Category? category = await Category.SingleAsync(idCategory);
+            if (category == null)
+            {
+                _logger.LogWarning("La catégorie n'a pas pu être trouvé.");
+                return false;
+            }
+
+            return await book.AddToCategoryAsync(category);
+        }
     }
 }

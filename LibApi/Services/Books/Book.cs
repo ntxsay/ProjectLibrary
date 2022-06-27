@@ -474,7 +474,7 @@ namespace LibApi.Services.Books
         /// <param name="notes"></param>
         /// <param name="description"></param>
         /// <returns></returns>
-        public async Task<bool> UpdateAsync(string? title, string? lang, string? notes, string? description)
+        public async Task<bool> UpdateAsync(string? title, string? lang = null, string? notes = null, string? description = null)
         {
             try
             {
@@ -1158,10 +1158,15 @@ namespace LibApi.Services.Books
         }
         #endregion
 
-        public async Task<bool> AddToCategory(Category category)
+        public async Task<bool> AddToCategoryAsync(Category category)
         {
             try
             {
+                if (IsDeleted)
+                {
+                    throw new InvalidOperationException($"Le livre {MainTitle} a déjà été supprimée.");
+                }
+
                 if (category == null)
                 {
                     throw new ArgumentNullException(nameof(category), $"La catégorie ne doit pas être null.");
@@ -1184,12 +1189,47 @@ namespace LibApi.Services.Books
                 
                 context.Tbooks.Update(record);
                 _ = await context.SaveChangesAsync();
-
+                DateEdition = dateEdition;
                 return true;
             }
             catch (Exception ex)
             {
                 Logs.Log(className:nameof(Book), exception:ex);
+                return false;
+            }
+        }
+
+        public async Task<bool> RemoveCategory()
+        {
+            try
+            {
+                if (IsDeleted)
+                {
+                    throw new InvalidOperationException($"Le livre {MainTitle} a déjà été supprimée.");
+                }
+
+                Tbook? record = await context.Tbooks.SingleOrDefaultAsync(w => w.Id == Id);
+                if (record == null)
+                {
+                    throw new NullReferenceException($"Le livre n'existe pas avec l'id \"{Id}\".");
+                }
+
+                if (record.IdCategorie != null)
+                {
+                    DateTime dateEdition = DateTime.UtcNow;
+                    record.DateEdition = dateEdition.ToString();
+                    record.IdCategorie = null;
+
+                    context.Tbooks.Update(record);
+                    _ = await context.SaveChangesAsync();
+                    DateEdition = dateEdition;
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Logs.Log(className: nameof(Book), exception: ex);
                 return false;
             }
         }

@@ -185,7 +185,7 @@ namespace LibTest
                 Assert.NotNull(library);
             }
 
-            Category? category = await library.AddCategoryAsync("Romans", "uu");
+            Category? category = await library.CreateCategoryAsync("Romans", "uu");
 
             if (category == null)
             {
@@ -214,7 +214,7 @@ namespace LibTest
                 Assert.NotNull(library);
             }
 
-            Category? category = await library.AddCategoryAsync("Romans", "uu", true);
+            Category? category = await library.CreateCategoryAsync("Romans", "uu", true);
 
             if (category == null)
             {
@@ -247,7 +247,7 @@ namespace LibTest
                 return;
             }
 
-            using Book? book = await library.AddBookAsync("Mon livre", "Francais", LibShared.BookFormat.Broche, "22/09/2020", "uu", "hhh", true);
+            using Book? book = await library.AddBookAsync("Mon livre", "Francais", LibShared.BookFormat.Broche, "uu", "hhh", true);
             if (book != null)
             {
                 var result = await book.UpdateAsync(title: "Le Marquis");

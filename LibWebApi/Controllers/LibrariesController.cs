@@ -1,9 +1,11 @@
 ﻿using AppHelpers.Strings;
 using LibApi.Services.Books;
+using LibApi.Services.Categories;
 using LibApi.Services.Collections;
 using LibApi.Services.Libraries;
 using LibShared;
 using LibShared.ViewModels.Books;
+using LibShared.ViewModels.Categories;
 using LibShared.ViewModels.Collections;
 using LibShared.ViewModels.Libraries;
 using Microsoft.AspNetCore.Http;
@@ -42,6 +44,14 @@ namespace LibWebApi.Controllers
         {
             IEnumerable<Library>? all = await Library.GetAllAsync();
             return all ?? Enumerable.Empty<LibraryVM>();
+        }
+
+        [Route("first")]
+        [HttpGet]
+        public async Task<LibraryVM?> GetFirstAsync()
+        {
+            IEnumerable<Library>? all = await Library.GetAllAsync();
+            return all.FirstOrDefault() ?? null;
         }
 
         [Route("collections/all")]
@@ -155,6 +165,31 @@ namespace LibWebApi.Controllers
             return collection;
         }
 
+        [Route("categories/create")]
+        [HttpPost]
+        public async Task<CategoryVM?> CreateCategoryAsync([FromQuery] long idLibrary, [FromQuery] string Name, [FromQuery] string? Description = null)
+        {
+            if (Name.IsStringNullOrEmptyOrWhiteSpace())
+            {
+                _logger.LogWarning("Le nom de la catégorie ne peut pas être nulle, vide ou ne contenir que des espaces blancs.");
+                return null;
+            }
+
+            using Library? library = await Library.GetSingleAsync(idLibrary);
+            if (library == null)
+            {
+                return null;
+            }
+
+            using Category? category = await library.CreateCategoryAsync(Name, Description);
+            if (category == null)
+            {
+                _logger.LogWarning("La categorie n'a pas pu être créée.");
+                return null;
+            }
+
+            return category;
+        }
 
         [Route("books/create")]
         [HttpPost]
