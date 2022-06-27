@@ -26,9 +26,9 @@ namespace LibWebApi.Controllers
 
         [Route("single")]
         [HttpGet]
-        public async Task<IEnumerable<LibraryVM>> GetAsync(long? id = null)
+        public async Task<IEnumerable<LibraryVM>> GetAsync(long id)
         {
-            using Library? library = await Library.GetSingleAsync((long)id);
+            using Library? library = await Library.GetSingleAsync(id);
             if (library == null)
             {
                 _logger.LogWarning("La bibliothèque n'existe pas.");

@@ -56,7 +56,7 @@ namespace LibWebApi.Controllers
         }
 
         [Route("single/categorie/add")]
-        [HttpGet]
+        [HttpPost]
         public async Task<bool> AddToCategoryAsync([FromQuery] long idBook, [FromQuery] long idCategory)
         {
             using Book? book = await Book.SingleAsync(idBook);
@@ -70,6 +70,12 @@ namespace LibWebApi.Controllers
             if (category == null)
             {
                 _logger.LogWarning("La catégorie n'a pas pu être trouvé.");
+                return false;
+            }
+
+            if (book.IdLibrary != category.IdLibrary)
+            {
+                _logger.LogWarning("Impossible d'ajouter ce livre à une catégorie provenant d'une autre bibliothèque.");
                 return false;
             }
 

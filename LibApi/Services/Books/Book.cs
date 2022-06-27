@@ -69,6 +69,19 @@ namespace LibApi.Services.Books
             }
         }
 
+        public new long Id
+        {
+            get => _Id;
+            private set
+            {
+                if (_Id != value)
+                {
+                    _Id = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
         public new DateTime DateAjout
         {
             get => _DateAjout;
@@ -1190,6 +1203,7 @@ namespace LibApi.Services.Books
                 context.Tbooks.Update(record);
                 _ = await context.SaveChangesAsync();
                 DateEdition = dateEdition;
+                IdCategorie = category.Id;
                 return true;
             }
             catch (Exception ex)
@@ -1223,6 +1237,7 @@ namespace LibApi.Services.Books
                     context.Tbooks.Update(record);
                     _ = await context.SaveChangesAsync();
                     DateEdition = dateEdition;
+                    IdCategorie = null;
                 }
 
                 return true;
@@ -1238,7 +1253,7 @@ namespace LibApi.Services.Books
         {
             try
             {
-                TlibraryCategorie? tlibraryCategorie = await context.TlibraryCategories.SingleOrDefaultAsync(w => w.Id == Id && w.IdLibrary == IdLibrary);
+                TlibraryCategorie? tlibraryCategorie = await context.TlibraryCategories.SingleOrDefaultAsync(w => w.Id == IdCategorie && w.IdLibrary == IdLibrary);
                 if (tlibraryCategorie != null)
                 {
                     return Category.ConvertToViewModel(tlibraryCategorie);
@@ -1409,6 +1424,7 @@ namespace LibApi.Services.Books
                 {
                     Id = model.Id,
                     IdLibrary = model.IdLibrary,
+                    IdCategorie = model.IdCategorie,
                     Guid = isGuidCorrect ? guid : Guid.Empty,
                     DateAjout = DateHelpers.Converter.GetDateFromString(model.DateAjout).ToLocalTime(),
                     DateEdition = DateHelpers.Converter.GetNullableDateFromString(model.DateEdition)?.ToLocalTime(),

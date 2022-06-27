@@ -15,6 +15,7 @@ namespace LibShared.ViewModels.Books
     {
         [JsonIgnore]
         public long IdLibrary { get; protected set; }
+        public long? IdCategorie { get; protected set; }
         public Guid Guid { get; set; } = Guid.NewGuid();
         public long CountOpening { get; set; }
 

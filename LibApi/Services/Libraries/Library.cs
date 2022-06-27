@@ -1,24 +1,18 @@
-﻿using System;
-using System.Diagnostics;
-using AppHelpers;
-using AppHelpers.Serialization;
+﻿using AppHelpers;
+using AppHelpers.Dates;
 using AppHelpers.Strings;
 using LibApi.Helpers;
 using LibApi.Models.Local.SQLite;
+using LibApi.Services.Books;
+using LibApi.Services.Categories;
+using LibApi.Services.Collections;
 using LibShared;
 using LibShared.ViewModels.Libraries;
 using Microsoft.EntityFrameworkCore;
-using LibApi.Extensions;
-using LibShared.ViewModels;
-using LibApi.Services.Collections;
-using AppHelpers.Dates;
-using LibApi.Services.Categories;
-using LibShared.ViewModels.Categories;
-using LibApi.Services.Books;
 
 namespace LibApi.Services.Libraries
 {
-	public sealed class Library : LibraryVM, IDisposable
+    public sealed class Library : LibraryVM, IDisposable
 	{
         /// <summary>
         /// Obtient une valeur booléenne indiquant si l'objet a déjà été effacé de la base de données
@@ -26,7 +20,7 @@ namespace LibApi.Services.Libraries
         public bool IsDeleted { get; private set; }
 
         readonly LibraryHelpers libraryHelpers = new();
-        LibrarySqLiteDbContext context = new ();
+        readonly LibrarySqLiteDbContext context = new ();
 
         #region Constructeurs
         /// <summary>
@@ -55,6 +49,45 @@ namespace LibApi.Services.Libraries
         #endregion
 
         #region Properties
+        public new long Id
+        {
+            get => _Id;
+            private set
+            {
+                if (_Id != value)
+                {
+                    _Id = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public new DateTime DateAjout
+        {
+            get => _DateAjout;
+            private set
+            {
+                if (_DateAjout != value)
+                {
+                    _DateAjout = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public new DateTime? DateEdition
+        {
+            get => _DateEdition;
+            private set
+            {
+                if (_DateEdition != value)
+                {
+                    _DateEdition = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
         public new string Name
         {
             get => _Name;

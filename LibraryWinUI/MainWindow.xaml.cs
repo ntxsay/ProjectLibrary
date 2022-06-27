@@ -28,6 +28,7 @@ using WinRT.Interop;
 using Microsoft.UI.Dispatching;
 using LibraryWinUI.Views.Pages;
 using Windows.ApplicationModel.Resources;
+using LibraryWinUI.Code.WebApi;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -61,6 +62,13 @@ namespace LibraryWinUI
             try
             {
                 LibrariesOrBooksCollectionNavigation();
+                LibraryWebApi libApi = new();
+                var task = libApi.GetLibraryVMsAsync().GetAwaiter();
+                task.OnCompleted(() =>
+                {
+                    var result = task.GetResult();
+                    Console.WriteLine(result);
+                });
             }
             catch (Exception ex)
             {
