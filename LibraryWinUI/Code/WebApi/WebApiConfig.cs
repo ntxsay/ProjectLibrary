@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace LibraryWinUI.Code.WebApi
 {
-    internal class WebApiConfig
+    internal abstract class WebApiConfig
     {
         protected string baseAPIUrl = "https://localhost:5001/";
         protected HttpClient HttpClient()

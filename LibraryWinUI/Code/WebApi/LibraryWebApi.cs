@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace LibraryWinUI.Code.WebApi
 {
-    internal class LibraryWebApi : WebApiConfig
+    internal sealed class LibraryWebApi : WebApiConfig
     {
         internal async Task<IEnumerable<LibraryVM>> GetAllLibrariesAsync()
         {
