@@ -852,7 +852,7 @@ namespace LibApi.Services.Libraries
                 {
                     throw new InvalidOperationException($"La bibliothèque {Name} a déjà été supprimée.");
                 }
-
+                
                 return await Book.SingleAsync(titleName:titleName, lang:lang, format:format, idLibrary:Id);
             }
             catch (Exception ex)

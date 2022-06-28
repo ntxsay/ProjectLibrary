@@ -8,6 +8,19 @@ namespace LibShared.ViewModels.Books
 {
     public class BookClassificationAgeVM : GenericVM
     {
+        private new long Id
+        {
+            get => _Id;
+            set
+            {
+                if (_Id != value)
+                {
+                    _Id = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
         private ClassificationAge _TypeClassification = ClassificationAge.ToutPublic;
         public ClassificationAge TypeClassification
         {

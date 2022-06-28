@@ -27,8 +27,6 @@ namespace LibApi.Services.Books
         /// </summary>
         public bool IsDeleted { get; private set; }
         
-        private Tbook? _Record = null;
-
         private Book()
         {
 
@@ -114,99 +112,6 @@ namespace LibApi.Services.Books
                 }
             }
         }
-
-        #region Identification
-        public new string? Cotation
-        {
-            get => _Cotation;
-            private set
-            {
-                if (_Cotation != value)
-                {
-                    _Cotation = value;
-                    OnPropertyChanged();
-                }
-            }
-        }
-
-        public new string? ASIN
-        {
-            get => _ASIN;
-            private set
-            {
-                if (_ASIN != value)
-                {
-                    _ASIN = value;
-                    OnPropertyChanged();
-                }
-            }
-        }
-
-        public new string? ISSN
-        {
-            get => _ISSN;
-            private set
-            {
-                if (_ISSN != value)
-                {
-                    _ISSN = value;
-                    OnPropertyChanged();
-                }
-            }
-        }
-
-        public new string? ISBN
-        {
-            get => _ISBN;
-            private set
-            {
-                if (_ISBN != value)
-                {
-                    _ISBN = value;
-                    OnPropertyChanged();
-                }
-            }
-        }
-
-        public new string? ISBN10
-        {
-            get => _ISBN10;
-            private set
-            {
-                if (_ISBN10 != value)
-                {
-                    _ISBN10 = value;
-                    OnPropertyChanged();
-                }
-            }
-        }
-
-        public new string? ISBN13
-        {
-            get => _ISBN13;
-            private set
-            {
-                if (_ISBN13 != value)
-                {
-                    _ISBN13 = value;
-                    OnPropertyChanged();
-                }
-            }
-        }
-
-        public new string? CodeBarre
-        {
-            get => _CodeBarre;
-            private set
-            {
-                if (_CodeBarre != value)
-                {
-                    _CodeBarre = value;
-                    OnPropertyChanged();
-                }
-            }
-        }
-        #endregion
 
         #region Format
         public new string? Format
@@ -410,7 +315,9 @@ namespace LibApi.Services.Books
         }
         #endregion
 
-        public BookClassificationAgeVM ClassificationAge { get; private set; } = new ();
+        public new BookIdentification Identification { get; private set; } = new();
+        
+        public BookClassificationAgeVM ClassificationAge { get; private set; } = new();
 
         #endregion
 
@@ -931,37 +838,37 @@ namespace LibApi.Services.Books
 
                 if (isbn != null)
                 {
-                    ISBN = tbookIdentification.Isbn;
+                    Identification.ISBN = tbookIdentification.Isbn;
                 }
 
                 if (isbn10 != null)
                 {
-                    ISBN10 = tbookIdentification.Isbn10;
+                    Identification.ISBN10 = tbookIdentification.Isbn10;
                 }
 
                 if (isbn13 != null)
                 {
-                    ISBN13 = tbookIdentification.Isbn13;
+                    Identification.ISBN13 = tbookIdentification.Isbn13;
                 }
 
                 if (issn != null)
                 {
-                    ISSN = tbookIdentification.Issn;
+                    Identification.ISSN = tbookIdentification.Issn;
                 }
 
                 if (asin != null)
                 {
-                    ASIN = tbookIdentification.Asin;
+                    Identification.ASIN = tbookIdentification.Asin;
                 }
 
                 if (cotation != null)
                 {
-                    Cotation = tbookIdentification.Cotation;
+                    Identification.Cotation = tbookIdentification.Cotation;
                 }
 
                 if (codeBarre != null)
                 {
-                    CodeBarre = tbookIdentification.CodeBarre;
+                    Identification.CodeBarre = tbookIdentification.CodeBarre;
                 }
 
                 await UpdateDateEditionAsync(record);
@@ -1604,13 +1511,13 @@ namespace LibApi.Services.Books
 
                 if (model.TbookIdentification != null)
                 {
-                    viewModel.ISBN = model.TbookIdentification.Isbn;
-                    viewModel.ISBN10 = model.TbookIdentification.Isbn10;
-                    viewModel.ISBN13 = model.TbookIdentification.Isbn13;
-                    viewModel.ISSN = model.TbookIdentification.Issn;
-                    viewModel.ASIN = model.TbookIdentification.Asin;
-                    viewModel.CodeBarre = model.TbookIdentification.CodeBarre;
-                    viewModel.Cotation = model.TbookIdentification.Cotation;
+                    viewModel.Identification.ISBN = model.TbookIdentification.Isbn;
+                    viewModel.Identification.ISBN10 = model.TbookIdentification.Isbn10;
+                    viewModel.Identification.ISBN13 = model.TbookIdentification.Isbn13;
+                    viewModel.Identification.ISSN = model.TbookIdentification.Issn;
+                    viewModel.Identification.ASIN = model.TbookIdentification.Asin;
+                    viewModel.Identification.CodeBarre = model.TbookIdentification.CodeBarre;
+                    viewModel.Identification.Cotation = model.TbookIdentification.Cotation;
                 }
 
                 if (model.TbookFormat != null)
