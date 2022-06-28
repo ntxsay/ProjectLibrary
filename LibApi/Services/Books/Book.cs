@@ -26,6 +26,8 @@ namespace LibApi.Services.Books
         /// Obtient une valeur booléenne indiquant si l'objet a déjà été effacé de la base de données
         /// </summary>
         public bool IsDeleted { get; private set; }
+        
+        private Tbook? _Record = null;
 
         #region Properties
         [DisplayName("Titre du livre")]
@@ -403,6 +405,8 @@ namespace LibApi.Services.Books
         }
         #endregion
 
+        public BookClassificationAgeVM ClassificationAge { get; private set; } = new ();
+
         #endregion
 
         readonly LibrarySqLiteDbContext context = new();
@@ -659,6 +663,7 @@ namespace LibApi.Services.Books
                 await context.SaveChangesAsync();
 
                 IsDeleted = true;
+                Record = null;
                 return true;
             }
             catch (Exception ex)
@@ -840,12 +845,18 @@ namespace LibApi.Services.Books
                     throw new InvalidOperationException("Au moins un paramètre doit être renseigné.");
                 }
 
-                TbookIdentification? tbookIdentification = await context.TbookIdentifications.SingleOrDefaultAsync(s => s.Id == Id);
+                Tbook? record = await context.Tbooks.SingleOrDefaultAsync(s => s.Id == Id);
+                if (record == null)
+                {
+                    throw new NullReferenceException($"Le livre n'existe pas avec l'id \"{Id}\".");
+                }
+
+                TbookIdentification? tbookIdentification = await context.TbookIdentifications.SingleOrDefaultAsync(s => s.Id == record.Id);
                 if (tbookIdentification == null)
                 {
                     tbookIdentification = new TbookIdentification()
                     {
-                        Id = Id,
+                        Id = record.Id,
                         Isbn = isbn ?? null,
                         Isbn10 = isbn10 ?? null,
                         Isbn13 = isbn13 ?? null,
@@ -934,6 +945,14 @@ namespace LibApi.Services.Books
                     CodeBarre = tbookIdentification.CodeBarre;
                 }
 
+                DateTime dateEdition = DateTime.UtcNow;
+                record.DateEdition = dateEdition.ToString();
+
+                context.Tbooks.Update(record);
+                _ = await context.SaveChangesAsync();
+
+                DateEdition = dateEdition;
+
                 return true;
             }
             catch (Exception ex)
@@ -993,6 +1012,8 @@ namespace LibApi.Services.Books
                     throw new NullReferenceException($"Le livre n'existe pas avec l'id \"{Id}\".");
                 }
 
+                DateTime dateEdition = DateTime.UtcNow;
+                record.DateEdition = dateEdition.ToString();
                 record.DateParution = _date;
                 context.Tbooks.Update(record);
                 await context.SaveChangesAsync();
@@ -1013,6 +1034,7 @@ namespace LibApi.Services.Books
                 }
 
                 DateParution = _date;
+                DateEdition = dateEdition;
                 return true;
             }
             catch (Exception ex)
@@ -1021,6 +1043,111 @@ namespace LibApi.Services.Books
                 return false;
             }
         }
+
+        public async Task<bool> AddOrUpdateClassificationAgeAsync(ClassificationAge type, byte? minAge, byte? maxAge)
+        {
+            try
+            {
+                if (IsDeleted)
+                {
+                    throw new InvalidOperationException($"Le livre {MainTitle} a déjà été supprimé.");
+                }
+
+                //S'il n'y a pas de nouveau nom et que la modification de la description est ignoré, alors génère une erreur.
+                if (minAge == null && maxAge == null)
+                {
+                    throw new InvalidOperationException("Au moins un paramètre doit être renseigné.");
+                }
+
+                if (ClassificationAge.TypeClassification == LibShared.ClassificationAge.ToutPublic)
+                {
+                    minAge = 0;
+                    maxAge = 0;
+                }
+                else if (ClassificationAge.TypeClassification == LibShared.ClassificationAge.ApartirDe)
+                {
+                    if (minAge is null or < 0)
+                    {
+                        throw new InvalidOperationException("L'âge minimal ne doit pas être inférieur à 0.");
+                    }
+                    maxAge = 0;
+                }
+                else if (ClassificationAge.TypeClassification == LibShared.ClassificationAge.Jusqua)
+                {
+                    if (maxAge is null or < 1)
+                    {
+                        throw new InvalidOperationException("L'âge ne doit pas être inférieur à 1.");
+                    }
+                    minAge = 0;
+                }
+                else if (ClassificationAge.TypeClassification == LibShared.ClassificationAge.DeTantATant)
+                {
+                    if (maxAge is null or < 1)
+                    {
+                        throw new InvalidOperationException("L'âge ne doit pas être inférieur à 1.");
+                    }
+
+                    if (minAge is null or < 0)
+                    {
+                        throw new InvalidOperationException("L'âge minimal ne doit pas être inférieur à 0.");
+                    }
+                    if (minAge > maxAge)
+                    {
+                        throw new InvalidOperationException("L'âge minimal ne peut pas être supérieur à l'âge maximal.");
+                    }
+                }
+
+                Tbook? record = await context.Tbooks.SingleOrDefaultAsync(a => a.Id == Id);
+                if (record == null)
+                {
+                    throw new NullReferenceException($"Le livre n'existe pas avec l'id \"{Id}\".");
+                }
+
+                TbookClassification? tbookClassificationAge = await context.TbookClassifications.SingleOrDefaultAsync(s => s.Id == record.Id);
+                if (tbookClassificationAge == null)
+                {
+                    tbookClassificationAge = new TbookClassification()
+                    {
+                        Id = record.Id,
+                        TypeClassification = (byte)type,
+                        DeTelAge = minAge != null ? (byte)minAge : 0,//Remplacer par minimumAge
+                        AtelAge = maxAge != null ? (byte)maxAge : 0,
+                    };
+
+                    await context.TbookClassifications.AddAsync(tbookClassificationAge);
+                    await context.SaveChangesAsync();
+                }
+                else
+                {
+                    tbookClassificationAge.TypeClassification = (byte)type;
+                    tbookClassificationAge.DeTelAge = minAge != null ? (byte)minAge : 0;//Remplacer par minimumAge
+                    tbookClassificationAge.AtelAge = maxAge != null ? (byte)maxAge : 0;
+                    
+                    context.TbookClassifications.Update(tbookClassificationAge);
+                    await context.SaveChangesAsync();
+                }
+
+                ClassificationAge.TypeClassification = (LibShared.ClassificationAge)tbookClassificationAge.TypeClassification;
+                ClassificationAge.MinimumAge = Convert.ToByte(tbookClassificationAge.DeTelAge);
+                ClassificationAge.MaximumAge = Convert.ToByte(tbookClassificationAge.AtelAge);
+
+                DateTime dateEdition = DateTime.UtcNow;
+                record.DateEdition = dateEdition.ToString();
+
+                context.Tbooks.Update(record);
+                _ = await context.SaveChangesAsync();
+                
+                DateEdition = dateEdition;
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Logs.Log(className: nameof(Book), exception: ex);
+                return false;
+            }
+        }
+
 
         #region Collections
         public async Task<IEnumerable<Collections.Collection>> GetCollectionsAsync()
@@ -1472,6 +1599,76 @@ namespace LibApi.Services.Books
             }
         } 
         #endregion
+
+        private async Task UpdateDateEditionAsync()
+        {
+            try
+            {
+                var record = await this.GetRecord();
+                if (record != null)
+                {
+                    DateTime dateEdition = DateTime.UtcNow;
+                    record.DateEdition = dateEdition.ToString();
+
+                    context.Tbooks.Update(record);
+                    _ = await context.SaveChangesAsync();
+
+                    DateEdition = dateEdition;
+                }
+            }
+            catch (Exception ex)
+            {
+                Logs.Log(className: nameof(Book), exception: ex);
+                return;
+            }
+        }
+
+        private async Task UpdateDateEditionAsync(Tbook record)
+        {
+            try
+            {
+                if (record != null)
+                {
+                    DateTime dateEdition = DateTime.UtcNow;
+                    record.DateEdition = dateEdition.ToString();
+
+                    context.Tbooks.Update(record);
+                    _ = await context.SaveChangesAsync();
+
+                    DateEdition = dateEdition;
+                }
+            }
+            catch (Exception ex)
+            {
+                Logs.Log(className: nameof(Book), exception: ex);
+                return;
+            }
+        }
+
+        private async Task<Tbook?> GetRecord()
+        {
+            try
+            {
+                if (IsDeleted)
+                {
+                    _Record = null;
+                    throw new NullReferenceException($"Le livre n'existe pas avec l'id \"{Id}\".");
+                }
+
+                if (_Record == null || _Record.Id != Id)
+                {
+                    _Record = await context.Tbooks.SingleOrDefaultAsync(s => s.Id == Id);
+                }
+
+                return _Record;
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
+
+
 
         public void Dispose()
         {

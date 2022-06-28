@@ -66,6 +66,14 @@ namespace LibShared
         Audio,
         Ebook,
     }
+
+    public enum ClassificationAge : byte
+    {
+        ToutPublic,
+        ApartirDe,
+        Jusqua,
+        DeTantATant,
+    }
     #endregion
 
     #region List
