@@ -10,6 +10,7 @@
     <Compile Remove="Models\Local\SQLite\LibrarySqLiteDbContext - Copier.cs" />
     <Compile Remove="Services\Contacts\ContactRole.cs" />
     <Compile Remove="Services\Contacts\ContactType.cs" />
+    <Compile Remove="Services\ILibraryAction.cs" />
   </ItemGroup>
 
   <ItemGroup>

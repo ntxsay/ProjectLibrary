@@ -21,12 +21,27 @@ namespace LibApi.Services.Contacts
         /// </summary>
         public bool IsDeleted { get; private set; }
 
-        LibrarySqLiteDbContext context = new ();
+        readonly LibrarySqLiteDbContext context = new ();
 
         private Contact()
         {
 
         }
+
+        #region Properties
+        public new long Id
+        {
+            get => _Id;
+            private set
+            {
+                if (_Id != value)
+                {
+                    _Id = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+        #endregion
 
         #region CRUD
         public static async Task<Contact?> CreateAsync(string? titreCivilite, string nomNaissance, string prenom, string? autresPrenoms = null, string? nomUsage = null, DateTime? dateNaissance = null, string? description = null, bool openIfExist = false)
@@ -1012,6 +1027,7 @@ namespace LibApi.Services.Contacts
         }
 
         #endregion
+
         public void Dispose()
         {
             context.Dispose();

@@ -282,6 +282,18 @@ namespace LibShared.ViewModels.Contacts
             }
         }
 
-        
+        protected string? _Description = string.Empty;
+        public virtual string? Description
+        {
+            get => _Description;
+            set
+            {
+                if (_Description != value)
+                {
+                    _Description = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
     }
 }

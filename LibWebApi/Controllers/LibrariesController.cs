@@ -155,7 +155,7 @@ namespace LibWebApi.Controllers
                 return null;
             }
 
-            Collection? collection = await library.AddCollectionAsync(Name, Description);
+            using Collection? collection = await library.CreateCollectionAsync(Name, Description);
             if (collection == null)
             {
                 _logger.LogWarning("La collection n'a pas pu être créée.");

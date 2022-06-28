@@ -29,6 +29,11 @@ namespace LibApi.Services.Books
         
         private Tbook? _Record = null;
 
+        private Book()
+        {
+
+        }
+
         #region Properties
         [DisplayName("Titre du livre")]
         public new string MainTitle
@@ -1398,12 +1403,22 @@ namespace LibApi.Services.Books
         }
 
         #region Static methods
-        public static async Task<IEnumerable<Book>> AllAsync()
+        public static async Task<IEnumerable<Book>> AllAsync(long? idLibrary = null)
         {
             try
             {
                 using LibrarySqLiteDbContext context = new();
-                var modelList = await context.Tbooks.ToListAsync();
+                List<Tbook>? modelList = new();
+
+                if (idLibrary == null)
+                {
+                    modelList = await context.Tbooks.ToListAsync();
+                }
+                else
+                {
+                    modelList = await context.Tbooks.Where(w => w.IdLibrary == (long)idLibrary).ToListAsync();
+                }
+
                 if (modelList == null || !modelList.Any())
                 {
                     return Enumerable.Empty<Book>();
@@ -1451,13 +1466,7 @@ namespace LibApi.Services.Books
                     throw new ArgumentNullException(nameof(titleName), $"Le nom du livre ne doit pas être null, vide ou ne contenir que des espaces blancs.");
                 }
 
-                long? existingBookId = await GetIdIfExistAsync(titleName, lang, format == null ? null : LibraryModelList.BookFormatDictionary.GetValueOrDefault((byte)format), false, null, idLibrary);
-                if (existingBookId == null)
-                {
-                    throw new NullReferenceException($"Le livre n'existe pas avec le nom \"{titleName}\".");
-                }
-
-                Tbook? record = await context.Tbooks.FirstOrDefaultAsync(s => s.Id == (long)existingBookId);
+                Tbook? record = await GetDbModelIfExistAsync(mainTitle: titleName, lang: lang, format: format == null ? null : LibraryModelList.BookFormatDictionary.GetValueOrDefault((byte)format), isEdit: false, modelId: null, idLibrary: idLibrary);
                 if (record == null)
                 {
                     throw new NullReferenceException($"Le livre n'existe pas avec le nom \"{titleName}\".");
@@ -1629,29 +1638,6 @@ namespace LibApi.Services.Books
             }
         } 
         #endregion
-
-        private async Task UpdateDateEditionAsync()
-        {
-            try
-            {
-                var record = await this.GetRecord();
-                if (record != null)
-                {
-                    DateTime dateEdition = DateTime.UtcNow;
-                    record.DateEdition = dateEdition.ToString();
-
-                    context.Tbooks.Update(record);
-                    _ = await context.SaveChangesAsync();
-
-                    DateEdition = dateEdition;
-                }
-            }
-            catch (Exception ex)
-            {
-                Logs.Log(className: nameof(Book), exception: ex);
-                return;
-            }
-        }
 
         private async Task UpdateDateEditionAsync(Tbook record)
         {

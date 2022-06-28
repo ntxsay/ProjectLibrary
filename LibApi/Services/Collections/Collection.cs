@@ -11,18 +11,33 @@ using System.Threading.Tasks;
 
 namespace LibApi.Services.Collections
 {
-    public sealed class Collection : CollectionVM
+    public sealed class Collection : CollectionVM, IDisposable
     {
         /// <summary>
         /// Obtient une valeur booléenne indiquant si l'objet a déjà été effacé de la base de données
         /// </summary>
         public bool IsDeleted { get; private set; }
+        readonly LibrarySqLiteDbContext context = new();
+
         private Collection()
         {
 
         }
 
         #region Properties
+        public new long Id
+        {
+            get => _Id;
+            private set
+            {
+                if (_Id != value)
+                {
+                    _Id = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
         public new string Name
         {
             get => _Name;
@@ -72,8 +87,6 @@ namespace LibApi.Services.Collections
                 {
                     throw new InvalidOperationException("Le nouveau nom de la collection ou sa nouvelle description devait être renseignée.");
                 }
-
-                using LibrarySqLiteDbContext context = new();
 
                 Tcollection? record = await context.Tcollections.SingleOrDefaultAsync(s => s.Id == Id);
                 if (record == null)
@@ -137,8 +150,6 @@ namespace LibApi.Services.Collections
                     throw new NotSupportedException($"La collection {Name} a déjà été supprimée.");
                 }
 
-                using LibrarySqLiteDbContext context = new();
-
                 Tcollection? record = await context.Tcollections.SingleOrDefaultAsync(s => s.Id == Id);
                 if (record == null)
                 {
@@ -170,6 +181,102 @@ namespace LibApi.Services.Collections
         }
 
         #endregion
+
+        public static async Task<IEnumerable<Collection>> AllAsync(long? idLibrary = null)
+        {
+            try
+            {
+                using LibrarySqLiteDbContext context = new();
+                List<Tcollection>? modelList = new();
+
+                if (idLibrary == null)
+                {
+                    modelList = await context.Tcollections.ToListAsync();
+                }
+                else
+                {
+                    modelList = await context.Tcollections.Where(w => w.IdLibrary == (long)idLibrary).ToListAsync();
+                }
+
+                if (modelList == null || !modelList.Any())
+                {
+                    return Enumerable.Empty<Collection>();
+                }
+
+                return modelList.Select(s => ConvertToViewModel(s)).Where(w => w != null)!;
+            }
+            catch (Exception ex)
+            {
+                Logs.Log(className: nameof(Collection), exception: ex);
+                return Enumerable.Empty<Collection>();
+            }
+        }
+
+        public static async Task<Collection?> SingleAsync(long id, long? idLibrary = null)
+        {
+            try
+            {
+                using LibrarySqLiteDbContext context = new();
+
+                Tcollection? record;
+                if (idLibrary == null)
+                {
+                    record = await context.Tcollections.SingleOrDefaultAsync(s => s.Id == id);
+                }
+                else
+                {
+                    record = await context.Tcollections.SingleOrDefaultAsync(s => s.Id == id && s.IdLibrary == (long)idLibrary);
+                }
+
+                if (record == null)
+                {
+                    throw new NullReferenceException($"La collection n'existe pas avec l'id \"{id}\".");
+                }
+
+                return ConvertToViewModel(record);
+            }
+            catch (Exception ex)
+            {
+                Logs.Log(className: nameof(Collection), exception: ex);
+                return null;
+            }
+        }
+
+        public static async Task<Collection?> SingleAsync(string name, long? idLibrary = null)
+        {
+            try
+            {
+                using LibrarySqLiteDbContext context = new();
+
+                if (name.IsStringNullOrEmptyOrWhiteSpace())
+                {
+                    throw new ArgumentNullException(nameof(name), $"Le nom de la collection ne doit pas être nulle, vide ou ne contenir que des espaces blancs.");
+                }
+
+                Tcollection? record;
+                if (idLibrary == null)
+                {
+                    record = await context.Tcollections.FirstOrDefaultAsync(s => s.Name.ToLower() == name.Trim().ToLower());
+                }
+                else
+                {
+                    record = await context.Tcollections.FirstOrDefaultAsync(s => s.Name.ToLower() == name.Trim().ToLower() && s.IdLibrary == (long)idLibrary);
+                }
+
+                if (record == null)
+                {
+                    throw new NullReferenceException($"La collection n'existe pas avec le nom \"{name}\".");
+                }
+
+                return ConvertToViewModel(record);
+            }
+            catch (Exception ex)
+            {
+                Logs.Log(className: nameof(Collection), exception: ex);
+                return null;
+            }
+        }
+
 
         public static async Task<Collection?> CreateAsync(long idLibrary, CollectionVM viewModel, bool openIfExist = false)
         {
@@ -291,5 +398,9 @@ namespace LibApi.Services.Collections
             }
         }
 
+        public void Dispose()
+        {
+            context?.Dispose();
+        }
     }
 }

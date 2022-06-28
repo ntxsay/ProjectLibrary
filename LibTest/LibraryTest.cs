@@ -88,7 +88,7 @@ namespace LibTest
             Library? library = await Library.CreateAsync("Library_" + DateTime.Now.ToString("yyyyMMddHHmmss"));
             if (library != null)
             {
-                Collection? collection = await library.AddCollectionAsync("Le petit futfut", "uu");
+                Collection? collection = await library.CreateCollectionAsync("Le petit futfut", "uu");
                 Assert.NotNull(collection);
             }
             Assert.NotNull(library);
@@ -100,7 +100,7 @@ namespace LibTest
             Library? library = await Library.CreateAsync("Capucine", "Contient les livres de tante Suzie");
             if (library != null)
             {
-                Collection? collection = await library.AddCollectionAsync("Le petit fute", "Ma description");
+                Collection? collection = await library.CreateCollectionAsync("Le petit fute", "Ma description");
                 if (collection != null)
                 {
                     bool isUpdated = await collection.UpdateAsync("Moi et les monstre", null);
@@ -117,7 +117,7 @@ namespace LibTest
             Library? library = await Library.CreateAsync("Capucine", "Contient les livres de tante Suzie");
             if (library != null)
             {
-                Collection? collection = await library.AddCollectionAsync("Le petit futé", null);
+                Collection? collection = await library.CreateCollectionAsync("Le petit futé", null);
                 if (collection != null)
                 {
                     await collection.DeleteAsync();

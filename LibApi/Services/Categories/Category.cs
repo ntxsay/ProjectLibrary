@@ -26,6 +26,19 @@ namespace LibApi.Services.Categories
         }
 
         #region Properties
+        public new long Id
+        {
+            get => _Id;
+            private set
+            {
+                if (_Id != value)
+                {
+                    _Id = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
         public new string Name
         {
             get => _Name;
@@ -153,7 +166,7 @@ namespace LibApi.Services.Categories
 
                 if (!newName.IsStringNullOrEmptyOrWhiteSpace())
                 {
-                    bool isExist = await context.Tcollections.AnyAsync(c => c.Id != Id && c.Name.ToLower() == newName.Trim().ToLower())!;
+                    bool isExist = await context.TlibraryCategories.AnyAsync(c => c.Id != Id && c.Name.ToLower() == newName.Trim().ToLower())!;
                     if (isExist)
                     {
                         throw new ArgumentException($"Cette catégorie existe déjà.");
@@ -358,12 +371,105 @@ namespace LibApi.Services.Categories
         }
 
         #region Static methods
-        public static async Task<IEnumerable<Category>> AllAsync()
+        public static async Task<Category?> CreateAsync(long idLibrary, CategoryVM viewModel, bool openIfExist = false)
+        {
+            try
+            {
+                if (viewModel == null)
+                {
+                    throw new ArgumentNullException(nameof(viewModel), "Le modèle de vue ne peut pas être null.");
+                }
+
+                if (viewModel.Name.IsStringNullOrEmptyOrWhiteSpace())
+                {
+                    throw new ArgumentNullException(nameof(viewModel.Name), "Le nom de la catégorie ne peut pas être nulle, vide ou ne contenir que des espaces blancs.");
+                }
+
+                using LibrarySqLiteDbContext context = new();
+
+                TlibraryCategorie? existingItem = await context.TlibraryCategories.SingleOrDefaultAsync(c => c.Name.ToLower() == viewModel.Name.Trim().ToLower() && c.IdParentCategorie == viewModel.IdParentCategory && c.IdLibrary == idLibrary);
+                if (existingItem != null)
+                {
+                    Logs.Log(nameof(Category), message: "Cette catégorie existe déjà");
+                    if (openIfExist)
+                    {
+                        return ConvertToViewModel(existingItem);
+                    }
+                    else
+                    {
+                        throw new InvalidOperationException($"La catégorie {viewModel.Name} existe déjà.");
+                    }
+                }
+
+                if (viewModel.IdParentCategory != null)
+                {
+                    bool isParentCategorieExist = await context.TlibraryCategories.AnyAsync(c => c.Id == viewModel.IdParentCategory && c.IdLibrary == idLibrary);
+                    if (isParentCategorieExist == false)
+                    {
+                        throw new InvalidOperationException($"La catégorie parente n'existe pas.");
+                    }
+                }
+
+                TlibraryCategorie record = new()
+                {
+                    Name = viewModel.Name.Trim(),
+                    IdLibrary = idLibrary,
+                    IdParentCategorie = viewModel.IdParentCategory,
+                    Description = viewModel.Description?.Trim(),
+                };
+
+                await context.TlibraryCategories.AddAsync(record);
+                await context.SaveChangesAsync();
+
+                return ConvertToViewModel(record);
+            }
+            catch (Exception ex)
+            {
+                Logs.Log(nameof(Category), exception: ex);
+                return null;
+            }
+        }
+
+        public static async Task<Category?> CreateAsync(long idLibrary, string name, string? description = null, long? idParentCategorie = null, bool openIfExist = false)
+        {
+            try
+            {
+                if (name.IsStringNullOrEmptyOrWhiteSpace())
+                {
+                    throw new ArgumentNullException(nameof(name), "Le nom de la catégorie ne peut pas être nulle, vide ou ne contenir que des espaces blancs.");
+                }
+
+                return await CreateAsync(idLibrary, new CategoryVM()
+                {
+                    IdParentCategory = idParentCategorie,
+                    Name = name.Trim(),
+                    Description = description?.Trim()
+                });
+            }
+            catch (Exception ex)
+            {
+                Logs.Log(nameof(Category), exception: ex);
+                return null;
+            }
+        }
+
+
+        public static async Task<IEnumerable<Category>> AllAsync(long? idLibrary = null)
         {
             try
             {
                 using LibrarySqLiteDbContext context = new();
-                var modelList = await context.TlibraryCategories.ToListAsync();
+                List<TlibraryCategorie>? modelList = new();
+
+                if (idLibrary == null)
+                {
+                    modelList = await context.TlibraryCategories.ToListAsync();
+                }
+                else
+                {
+                    modelList = await context.TlibraryCategories.Where(w => w.IdLibrary == (long)idLibrary).ToListAsync();
+                }
+
                 if (modelList == null || !modelList.Any())
                 {
                     return Enumerable.Empty<Category>();
@@ -442,7 +548,6 @@ namespace LibApi.Services.Categories
                 return null;
             }
         }
-
         #endregion
 
         public static Category? ConvertToViewModel(TlibraryCategorie model)
