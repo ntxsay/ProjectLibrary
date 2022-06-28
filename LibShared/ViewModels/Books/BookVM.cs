@@ -484,12 +484,12 @@ namespace LibShared.ViewModels.Books
                     OnPropertyChanged();
                 }
             }
-        } 
+        }
         #endregion
 
+        public string Dimensions => $"{Hauteur?.ToString() ?? "?"} cm × {Largeur?.ToString() ?? "?"} cm × {Epaisseur?.ToString() ?? "?"} cm";
 
         //public LivreDescriptionVM Description { get; set; } = new LivreDescriptionVM();
-        //public LivreClassificationAgeVM ClassificationAge { get; set; } = new LivreClassificationAgeVM();
 
         //public LivreIdentificationVM Identification { get; set; } = new LivreIdentificationVM();
         //public LivreFormatVM Format { get; set; } = new LivreFormatVM();

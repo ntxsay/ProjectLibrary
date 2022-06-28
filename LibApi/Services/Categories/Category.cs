@@ -408,7 +408,7 @@ namespace LibApi.Services.Categories
             }
         }
 
-        public static async Task<Category?> FirstAsync(string name, long? idLibrary = null)
+        public static async Task<Category?> SingleAsync(string name, long? idLibrary = null)
         {
             try
             {

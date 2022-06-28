@@ -208,7 +208,7 @@ namespace LibWebApi.Controllers
                 return null;
             }
 
-            using Book? book = await library.AddBookAsync(title, lang, format);
+            using Book? book = await library.CreateBookAsync(title, lang, format);
             return book;
         }
 

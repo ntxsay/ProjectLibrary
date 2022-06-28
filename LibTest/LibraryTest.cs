@@ -247,7 +247,7 @@ namespace LibTest
                 return;
             }
 
-            using Book? book = await library.AddBookAsync("Mon livre", "Francais", LibShared.BookFormat.Broche, "uu", "hhh", true);
+            using Book? book = await library.CreateBookAsync("Mon livre", "Francais", LibShared.BookFormat.Broche, "uu", "hhh", true);
             if (book != null)
             {
                 var result = await book.UpdateAsync(title: "Le Marquis");

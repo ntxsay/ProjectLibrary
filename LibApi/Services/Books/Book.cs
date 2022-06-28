@@ -411,7 +411,6 @@ namespace LibApi.Services.Books
 
         readonly LibrarySqLiteDbContext context = new();
 
-        public string Dimensions => $"{Hauteur?.ToString() ?? "?"} cm × {Largeur?.ToString() ?? "?"} cm × {Epaisseur?.ToString() ?? "?"} cm";
 
         #region CRUD
         /// <summary>
@@ -663,7 +662,7 @@ namespace LibApi.Services.Books
                 await context.SaveChangesAsync();
 
                 IsDeleted = true;
-                Record = null;
+                //Record = null;
                 return true;
             }
             catch (Exception ex)
@@ -674,6 +673,12 @@ namespace LibApi.Services.Books
         }
         #endregion
 
+        /// <summary>
+        /// Ajoute et/ou met à jour les autres titres.
+        /// </summary>
+        /// <param name="values"></param>
+        /// <remarks>Si vous souhaitez ajouter un ou plusieurs titres tout en conservant l'existant, alors rajoutez l'existant en plus du nouveau en paramètre</remarks>
+        /// <returns></returns>
         public async Task<bool> AddOrUpdateOtherTitles(string[] values)
         {
             try
@@ -713,6 +718,7 @@ namespace LibApi.Services.Books
 
                 await context.SaveChangesAsync();
                 OtherTitles = new ObservableCollection<string>(values.Where(w => w != null));
+                await UpdateDateEditionAsync(record);
 
                 return true;
             }
@@ -738,12 +744,18 @@ namespace LibApi.Services.Books
                     throw new InvalidOperationException("Au moins un paramètre doit être renseigné.");
                 }
 
+                Tbook? record = await context.Tbooks.SingleOrDefaultAsync(s => s.Id == Id);
+                if (record == null)
+                {
+                    throw new NullReferenceException($"Le livre n'existe pas avec l'id \"{Id}\".");
+                }
+
                 TbookFormat? tbookFormat = await context.TbookFormats.SingleOrDefaultAsync(s => s.Id == Id);
                 if (tbookFormat == null)
                 {
                     tbookFormat = new TbookFormat()
                     {
-                        Id = Id,
+                        Id = record.Id,
                         Format = format == null ? null : LibraryModelList.BookFormatDictionary.GetValueOrDefault((byte)format),
                         NbOfPages = nbPages is null or < 0 ? null : nbPages,
                         Largeur = largeur is null or < 0 ? null : largeur,
@@ -820,6 +832,8 @@ namespace LibApi.Services.Books
                 {
                     Poids = tbookFormat.Weight;
                 }
+
+                await UpdateDateEditionAsync(record);
 
                 return true;
             }
@@ -945,13 +959,7 @@ namespace LibApi.Services.Books
                     CodeBarre = tbookIdentification.CodeBarre;
                 }
 
-                DateTime dateEdition = DateTime.UtcNow;
-                record.DateEdition = dateEdition.ToString();
-
-                context.Tbooks.Update(record);
-                _ = await context.SaveChangesAsync();
-
-                DateEdition = dateEdition;
+                await UpdateDateEditionAsync(record);
 
                 return true;
             }
@@ -1131,13 +1139,7 @@ namespace LibApi.Services.Books
                 ClassificationAge.MinimumAge = Convert.ToByte(tbookClassificationAge.DeTelAge);
                 ClassificationAge.MaximumAge = Convert.ToByte(tbookClassificationAge.AtelAge);
 
-                DateTime dateEdition = DateTime.UtcNow;
-                record.DateEdition = dateEdition.ToString();
-
-                context.Tbooks.Update(record);
-                _ = await context.SaveChangesAsync();
-                
-                DateEdition = dateEdition;
+                await UpdateDateEditionAsync(record);
 
                 return true;
             }
@@ -1438,7 +1440,7 @@ namespace LibApi.Services.Books
             }
         }
 
-        public static async Task<Book?> FirstAsync(string titleName, string? lang = null, BookFormat? format = null)
+        public static async Task<Book?> SingleAsync(string titleName, string? lang = null, BookFormat? format = null, long? idLibrary = null)
         {
             try
             {
@@ -1449,7 +1451,7 @@ namespace LibApi.Services.Books
                     throw new ArgumentNullException(nameof(titleName), $"Le nom du livre ne doit pas être null, vide ou ne contenir que des espaces blancs.");
                 }
 
-                long? existingBookId = await GetIdIfExistAsync(titleName, lang, format == null ? null : LibraryModelList.BookFormatDictionary.GetValueOrDefault((byte)format));
+                long? existingBookId = await GetIdIfExistAsync(titleName, lang, format == null ? null : LibraryModelList.BookFormatDictionary.GetValueOrDefault((byte)format), false, null, idLibrary);
                 if (existingBookId == null)
                 {
                     throw new NullReferenceException($"Le livre n'existe pas avec le nom \"{titleName}\".");
@@ -1472,7 +1474,21 @@ namespace LibApi.Services.Books
         }
 
 
-        public static async Task<long?> GetIdIfExistAsync(string mainTitle, string? lang, string? format, bool isEdit = false, long? modelId = null)
+        public static async Task<long?> GetIdIfExistAsync(string mainTitle, string? lang, string? format, bool isEdit = false, long? modelId = null, long? idLibrary = null)
+        {
+            try
+            {
+                var item = await GetDbModelIfExistAsync(mainTitle: mainTitle, lang: lang, format: format, isEdit: isEdit, modelId: modelId, idLibrary: idLibrary);
+                return item?.Id;
+            }
+            catch (Exception ex)
+            {
+                Logs.Log(className: nameof(Book), exception: ex);
+                return null;
+            }
+        }
+
+        internal static async Task<Tbook?> GetDbModelIfExistAsync(string mainTitle, string? lang, string? format, bool isEdit = false, long? modelId = null, long? idLibrary = null)
         {
             try
             {
@@ -1488,11 +1504,25 @@ namespace LibApi.Services.Books
 
                 if (!isEdit)
                 {
-                    existingItemList = await context.Tbooks.Where(c => c.MainTitle.ToLower() == mainTitle).ToListAsync();
+                    if (idLibrary == null)
+                    {
+                        existingItemList = await context.Tbooks.Where(c => c.MainTitle.ToLower() == mainTitle).ToListAsync();
+                    }
+                    else
+                    {
+                        existingItemList = await context.Tbooks.Where(c => c.MainTitle.ToLower() == mainTitle && c.IdLibrary == (long)idLibrary).ToListAsync();
+                    }
                 }
                 else if (isEdit && modelId != null)
                 {
-                    existingItemList = await context.Tbooks.Where(c => c.Id != (long)modelId && c.MainTitle.ToLower() == mainTitle).ToListAsync();
+                    if (idLibrary == null)
+                    {
+                        existingItemList = await context.Tbooks.Where(c => c.Id != (long)modelId && c.MainTitle.ToLower() == mainTitle).ToListAsync();
+                    }
+                    else
+                    {
+                        existingItemList = await context.Tbooks.Where(c => c.Id != (long)modelId && c.MainTitle.ToLower() == mainTitle && c.IdLibrary == (long)idLibrary).ToListAsync();
+                    }
                 }
 
                 if (existingItemList != null && existingItemList.Any())
@@ -1502,7 +1532,7 @@ namespace LibApi.Services.Books
                         item.TbookFormat = await context.TbookFormats.SingleOrDefaultAsync(c => c.Id == item.Id);
                         if (item.TbookFormat?.Format?.ToLower() == format && item.Langue?.ToLower() == lang)
                         {
-                            return item.Id;
+                            return item;
                         }
                     }
                 }
@@ -1644,31 +1674,6 @@ namespace LibApi.Services.Books
                 return;
             }
         }
-
-        private async Task<Tbook?> GetRecord()
-        {
-            try
-            {
-                if (IsDeleted)
-                {
-                    _Record = null;
-                    throw new NullReferenceException($"Le livre n'existe pas avec l'id \"{Id}\".");
-                }
-
-                if (_Record == null || _Record.Id != Id)
-                {
-                    _Record = await context.Tbooks.SingleOrDefaultAsync(s => s.Id == Id);
-                }
-
-                return _Record;
-            }
-            catch (Exception)
-            {
-                return null;
-            }
-        }
-
-
 
         public void Dispose()
         {

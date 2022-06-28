@@ -925,6 +925,8 @@ namespace LibApi.Services.Libraries
                     throw new InvalidOperationException($"La bibliothèque {Name} a déjà été supprimée.");
                 }
 
+                return await Book.FirstAsync(titleName, lang, format);
+
                 if (titleName.IsStringNullOrEmptyOrWhiteSpace())
                 {
                     throw new ArgumentNullException($"Le nom du livre ne doit pas être null, vide ou ne contenir que des espaces blancs.");
@@ -954,10 +956,10 @@ namespace LibApi.Services.Libraries
 
 
         /// <summary>
-        /// Ajoute un livre à la bibliothèque.
+        /// Crée un livre puis l'ajoute à la bibliothèque.
         /// </summary>
         /// <returns></returns>
-        public async Task<Book?> AddBookAsync(string title, string? lang = null, BookFormat? format = null, string? notes = null, string? description = null, bool openIfExist = false)
+        public async Task<Book?> CreateBookAsync(string title, string? lang = null, BookFormat? format = null, string? notes = null, string? description = null, bool openIfExist = false)
         {
             try
             {
