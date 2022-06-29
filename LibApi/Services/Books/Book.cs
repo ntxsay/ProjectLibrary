@@ -1396,6 +1396,49 @@ namespace LibApi.Services.Books
             }
         }
 
+        public static async Task<IEnumerable<Book>> MultiplesAsync(long[] idArray, long? idLibrary = null)
+        {
+            try
+            {
+                if (idArray == null || !idArray.Any())
+                {
+                    throw new ArgumentNullException(nameof(idArray), $"Le tableau d'id ne doit pas être null et doit contenir au moins un élément.");
+                }
+
+                using LibrarySqLiteDbContext context = new();
+
+                List<Tbook> tmodelList = new();
+                foreach (long id in idArray)
+                {
+                    Tbook? record = null;
+
+                    if (idLibrary == null)
+                    {
+                        record = await context.Tbooks.SingleOrDefaultAsync(s => s.Id == id);
+                    }
+                    else
+                    {
+                        record = await context.Tbooks.SingleOrDefaultAsync(s => s.Id == id && s.IdLibrary == idLibrary);
+                    }
+
+                    if (record == null)
+                    {
+                        Logs.Log(className: nameof(Book), message: $"Le livre n'existe pas avec l'id \"{id}\".");
+                        continue;
+                    }
+
+                    tmodelList.Add(record);
+                }
+
+                return tmodelList.Select(s => ConvertToViewModel(s))!;
+            }
+            catch (Exception ex)
+            {
+                Logs.Log(nameof(Book), exception: ex);
+                return Enumerable.Empty<Book>();
+            }
+        }
+
 
         public static async Task<long?> GetIdIfExistAsync(string mainTitle, string? lang, string? format, bool isEdit = false, long? modelId = null, long? idLibrary = null)
         {

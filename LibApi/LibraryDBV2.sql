@@ -53,7 +53,7 @@ DROP TABLE IF EXISTS "TContact";
 CREATE TABLE IF NOT EXISTS "TContact" (
 	"Id" INTEGER NOT NULL UNIQUE,
     "ContactType" INTEGER NOT NULL,
-    "Guid" TEXT NOT NULL UNIQUE,--Si le dossier ce cree
+    "Guid" TEXT NOT NULL UNIQUE, --Si le dossier ce cree
     "DateAjout" TEXT NOT NULL,
     "DateEdition" TEXT NULL,
     "SocietyName" TEXT NULL,
@@ -125,10 +125,8 @@ DROP TABLE IF EXISTS "TBookClassification";
 CREATE TABLE IF NOT EXISTS "TBookClassification" (
 	"Id" INTEGER NOT NULL UNIQUE,
     "TypeClassification" INTEGER  NOT NULL DEFAULT 0,
-    "ApartirDe" INTEGER  NOT NULL DEFAULT 0,
-    "Jusqua" INTEGER  NOT NULL DEFAULT 0,
-    "DeTelAge" INTEGER  NOT NULL DEFAULT 0,
-    "ATelAge" INTEGER  NOT NULL DEFAULT 0,
+    "MinimumAge" INTEGER NULL,
+    "MaximumAge" INTEGER NULL,
 	PRIMARY KEY("Id" AUTOINCREMENT)
     FOREIGN KEY("Id") REFERENCES "TBook"("Id") ON DELETE CASCADE
 );
@@ -157,7 +155,7 @@ DROP TABLE IF EXISTS "TBookReading";
 --Cree la Table si n'existe pas
 CREATE TABLE IF NOT EXISTS "TBookReading" (
 	"Id" INTEGER NOT NULL UNIQUE,
-    "Status" INTEGER NULL, -- Terminé, En pause, En cours de lecture, Abandonné, Non lu, A lire
+    "Status" INTEGER NULL, -- Terminï¿½, En pause, En cours de lecture, Abandonnï¿½, Non lu, A lire
     "LastPageReaded" INTEGER NULL,
     "LastDateReaded" TEXT NULL,
     "Note10" REAL NULL,
@@ -206,7 +204,7 @@ CREATE TABLE IF NOT EXISTS "TBookExemplary" (
     --"Quantity" INTEGER NOT NULL DEFAULT 0,
     "DateAjout" TEXT NOT NULL,
     "DateEdition" TEXT NULL,
-    "TypeAcquisition" TEXT NOT NULL, --Donné, Acheté, preté, Autre 
+    "TypeAcquisition" TEXT NOT NULL, --Donnï¿½, Achetï¿½, pretï¿½, Autre 
     "Price" REAL NULL,
 	"DeviceName" TEXT NULL,
     "DateAcquisition" TEXT NULL, --Date emprunt, Achat, Donation
@@ -227,7 +225,7 @@ CREATE TABLE IF NOT EXISTS "TBookContactRoleConnector" (
 	"Id" INTEGER NOT NULL UNIQUE,
 	"IdBook" INTEGER NOT NULL,
 	"IdContact" INTEGER NOT NULL,
-	"Role" INTEGER NOT NULL DEFAULT 0, --Adhérant,
+	"Role" INTEGER NOT NULL DEFAULT 0, --Adhï¿½rant,
 	PRIMARY KEY("Id" AUTOINCREMENT)
     FOREIGN KEY("IdBook") REFERENCES "TBook"("Id") ON DELETE CASCADE
     FOREIGN KEY("IdContact") REFERENCES "TContact"("Id") ON DELETE CASCADE
@@ -242,7 +240,7 @@ CREATE TABLE IF NOT EXISTS "TBookEtat" (
 	"Id" INTEGER NOT NULL UNIQUE,
 	"IdBookExemplary" INTEGER NOT NULL,
     "DateAjout" TEXT NOT NULL,
-    "TypeVerification" INTEGER NOT NULL, -- Entrée, avant pret, apres pret, sortie
+    "TypeVerification" INTEGER NOT NULL, -- Entrï¿½e, avant pret, apres pret, sortie
 	"Etat" TEXT NOT NULL,
 	"Observations" TEXT NULL,
     PRIMARY KEY("Id" AUTOINCREMENT)

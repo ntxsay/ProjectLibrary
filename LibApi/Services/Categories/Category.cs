@@ -667,7 +667,18 @@ namespace LibApi.Services.Categories
 
         public void Dispose()
         {
-            context?.Dispose();
+            if (context != null)
+            {
+                context.Dispose();
+            }
+        }
+
+        public async Task DisposeAsync()
+        {
+            if (context != null)
+            {
+                await context.DisposeAsync();
+            }
         }
     }
 }
