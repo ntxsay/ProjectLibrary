@@ -7,7 +7,6 @@ namespace LibApi.Services.ES
     public class InputOutput
     {
         private const string mainRootName = "Ressources";
-        public string MainRootPath { get; private set; }
         public static string RessourcesPath => System.IO.Path.Combine(Environment.CurrentDirectory, mainRootName);
 
         public static string LibrariesPath => $"{RessourcesPath}{System.IO.Path.DirectorySeparatorChar}Libraries";
@@ -133,6 +132,40 @@ namespace LibApi.Services.ES
                 return null;
             }
         }
+
+        public bool DeleteDefaultFolderItem(Guid guid, DefaultFolders defaultFolder)
+        {
+            try
+            {
+                if (guid == Guid.Empty)
+                {
+                    throw new ArgumentNullException(nameof(guid), "Le GUID n'est pas valide.");
+                }
+
+                string folderName = guid.ToString();
+
+                DirectoryInfo? defaultFolderDirectoryInfo = CreateOrGetDefaultFolder(defaultFolder);
+                if (defaultFolderDirectoryInfo == null || !defaultFolderDirectoryInfo.Exists)
+                {
+                    throw new Exception("Le dossier parent n'est pas valide ou n'existe pas.");
+                }
+
+                DirectoryInfo? existingFolder = defaultFolderDirectoryInfo.EnumerateDirectories().FirstOrDefault(d => d.Name.ToLower() == folderName.ToLower());
+                if (existingFolder != null && existingFolder.Exists)
+                {
+                    existingFolder.Delete(true);
+                    return true;
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Logs.Log(className: nameof(InputOutput), exception: ex);
+                return false;
+            }
+        }
+
     }
 }
 

@@ -37,6 +37,8 @@ namespace AppHelpers.Serialization
     public class JsonSerialization
     {
         private const string className = nameof(JsonSerialization);
+
+
         public static bool SerializeClassTofile<T>(T ObjectToSerialize, string FilePath) where T : class
         {
             try
@@ -113,6 +115,7 @@ namespace AppHelpers.Serialization
             }
         }
 
+
         public static Task<bool> SerializeClassToFileAsync<T>(IEnumerable<T> ObjectsToSerialize, string FilePath) where T : class
         {
             try
@@ -180,6 +183,7 @@ namespace AppHelpers.Serialization
             }
         }
 
+
         public static string? SerializeObjectToString<T>(T ObjectToSerialize) where T : class
         {
             try
@@ -212,6 +216,7 @@ namespace AppHelpers.Serialization
                 return null;
             }
         }
+
 
         public static async Task<bool> SerializeDataStringToFile(string dataString, string configFileName)
         {
@@ -274,7 +279,7 @@ namespace AppHelpers.Serialization
             }
             catch (Exception ex)
             {
-                Logs.Log(className, nameof(DeSerializeFileToClassAsync), ex);
+                Logs.Log(className: className, exception:ex);
                 return Task.FromResult<T?>(null);
             }
         }
@@ -338,6 +343,100 @@ namespace AppHelpers.Serialization
             }
         }
 
+
+        public static async Task<T?> DeserializeSingleFromPathAsync<T>(string configFilePath)
+        {
+            try
+            {
+                if (configFilePath.IsStringNullOrEmptyOrWhiteSpace())
+                {
+                    throw new ArgumentNullException(nameof(configFilePath), "Le chemin d'accès au fichier n'est pas valide.");
+                }
+
+                string dataString = await File.ReadAllTextAsync(configFilePath);
+                if (dataString.IsStringNullOrEmptyOrWhiteSpace())
+                {
+                    throw new Exception("Le fichier n'a retourné aucune données.");
+                }
+
+                var settings = new JsonSerializerSettings();
+                return JsonConvert.DeserializeObject<T>(dataString, settings);
+            }
+            catch (Exception ex)
+            {
+                Logs.Log(className: className, exception: ex);
+                return default;
+            }
+        }
+
+        public static async Task<IEnumerable<T>> DeserializeManyFromPathAsync<T>(string configFilePath)
+        {
+            try
+            {
+                if (configFilePath.IsStringNullOrEmptyOrWhiteSpace())
+                {
+                    throw new ArgumentNullException(nameof(configFilePath), "Le chemin d'accès au fichier n'est pas valide.");
+                }
+
+                string dataString = await File.ReadAllTextAsync(configFilePath);
+                if (dataString.IsStringNullOrEmptyOrWhiteSpace())
+                {
+                    throw new Exception("Le fichier n'a retourné aucune données.");
+                }
+
+                var settings = new JsonSerializerSettings();
+                return JsonConvert.DeserializeObject<IEnumerable<T>>(dataString, settings) ?? Enumerable.Empty<T>();
+            }
+            catch (Exception ex)
+            {
+                Logs.Log(className: className, exception: ex);
+                return Enumerable.Empty<T>();
+            }
+        }
+
+        public static async Task<IEnumerable<T>> DeserializeAnyFromPathAsync<T>(string configFilePath) where T : class
+        {
+            try
+            {
+                if (configFilePath.IsStringNullOrEmptyOrWhiteSpace())
+                {
+                    throw new ArgumentNullException(nameof(configFilePath), "Le chemin d'accès au fichier n'est pas valide.");
+                }
+
+                JToken? jsonType = await GetJsonType(configFilePath);
+                if (jsonType == null)
+                {
+                    throw new Exception("Le type JSON n'est pas valide.");
+                }
+                else if (jsonType is JObject)
+                {
+                    var result = await DeserializeSingleFromPathAsync<T>(configFilePath);
+                    if (result == null)
+                    {
+                        throw new Exception("La désérialisation n'a retourné aucune données.");
+                    }
+                    return new T[] { result };
+                }
+                else if (jsonType is JArray)
+                {
+                    var result = await DeserializeManyFromPathAsync<T>(configFilePath);
+                    if (result == null)
+                    {
+                        throw new Exception("La désérialisation n'a retourné aucune données.");
+                    }
+                    return result;
+                }
+
+                return Enumerable.Empty<T>();
+            }
+            catch (Exception ex)
+            {
+                Logs.Log(className: className, exception: ex);
+                return Enumerable.Empty<T>();
+            }
+        }
+
+
         public static async Task<string?> GetDataStringAsync(string configFileName)
         {
             try
@@ -399,5 +498,6 @@ namespace AppHelpers.Serialization
                 return null;
             }
         }
+
     }
 }

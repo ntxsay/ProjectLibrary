@@ -6,6 +6,7 @@ using LibApi.Models.Local.SQLite;
 using LibApi.Services.Books;
 using LibApi.Services.Categories;
 using LibApi.Services.Collections;
+using LibApi.Services.ES;
 using LibShared;
 using LibShared.ViewModels.Libraries;
 using Microsoft.EntityFrameworkCore;
@@ -268,36 +269,11 @@ namespace LibApi.Services.Libraries
                     throw new ArgumentNullException(nameof(name), "Le nom de la bibliothèque ne peut pas être nulle, vide ou ne contenir que des espaces blancs.");
                 }
 
-                using LibrarySqLiteDbContext context = new();
-                Tlibrary? existingItem = await context.Tlibraries.SingleOrDefaultAsync(c => c.Name.ToLower() == name.Trim().ToLower());
-                if (existingItem != null)
+                return await CreateAsync(new LibraryVM()
                 {
-                    Logs.Log(nameof(Library), nameof(CreateAsync), $"La bibliothèque {name} existe déjà.");
-                    if (openIfExist)
-                    {
-                        return ConvertToViewModel(existingItem);
-                    }
-                    else
-                    {
-                        throw new InvalidOperationException($"La bibliothèque {name} existe déjà.");
-                    }
-                }
-
-                var _dateAjout = DateTime.UtcNow;
-                var _guid = System.Guid.NewGuid();
-
-                Tlibrary record = new()
-                {
-                    DateAjout = _dateAjout.ToString(),
-                    Guid = _guid.ToString(),
                     Name = name.Trim(),
-                    Description = description?.Trim(),
-                };
-
-                await context.Tlibraries.AddAsync(record);
-                await context.SaveChangesAsync();
-
-                return ConvertToViewModel(record);
+                    Description = description?.Trim()
+                }, openIfExist);
             }
             catch (Exception ex)
             {
@@ -348,6 +324,9 @@ namespace LibApi.Services.Libraries
 
                 await context.Tlibraries.AddAsync(record);
                 await context.SaveChangesAsync();
+
+                InputOutput inputOutput = new();
+                inputOutput.GetOrCreateDefaultFolderItem(_guid, DefaultFolders.Libraries);
 
                 return ConvertToViewModel(record);
             }
@@ -477,6 +456,13 @@ namespace LibApi.Services.Libraries
                 _ = await context.SaveChangesAsync();
 
                 IsDeleted = true;
+
+                if (Guid.TryParse(tlibrary.Guid, out Guid guid))
+                {
+                    InputOutput inputOutput = new();
+                    inputOutput.GetOrCreateDefaultFolderItem(guid, DefaultFolders.Libraries);
+                }
+
                 return true;
             }
             catch (Exception ex)
@@ -879,7 +865,18 @@ namespace LibApi.Services.Libraries
 
         public void Dispose()
         {
-            context?.Dispose();
+            if (context != null)
+            {
+                context.Dispose();
+            }
+        }
+
+        public async Task DisposeAsync()
+        {
+            if (context != null)
+            {
+                await context.DisposeAsync();
+            }
         }
     }
 }

@@ -2,6 +2,7 @@
 using AppHelpers.Dates;
 using AppHelpers.Strings;
 using LibApi.Models.Local.SQLite;
+using LibApi.Services.ES;
 using LibShared;
 using LibShared.ViewModels.Contacts;
 using Microsoft.EntityFrameworkCore;
@@ -234,6 +235,9 @@ namespace LibApi.Services.Contacts
 
                 await context.Tcontacts.AddAsync(record);
                 await context.SaveChangesAsync();
+
+                InputOutput inputOutput = new();
+                inputOutput.GetOrCreateDefaultFolderItem(_guid, DefaultFolders.Contacts);
 
                 return ConvertToViewModel(record);
             }
@@ -553,7 +557,14 @@ namespace LibApi.Services.Contacts
 
                 context.Tcontacts.Remove(record);
                 _ = await context.SaveChangesAsync();
+
                 IsDeleted = true;
+
+                if (Guid.TryParse(record.Guid, out Guid guid))
+                {
+                    InputOutput inputOutput = new();
+                    inputOutput.GetOrCreateDefaultFolderItem(guid, DefaultFolders.Contacts);
+                }
 
                 return true;
             }

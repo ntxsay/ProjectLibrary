@@ -12,6 +12,7 @@ using AppHelpers.Dates;
 using AppHelpers.Strings;
 using LibApi.Models.Local.SQLite;
 using LibApi.Services.Categories;
+using LibApi.Services.ES;
 using LibShared;
 using LibShared.ViewModels.Books;
 using LibShared.ViewModels.Collections;
@@ -383,6 +384,9 @@ namespace LibApi.Services.Books
                 await context.Tbooks.AddAsync(record);
                 await context.SaveChangesAsync();
 
+                InputOutput inputOutput = new ();
+                inputOutput.GetOrCreateDefaultFolderItem(_guid, DefaultFolders.Books);
+
                 await CompleteBookAsync(context, record);
                 return ConvertToViewModel(record);
             }
@@ -581,7 +585,13 @@ namespace LibApi.Services.Books
                 await context.SaveChangesAsync();
 
                 IsDeleted = true;
-                //Record = null;
+
+                if (Guid.TryParse(record.Guid, out Guid guid))
+                {
+                    InputOutput inputOutput = new();
+                    inputOutput.GetOrCreateDefaultFolderItem(guid, DefaultFolders.Books);
+                }
+
                 return true;
             }
             catch (Exception ex)
@@ -1620,12 +1630,18 @@ namespace LibApi.Services.Books
 
         public void Dispose()
         {
-            context.Dispose();
+            if (context != null)
+            {
+                context.Dispose();
+            }
         }
 
         public async Task DisposeAsync()
         {
-            await context.DisposeAsync();
+            if (context != null)
+            {
+                await context.DisposeAsync();
+            }
         }
     }
 }
