@@ -277,6 +277,98 @@ namespace LibApi.Services.Collections
             }
         }
 
+        public static async Task<IEnumerable<Collection>> MultiplesAsync(string[] names, long? idLibrary = null)
+        {
+            try
+            {
+                if (names == null || !names.Any())
+                {
+                    throw new ArgumentNullException(nameof(names), $"Le tableau de nom ne doit pas être null, vide ou ne contenir que des espaces blancs.");
+                }
+
+                using LibrarySqLiteDbContext context = new();
+
+                List<Tcollection> tcollections = new();
+                foreach (string name in names)
+                {
+                    if (name.IsStringNullOrEmptyOrWhiteSpace())
+                    {
+                        Logs.Log(className: nameof(Collection), message: $"Le nom de la collection ne doit pas être nulle, vide ou ne contenir que des espaces blancs.");
+                        continue;
+                    }
+
+                    Tcollection? record = null;
+
+                    if (idLibrary == null)
+                    {
+                        record = await context.Tcollections.SingleOrDefaultAsync(s => s.Name.ToLower() == name.Trim().ToLower());
+                    }
+                    else
+                    {
+                        record = await context.Tcollections.SingleOrDefaultAsync(s => s.Name.ToLower() == name.Trim().ToLower() && s.IdLibrary == idLibrary);
+                    }
+
+                    if (record == null)
+                    {
+                        Logs.Log(className: nameof(Collection), message: $"La collection n'existe pas avec le nom \"{name}\".");
+                        continue;
+                    }
+
+                    tcollections.Add(record);
+                }
+
+                return tcollections.Select(s => ConvertToViewModel(s))!;
+            }
+            catch (Exception ex)
+            {
+                Logs.Log(className: nameof(Collection), exception: ex);
+                return Enumerable.Empty<Collection>();
+            }
+        }
+
+        public static async Task<IEnumerable<Collection>> MultiplesAsync(long[] idArray, long? idLibrary = null)
+        {
+            try
+            {
+                if (idArray == null || !idArray.Any())
+                {
+                    throw new ArgumentNullException(nameof(idArray), $"Le tableau d'id ne doit pas être null et doit contenir au moins un élément.");
+                }
+
+                using LibrarySqLiteDbContext context = new();
+
+                List<Tcollection> tcollections = new();
+                foreach (long id in idArray)
+                {
+                    Tcollection? record = null;
+
+                    if (idLibrary == null)
+                    {
+                        record = await context.Tcollections.SingleOrDefaultAsync(s => s.Id == id);
+                    }
+                    else
+                    {
+                        record = await context.Tcollections.SingleOrDefaultAsync(s => s.Id == id && s.IdLibrary == idLibrary);
+                    }
+
+                    if (record == null)
+                    {
+                        Logs.Log(className: nameof(Collection), message: $"La collection n'existe pas avec l'id \"{id}\".");
+                        continue;
+                    }
+
+                    tcollections.Add(record);
+                }
+
+                return tcollections.Select(s => ConvertToViewModel(s))!;
+            }
+            catch (Exception ex)
+            {
+                Logs.Log(nameof(Collection), exception: ex);
+                return Enumerable.Empty<Collection>();
+            }
+        }
+
 
         public static async Task<Collection?> CreateAsync(long idLibrary, CollectionVM viewModel, bool openIfExist = false)
         {

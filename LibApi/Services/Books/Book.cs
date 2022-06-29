@@ -1572,5 +1572,10 @@ namespace LibApi.Services.Books
         {
             context.Dispose();
         }
+
+        public async Task DisposeAsync()
+        {
+            await context.DisposeAsync();
+        }
     }
 }

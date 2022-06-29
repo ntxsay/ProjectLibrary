@@ -452,13 +452,25 @@ namespace LibApi.Services.Libraries
                 Tlibrary? tlibrary = await context.Tlibraries.SingleOrDefaultAsync(s => s.Id == Id);
                 if (tlibrary == null)
                 {
-                    throw new ArgumentNullException(nameof(Tlibrary), $"La bibliothèque n'existe pas avec l'id \"{Id}\".");
+                    throw new NullReferenceException($"La bibliothèque n'existe pas avec l'id \"{Id}\".");
                 }
 
                 List<Tcollection>? tcollections = await context.Tcollections.Where(s => s.IdLibrary == Id).ToListAsync();
                 if (tcollections.Any())
                 {
                     context.Tcollections.RemoveRange(tcollections);
+                }
+
+                IEnumerable<Book> books = await Book.AllAsync(idLibrary: Id);
+                if (books != null && books.Any())
+                {
+                    foreach (Book book in books)
+                    {
+                        await book.DeleteAsync();
+                        await book.DisposeAsync();
+                    }
+
+                    books = Enumerable.Empty<Book>();
                 }
 
                 context.Tlibraries.Remove(tlibrary);
@@ -569,31 +581,7 @@ namespace LibApi.Services.Libraries
                     throw new InvalidOperationException($"La bibliothèque {Name} a déjà été supprimée.");
                 }
 
-                if (collectionNames == null || !collectionNames.Any())
-                {
-                    throw new ArgumentNullException($"Le tableau de nom ne doit pas être null, vide ou ne contenir que des espaces blancs.");
-                }
-
-                List<Tcollection> tcollections = new ();
-                foreach (string collectionName in collectionNames)
-                {
-                    if (collectionName.IsStringNullOrEmptyOrWhiteSpace())
-                    {
-                        Logs.Log(nameof(Library), nameof(GetMultipleCollectionsAsync), $"Le nom de la collection ne doit pas être nulle, vide ou ne contenir que des espaces blancs.");
-                        continue;
-                    }
-
-                    Tcollection? record = await context.Tcollections.SingleOrDefaultAsync(s => s.Name.ToLower() == collectionName.Trim().ToLower() && s.IdLibrary == Id);
-                    if (record == null)
-                    {
-                        Logs.Log(nameof(Library), nameof(GetMultipleCollectionsAsync), $"La collection n'existe pas avec le nom \"{collectionName}\".");
-                        continue;
-                    }
-
-                    tcollections.Add(record);
-                }
-
-                return tcollections.Select(s => Collection.ConvertToViewModel(s))!;
+                return await Collection.MultiplesAsync(names: collectionNames, idLibrary: Id);
             }
             catch (Exception ex)
             {
@@ -611,25 +599,7 @@ namespace LibApi.Services.Libraries
                     throw new InvalidOperationException($"La bibliothèque {Name} a déjà été supprimée.");
                 }
 
-                if (idCollections == null || !idCollections.Any())
-                {
-                    throw new ArgumentNullException($"Le tableau d'id ne doit pas être null et doit contenir au moins un élément.");
-                }
-
-                List<Tcollection> tcollections = new();
-                foreach (long idCollection in idCollections)
-                {
-                    Tcollection? record = await context.Tcollections.SingleOrDefaultAsync(s => s.Id == idCollection && s.IdLibrary == Id);
-                    if (record == null)
-                    {
-                        Logs.Log(nameof(Library), nameof(GetMultipleCollectionsAsync), $"La collection n'existe pas avec l'id \"{idCollection}\".");
-                        continue;
-                    }
-
-                    tcollections.Add(record);
-                }
-
-                return tcollections.Select(s => Collection.ConvertToViewModel(s))!;
+                return await Collection.MultiplesAsync(idArray: idCollections, idLibrary: Id);
             }
             catch (Exception ex)
             {
@@ -711,31 +681,7 @@ namespace LibApi.Services.Libraries
                     throw new InvalidOperationException($"La bibliothèque {Name} a déjà été supprimée.");
                 }
 
-                if (categoriesNames == null || !categoriesNames.Any())
-                {
-                    throw new ArgumentNullException($"Le tableau de nom ne doit pas être null, vide ou ne contenir que des espaces blancs.");
-                }
-
-                List<TlibraryCategorie> tlibraryCategories = new();
-                foreach (string categoryName in categoriesNames)
-                {
-                    if (categoryName.IsStringNullOrEmptyOrWhiteSpace())
-                    {
-                        Logs.Log(nameof(Library), nameof(GetMultipleCategoriesAsync), $"Le nom de la catégorie ne doit pas être nulle, vide ou ne contenir que des espaces blancs.");
-                        continue;
-                    }
-
-                    TlibraryCategorie? record = await context.TlibraryCategories.SingleOrDefaultAsync(s => s.Name.ToLower() == categoryName.Trim().ToLower() && s.IdLibrary == Id);
-                    if (record == null)
-                    {
-                        Logs.Log(nameof(Library), nameof(GetMultipleCategoriesAsync), $"La catégorie n'existe pas avec le nom \"{categoryName}\".");
-                        continue;
-                    }
-
-                    tlibraryCategories.Add(record);
-                }
-
-                return tlibraryCategories.Select(s => Category.ConvertToViewModel(s))!;
+                return await Category.MultiplesAsync(names: categoriesNames, idLibrary: Id);
             }
             catch (Exception ex)
             {
@@ -753,25 +699,7 @@ namespace LibApi.Services.Libraries
                     throw new InvalidOperationException($"La bibliothèque {Name} a déjà été supprimée.");
                 }
 
-                if (idCategories == null || !idCategories.Any())
-                {
-                    throw new ArgumentNullException($"Le tableau d'id ne doit pas être null et doit contenir au moins un élément.");
-                }
-
-                List<TlibraryCategorie> tlibraryCategories = new();
-                foreach (long idCategory in idCategories)
-                {
-                    TlibraryCategorie? record = await context.TlibraryCategories.SingleOrDefaultAsync(s => s.Id == idCategory && s.IdLibrary == Id);
-                    if (record == null)
-                    {
-                        Logs.Log(nameof(Library), nameof(GetMultipleCategoriesAsync), $"La catégorie n'existe pas avec l'id \"{idCategory}\".");
-                        continue;
-                    }
-
-                    tlibraryCategories.Add(record);
-                }
-
-                return tlibraryCategories.Select(s => Category.ConvertToViewModel(s))!;
+                return await Category.MultiplesAsync(idArray: idCategories, idLibrary: Id);
             }
             catch (Exception ex)
             {
@@ -861,7 +789,6 @@ namespace LibApi.Services.Libraries
                 return null;
             }
         }
-
 
         /// <summary>
         /// Crée un livre puis l'ajoute à la bibliothèque.

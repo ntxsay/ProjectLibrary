@@ -453,7 +453,6 @@ namespace LibApi.Services.Categories
             }
         }
 
-
         public static async Task<IEnumerable<Category>> AllAsync(long? idLibrary = null)
         {
             try
@@ -546,6 +545,98 @@ namespace LibApi.Services.Categories
             {
                 Logs.Log(className: nameof(Category), exception: ex);
                 return null;
+            }
+        }
+
+        public static async Task<IEnumerable<Category>> MultiplesAsync(string[] names, long? idLibrary = null)
+        {
+            try
+            {
+                if (names == null || !names.Any())
+                {
+                    throw new ArgumentNullException(nameof(names),$"Le tableau de nom ne doit pas être null, vide ou ne contenir que des espaces blancs.");
+                }
+
+                using LibrarySqLiteDbContext context = new();
+
+                List<TlibraryCategorie> tlibraryCategories = new();
+                foreach (string name in names)
+                {
+                    if (name.IsStringNullOrEmptyOrWhiteSpace())
+                    {
+                        Logs.Log(className:nameof(Category), message:$"Le nom de la catégorie ne doit pas être nulle, vide ou ne contenir que des espaces blancs.");
+                        continue;
+                    }
+
+                    List<TlibraryCategorie>? records = new();
+
+                    if (idLibrary == null)
+                    {
+                        records = await context.TlibraryCategories.Where(s => s.Name.ToLower() == name.Trim().ToLower()).ToListAsync();
+                    }
+                    else
+                    {
+                        records = await context.TlibraryCategories.Where(s => s.Name.ToLower() == name.Trim().ToLower() && s.IdLibrary == idLibrary).ToListAsync();
+                    }
+
+                    if (records == null || !records.Any())
+                    {
+                        Logs.Log(className: nameof(Category), message: $"La catégorie n'existe pas avec le nom \"{name}\".");
+                        continue;
+                    }
+
+                    tlibraryCategories.AddRange(records);
+                }
+
+                return tlibraryCategories.Select(s => ConvertToViewModel(s))!;
+            }
+            catch (Exception ex)
+            {
+                Logs.Log(className:nameof(Category), exception: ex);
+                return Enumerable.Empty<Category>();
+            }
+        }
+
+        public static async Task<IEnumerable<Category>> MultiplesAsync(long[] idArray, long? idLibrary = null)
+        {
+            try
+            {
+                if (idArray == null || !idArray.Any())
+                {
+                    throw new ArgumentNullException(nameof(idArray), $"Le tableau d'id ne doit pas être null et doit contenir au moins un élément.");
+                }
+
+                using LibrarySqLiteDbContext context = new();
+
+                List<TlibraryCategorie> tlibraryCategories = new();
+                foreach (long id in idArray)
+                {
+                    TlibraryCategorie? record = null;
+
+                    if (idLibrary == null)
+                    {
+                        record = await context.TlibraryCategories.SingleOrDefaultAsync(s => s.Id == id);
+                    }
+                    else
+                    {
+                        record = await context.TlibraryCategories.SingleOrDefaultAsync(s => s.Id == id && s.IdLibrary == idLibrary);
+                    }
+
+                    if (record == null)
+                    {
+                        Logs.Log(className: nameof(Category), message: $"La catégorie n'existe pas avec l'id \"{id}\".");
+                        continue;
+                    }
+
+                    tlibraryCategories.Add(record);
+                }
+
+                return tlibraryCategories.Select(s => ConvertToViewModel(s))!;
+            }
+            catch (Exception ex)
+            {
+                Logs.Log(nameof(Category), exception: ex);
+                return Enumerable.Empty<Category>();
             }
         }
         #endregion
