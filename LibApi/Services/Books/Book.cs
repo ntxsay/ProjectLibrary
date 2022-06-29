@@ -540,11 +540,18 @@ namespace LibApi.Services.Books
                     context.TbookFormats.Remove(recordFormat);
                 }
 
-                //Collection connecto
+                //Collection connector
                 var recordCollection = await context.TbookCollections.Where(a => a.IdBook == record.Id).ToListAsync();
                 if (recordCollection.Any())
                 {
                     context.TbookCollections.RemoveRange(recordCollection);
+                }
+
+                //Contact role connector
+                List<TbookContactRoleConnector>? tbookContactRoleConnectors = await context.TbookContactRoleConnectors.Where(a => a.IdBook == record.Id).ToListAsync();
+                if (tbookContactRoleConnectors.Any())
+                {
+                    context.TbookContactRoleConnectors.RemoveRange(tbookContactRoleConnectors);
                 }
 
                 //Exemplaries
