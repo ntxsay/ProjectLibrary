@@ -40,5 +40,12 @@ namespace LibApi
                     {(byte)Terms.EndWith, TermEndWith },
                 };
     }
+
+    public enum DefaultFolders
+    {
+        Libraries,
+        Books,
+        Contacts,
+    }
 }
 
