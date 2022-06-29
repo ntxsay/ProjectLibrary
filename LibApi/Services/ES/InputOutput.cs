@@ -7,12 +7,11 @@ namespace LibApi.Services.ES
     public class InputOutput
     {
         private const string mainRootName = "Ressources";
-        public static string RessourcesPath => System.IO.Path.Combine(Environment.CurrentDirectory, mainRootName);
+        public static string RessourcesPath => Path.Combine(Environment.CurrentDirectory, mainRootName);
 
-        public static string LibrariesPath => $"{RessourcesPath}{System.IO.Path.DirectorySeparatorChar}Libraries";
-        public static string BooksPath => $"{RessourcesPath}{System.IO.Path.DirectorySeparatorChar}Books";
-        public static string ContactsPath => $"{RessourcesPath}{System.IO.Path.DirectorySeparatorChar}Contacts";
-
+        public static string LibrariesPath => $"{RessourcesPath}{Path.DirectorySeparatorChar}Libraries";
+        public static string BooksPath => $"{RessourcesPath}{Path.DirectorySeparatorChar}Books";
+        public static string ContactsPath => $"{RessourcesPath}{Path.DirectorySeparatorChar}Contacts";
 
         public static Dictionary<byte, string> FoldersDictionary = new ()
         {
@@ -47,7 +46,7 @@ namespace LibApi.Services.ES
             {
                 if (NomDuDossierACreer.IsStringNullOrEmptyOrWhiteSpace())
                 {
-                    return null;
+                    throw new ArgumentNullException(nameof(NomDuDossierACreer), "Le GUID n'est pas valide.");
                 }
 
                 DirectoryInfo? ressourcesDirectory = this.GetRessourcesFolder();
@@ -60,7 +59,12 @@ namespace LibApi.Services.ES
                     }
                     else
                     {
-                        return ressourcesDirectory.CreateSubdirectory(NomDuDossierACreer);
+                        DirectoryInfo? newDirectory = ressourcesDirectory.CreateSubdirectory(NomDuDossierACreer);
+                        if (newDirectory == null || !newDirectory.Exists)
+                        {
+                            throw new Exception("Le nouveau dossier n'est pas valide ou n'existe pas.");
+                        }
+                        return newDirectory;
                     }
                 }
 
@@ -80,7 +84,7 @@ namespace LibApi.Services.ES
                 string? folderPath = FoldersDictionary.GetValueOrDefault((byte)defaultFolder);
                 if (folderPath == null)
                 {
-                    return null;
+                    throw new Exception("Le chemin d'accès n'est pas valide ou n'existe pas.");
                 }
 
                 DirectoryInfo directoryInfo = new(folderPath);
@@ -105,7 +109,7 @@ namespace LibApi.Services.ES
             {
                 if (guid == Guid.Empty)
                 {
-                    return null;
+                    throw new ArgumentNullException(nameof(guid), "Le GUID n'est pas valide.");
                 }
 
                 string folderName = guid.ToString();
@@ -113,7 +117,7 @@ namespace LibApi.Services.ES
                 DirectoryInfo? defaultFolderDirectoryInfo = CreateOrGetDefaultFolder(defaultFolder);
                 if (defaultFolderDirectoryInfo == null || !defaultFolderDirectoryInfo.Exists)
                 {
-                    return null;
+                    throw new Exception("Le dossier parent n'est pas valide ou n'existe pas.");
                 }
 
                 DirectoryInfo? existingFolder = defaultFolderDirectoryInfo.EnumerateDirectories().FirstOrDefault(d => d.Name.ToLower() == folderName.ToLower());
@@ -123,7 +127,12 @@ namespace LibApi.Services.ES
                 }
                 else
                 {
-                    return defaultFolderDirectoryInfo.CreateSubdirectory(folderName);
+                    DirectoryInfo? newDirectory = defaultFolderDirectoryInfo.CreateSubdirectory(folderName);
+                    if (newDirectory == null || !newDirectory.Exists)
+                    {
+                        throw new Exception("Le nouveau dossier n'est pas valide ou n'existe pas.");
+                    }
+                    return newDirectory;
                 }
             }
             catch (Exception ex)
