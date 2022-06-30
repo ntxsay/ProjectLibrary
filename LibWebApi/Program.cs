@@ -1,3 +1,6 @@
+using LibApi.Models.Local.SQLite;
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -7,6 +10,10 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+#region SQL Server Connexion
+//builder.Services.AddDbContext<LibrarySqLiteDbContext>(options =>
+    //options.UseSqlite(builder.Configuration["ConnectionStrings:LibrarySqLiteV1"], null));
+#endregion
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

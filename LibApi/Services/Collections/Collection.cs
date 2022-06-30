@@ -147,31 +147,24 @@ namespace LibApi.Services.Collections
             {
                 if (IsDeleted)
                 {
-                    throw new NotSupportedException($"La collection {Name} a déjà été supprimée.");
+                    throw new InvalidOperationException($"La collection {Name} a déjà été supprimée.");
                 }
 
                 Tcollection? record = await context.Tcollections.SingleOrDefaultAsync(s => s.Id == Id);
                 if (record == null)
                 {
-                    throw new ArgumentNullException(nameof(Tcollection), $"La collection n'existe pas avec l'id \"{Id}\".");
+                    throw new Exception($"La collection n'existe pas avec l'id \"{Id}\".");
                 }
 
-                context.Tcollections.Remove(record);
-                _ = await context.SaveChangesAsync();
-                
+                bool isDeleted = await DeleteAsync(tcollections: new Tcollection[] { record }, null);
+                if (!isDeleted)
+                {
+                    throw new Exception("La collection n'a pas pû être supprimée.");
+                }
+
                 IsDeleted = true;
 
                 return true;
-            }
-            catch (ArgumentNullException ex)
-            {
-                Logs.Log(nameof(Collection), nameof(DeleteAsync), ex);
-                return false;
-            }
-            catch (OperationCanceledException ex)
-            {
-                Logs.Log(nameof(Collection), nameof(DeleteAsync), ex);
-                return false;
             }
             catch (Exception ex)
             {
@@ -180,7 +173,80 @@ namespace LibApi.Services.Collections
             }
         }
 
+        /// <summary>
+        /// Efface tous les enregistrement ou seulement ceux d'une bibliothèque spécifiée.
+        /// </summary>
+        /// <param name="idLibrary">Identifiant de la bibliothèque</param>
+        /// <returns>True si la suppression s'est correctement effectuée sinon False</returns>
+        internal static async Task<bool> DeleteAsync(long? idLibrary = null)
+        {
+            try
+            {
+                using LibrarySqLiteDbContext context = new();
+
+                List<Tcollection> tcollections = idLibrary == null ? await context.Tcollections.ToListAsync() : await context.Tcollections.Where(s => s.IdLibrary == idLibrary).ToListAsync();
+                if (tcollections == null || !tcollections.Any())
+                {
+                    return true;
+                }
+
+                return await DeleteAsync(tcollections, null);
+            }
+            catch (Exception ex)
+            {
+                Logs.Log(className: nameof(Collection), exception: ex);
+                return false;
+            }
+        }
+
+        internal static async Task<bool> DeleteAsync(IEnumerable<Tcollection> tcollections, long? idLibrary = null)
+        {
+            try
+            {
+                if (tcollections == null || !tcollections.Any())
+                {
+                    throw new ArgumentNullException(nameof(tcollections), "La liste des modèles ne doit pas être null.");
+                }
+
+                List<Tcollection> _tcollections = idLibrary == null ? tcollections.ToList() : tcollections.Where(s => s.IdLibrary == idLibrary).ToList();
+                if (_tcollections == null || !_tcollections.Any())
+                {
+                    return true;
+                }
+
+                using LibrarySqLiteDbContext context = new();
+
+                List<TbookCollection> tbookCollectionsToDelete = new();
+                foreach (var tcollection in _tcollections)
+                {
+                    //Collection connector
+                    List<TbookCollection> _tbookCollections = await context.TbookCollections.Where(a => a.IdCollection == tcollection.Id).ToListAsync();
+                    if (_tbookCollections != null && _tbookCollections.Any())
+                    {
+                        tbookCollectionsToDelete.AddRange(_tbookCollections);
+                    }
+                }
+
+                if (tbookCollectionsToDelete != null && tbookCollectionsToDelete.Any())
+                {
+                    context.TbookCollections.RemoveRange(tbookCollectionsToDelete);
+                }
+
+                context.Tcollections.RemoveRange(tcollections);
+                await context.SaveChangesAsync();
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Logs.Log(className: nameof(Collection), exception: ex);
+                return false;
+            }
+        }
+
         #endregion
+
+
 
         public static async Task<IEnumerable<Collection>> AllAsync(long? idLibrary = null)
         {

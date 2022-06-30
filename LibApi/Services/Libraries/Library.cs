@@ -6,7 +6,6 @@ using LibApi.Models.Local.SQLite;
 using LibApi.Services.Books;
 using LibApi.Services.Categories;
 using LibApi.Services.Collections;
-using LibApi.Services.ES;
 using LibShared;
 using LibShared.ViewModels.Libraries;
 using Microsoft.EntityFrameworkCore;
@@ -434,11 +433,9 @@ namespace LibApi.Services.Libraries
                     throw new NullReferenceException($"La bibliothèque n'existe pas avec l'id \"{Id}\".");
                 }
 
-                List<Tcollection>? tcollections = await context.Tcollections.Where(s => s.IdLibrary == Id).ToListAsync();
-                if (tcollections.Any())
-                {
-                    context.Tcollections.RemoveRange(tcollections);
-                }
+
+                _ = await Collection.DeleteAsync(idLibrary:Id);
+
 
                 IEnumerable<Book> books = await Book.AllAsync(idLibrary: Id);
                 if (books != null && books.Any())

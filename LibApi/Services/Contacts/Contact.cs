@@ -1,8 +1,8 @@
 ﻿using AppHelpers;
 using AppHelpers.Dates;
 using AppHelpers.Strings;
+using LibApi.Helpers;
 using LibApi.Models.Local.SQLite;
-using LibApi.Services.ES;
 using LibShared;
 using LibShared.ViewModels.Contacts;
 using Microsoft.EntityFrameworkCore;

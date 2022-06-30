@@ -2,7 +2,7 @@
 using AppHelpers;
 using AppHelpers.Strings;
 
-namespace LibApi.Services.ES
+namespace LibApi.Helpers
 {
     public class InputOutput
     {

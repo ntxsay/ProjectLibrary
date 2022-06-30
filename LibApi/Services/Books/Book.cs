@@ -10,9 +10,9 @@ using System.Threading.Tasks;
 using AppHelpers;
 using AppHelpers.Dates;
 using AppHelpers.Strings;
+using LibApi.Helpers;
 using LibApi.Models.Local.SQLite;
 using LibApi.Services.Categories;
-using LibApi.Services.ES;
 using LibShared;
 using LibShared.ViewModels.Books;
 using LibShared.ViewModels.Collections;
@@ -516,80 +516,210 @@ namespace LibApi.Services.Books
                     throw new ArgumentNullException(nameof(Tlibrary), $"Le livre n'existe pas avec l'id \"{Id}\".");
                 }
 
-                //Titles
-                var recordTitles = await context.TbookOtherTitles.Where(a => a.IdBook == record.Id).ToListAsync();
-                if (recordTitles.Any())
+                bool isDeleted = await DeleteAsync(tValues: new Tbook[] { record }, null);
+                if (!isDeleted)
                 {
-                    context.TbookOtherTitles.RemoveRange(recordTitles);
+                    throw new Exception("Le livre n'a pas pû être supprimé.");
                 }
-
-                //Identification
-                TbookIdentification? recordIdentification = await context.TbookIdentifications.SingleOrDefaultAsync(a => a.Id == record.Id);
-                if (recordIdentification != null)
-                {
-                    context.TbookIdentifications.Remove(recordIdentification);
-                }
-
-                //Classification
-                TbookClassification? recordClassification = await context.TbookClassifications.SingleOrDefaultAsync(a => a.Id == record.Id);
-                if (recordClassification != null)
-                {
-                    context.TbookClassifications.Remove(recordClassification);
-                }
-
-                //Format
-                TbookFormat? recordFormat = await context.TbookFormats.SingleOrDefaultAsync(a => a.Id == record.Id);
-                if (recordFormat != null)
-                {
-                    context.TbookFormats.Remove(recordFormat);
-                }
-
-                //Collection connector
-                var recordCollection = await context.TbookCollections.Where(a => a.IdBook == record.Id).ToListAsync();
-                if (recordCollection.Any())
-                {
-                    context.TbookCollections.RemoveRange(recordCollection);
-                }
-
-                //Contact role connector
-                List<TbookContactRoleConnector>? tbookContactRoleConnectors = await context.TbookContactRoleConnectors.Where(a => a.IdBook == record.Id).ToListAsync();
-                if (tbookContactRoleConnectors.Any())
-                {
-                    context.TbookContactRoleConnectors.RemoveRange(tbookContactRoleConnectors);
-                }
-
-                //Exemplaries
-                var recordExemplary = await context.TbookExemplaries.Where(a => a.IdBook == record.Id).ToListAsync();
-                if (recordExemplary.Any())
-                {
-                    foreach (var exemplary in recordExemplary)
-                    {
-                        //Pret
-                        var recordPrets = await context.TbookPrets.Where(a => a.IdBookExemplary == exemplary.Id).ToListAsync();
-                        if (recordPrets != null)
-                        {
-                            context.TbookPrets.RemoveRange(recordPrets);
-                        }
-
-                        //Etats
-                        var recordEtats = await context.TbookEtats.Where(a => a.IdBookExemplary == exemplary.Id).ToListAsync();
-                        if (recordEtats != null)
-                        {
-                            context.TbookEtats.RemoveRange(recordEtats);
-                        }
-                    }
-                    context.TbookExemplaries.RemoveRange(recordExemplary);
-                }
-
-                context.Tbooks.Remove(record);
-                await context.SaveChangesAsync();
 
                 IsDeleted = true;
 
-                if (Guid.TryParse(record.Guid, out Guid guid))
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Logs.Log(className: nameof(Book), exception: ex);
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Efface tous les enregistrement ou seulement ceux d'une bibliothèque spécifié.
+        /// </summary>
+        /// <param name="idLibrary">Identifiant de la bibliothèque</param>
+        /// <returns></returns>
+        internal static async Task<bool> DeleteAsync(long? idLibrary = null)
+        {
+            try
+            {
+                using LibrarySqLiteDbContext context = new();
+
+                List<Tbook> tValues = idLibrary == null ? await context.Tbooks.ToListAsync() : await context.Tbooks.Where(s => s.IdLibrary == idLibrary).ToListAsync();
+                if (tValues == null || !tValues.Any())
                 {
-                    InputOutput inputOutput = new();
-                    inputOutput.GetOrCreateDefaultFolderItem(guid, DefaultFolders.Books);
+                    return true;
+                }
+
+                return await DeleteAsync(tValues, null);
+            }
+            catch (Exception ex)
+            {
+                Logs.Log(className: nameof(Book), exception: ex);
+                return false;
+            }
+        }
+
+
+        internal static async Task<bool> DeleteAsync(IEnumerable<Tbook> tValues, long? idLibrary = null)
+        {
+            try
+            {
+                if (tValues == null || !tValues.Any())
+                {
+                    throw new ArgumentNullException(nameof(tValues), "La liste des modèles ne doit pas être null.");
+                }
+
+                List<Tbook> _tValues = idLibrary == null ? tValues.ToList() : tValues.Where(s => s.IdLibrary == idLibrary).ToList();
+                if (_tValues == null || !_tValues.Any())
+                {
+                    return true;
+                }
+
+                using LibrarySqLiteDbContext context = new();
+
+                List<TbookCollection>? tbookCollectionsToDelete = new();
+                List<TbookOtherTitle>? tbookOtherTitlesToDelete = new();
+                List<TbookIdentification>? tbookIdentificationsToDelete = new();
+                List<TbookClassification>? tbookClassificationsToDelete = new();
+                List<TbookFormat>? tbookFormatsToDelete = new();
+                List<TbookContactRoleConnector>? tbookContactRoleConnectorsToDelete = new();
+                List<TbookExemplary>? tbookExemplariesToDelete = new();
+                List<TbookPret>? tbookPretsToDelete = new();
+                List<TbookEtat>? tbookEtatsToDelete = new();
+
+                foreach (var tValue in _tValues)
+                {
+                    //Titles
+                    List<TbookOtherTitle>? recordTitles = await context.TbookOtherTitles.Where(a => a.IdBook == tValue.Id).ToListAsync();
+                    if (recordTitles != null && recordTitles.Any())
+                    {
+                        tbookOtherTitlesToDelete.AddRange(recordTitles);
+                    }
+
+                    //Identification
+                    TbookIdentification? recordIdentification = await context.TbookIdentifications.SingleOrDefaultAsync(a => a.Id == tValue.Id);
+                    if (recordIdentification != null)
+                    {
+                        tbookIdentificationsToDelete.Add(recordIdentification);
+                    }
+
+                    //Classification
+                    TbookClassification? recordClassification = await context.TbookClassifications.SingleOrDefaultAsync(a => a.Id == tValue.Id);
+                    if (recordClassification != null)
+                    {
+                        tbookClassificationsToDelete.Add(recordClassification);
+                    }
+
+                    //Format
+                    TbookFormat? recordFormat = await context.TbookFormats.SingleOrDefaultAsync(a => a.Id == tValue.Id);
+                    if (recordFormat != null)
+                    {
+                        tbookFormatsToDelete.Add(recordFormat);
+                    }
+
+                    //Collection connector
+                    List<TbookCollection> _tbookCollections = await context.TbookCollections.Where(a => a.IdBook == tValue.Id).ToListAsync();
+                    if (_tbookCollections != null && _tbookCollections.Any())
+                    {
+                        tbookCollectionsToDelete.AddRange(_tbookCollections);
+                    }
+
+                    //Contact role connector
+                    List<TbookContactRoleConnector>? tbookContactRoleConnectors = await context.TbookContactRoleConnectors.Where(a => a.IdBook == tValue.Id).ToListAsync();
+                    if (tbookContactRoleConnectors != null && tbookContactRoleConnectors.Any())
+                    {
+                        tbookContactRoleConnectorsToDelete.AddRange(tbookContactRoleConnectors);
+                    }
+
+                    //Exemplaries
+                    List<TbookExemplary>? recordExemplary = await context.TbookExemplaries.Where(a => a.IdBook == tValue.Id).ToListAsync();
+                    if (recordExemplary != null && recordExemplary.Any())
+                    {
+                        foreach (var exemplary in recordExemplary)
+                        {
+                            //Pret
+                            List<TbookPret>? recordPrets = await context.TbookPrets.Where(a => a.IdBookExemplary == exemplary.Id).ToListAsync();
+                            if (recordPrets != null && recordPrets.Any())
+                            {
+                                tbookPretsToDelete.AddRange(recordPrets);
+                            }
+
+                            //Etats
+                            List<TbookEtat>? recordEtats = await context.TbookEtats.Where(a => a.IdBookExemplary == exemplary.Id).ToListAsync();
+                            if (recordEtats != null && recordEtats.Any())
+                            {
+                                tbookEtatsToDelete.AddRange(recordEtats);
+                            }
+                        }
+
+                        tbookExemplariesToDelete.AddRange(recordExemplary);
+                    }
+                }
+
+                //Titles
+                if (tbookOtherTitlesToDelete != null && tbookOtherTitlesToDelete.Any())
+                {
+                    context.TbookOtherTitles.RemoveRange(tbookOtherTitlesToDelete);
+                }
+
+                //Identification
+                if (tbookIdentificationsToDelete != null && tbookIdentificationsToDelete.Any())
+                {
+                    context.TbookIdentifications.RemoveRange(tbookIdentificationsToDelete);
+                }
+
+                //Classification
+                if (tbookClassificationsToDelete != null && tbookClassificationsToDelete.Any())
+                {
+                    context.TbookClassifications.RemoveRange(tbookClassificationsToDelete);
+                }
+
+                //Format
+                if (tbookFormatsToDelete != null && tbookFormatsToDelete.Any())
+                {
+                    context.TbookFormats.RemoveRange(tbookFormatsToDelete);
+                }
+
+                //Collection Connector
+                if (tbookCollectionsToDelete != null && tbookCollectionsToDelete.Any())
+                {
+                    context.TbookCollections.RemoveRange(tbookCollectionsToDelete);
+                }
+
+                //Contact role connector
+                if (tbookContactRoleConnectorsToDelete != null && tbookContactRoleConnectorsToDelete.Any())
+                {
+                    context.TbookContactRoleConnectors.RemoveRange(tbookContactRoleConnectorsToDelete);
+                }
+
+                //Book Etat
+                if (tbookEtatsToDelete != null && tbookEtatsToDelete.Any())
+                {
+                    context.TbookEtats.RemoveRange(tbookEtatsToDelete);
+                }
+
+                //Book Pret
+                if (tbookPretsToDelete != null && tbookPretsToDelete.Any())
+                {
+                    context.TbookPrets.RemoveRange(tbookPretsToDelete);
+                }
+
+                //Book Exemplary
+                if (tbookExemplariesToDelete != null && tbookExemplariesToDelete.Any())
+                {
+                    context.TbookExemplaries.RemoveRange(tbookExemplariesToDelete);
+                }
+
+                context.Tbooks.RemoveRange(_tValues);
+                await context.SaveChangesAsync();
+
+                foreach (var tValue in _tValues)
+                {
+                    if (Guid.TryParse(tValue.Guid, out Guid guid))
+                    {
+                        InputOutput inputOutput = new();
+                        inputOutput.GetOrCreateDefaultFolderItem(guid, DefaultFolders.Books);
+                    }
                 }
 
                 return true;
@@ -600,6 +730,7 @@ namespace LibApi.Services.Books
                 return false;
             }
         }
+
         #endregion
 
         /// <summary>

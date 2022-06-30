@@ -223,14 +223,21 @@ namespace LibApi.Services.Categories
                 TlibraryCategorie? record = await context.TlibraryCategories.SingleOrDefaultAsync(s => s.Id == Id);
                 if (record == null)
                 {
-                    throw new ArgumentNullException(nameof(Tcollection), $"La catégorie n'existe pas avec l'id \"{Id}\".");
+                    throw new Exception($"La catégorie n'existe pas avec l'id \"{Id}\".");
                 }
 
-                List< TlibraryCategorie> recordChilds = await context.TlibraryCategories.Where(s => s.IdParentCategorie == Id).ToListAsync();
+                List<TlibraryCategorie> recordChilds = await context.TlibraryCategories.Where(s => s.IdParentCategorie == Id).ToListAsync();
                 if (recordChilds.Any())
                 {
                     recordChilds.ForEach(f => f.IdParentCategorie = null);
                     context.TlibraryCategories.UpdateRange(recordChilds);
+                }
+
+                List<Tbook> tbooks = await context.Tbooks.Where(w => w.IdCategorie == record.Id).ToListAsync();
+                if (tbooks != null && tbooks.Any())
+                {
+                    tbooks.ForEach(f => f.IdCategorie = null);
+                    context.Tbooks.UpdateRange(tbooks);
                 }
 
                 context.TlibraryCategories.Remove(record);
@@ -247,6 +254,77 @@ namespace LibApi.Services.Categories
             }
         }
 
+        /// <summary>
+        /// Efface tous les enregistrement ou seulement ceux d'une bibliothèque spécifiée.
+        /// </summary>
+        /// <param name="idLibrary">Identifiant de la bibliothèque</param>
+        /// <returns>True si la suppression s'est correctement effectuée sinon False</returns>
+        internal static async Task<bool> DeleteAsync(long? idLibrary = null)
+        {
+            try
+            {
+                using LibrarySqLiteDbContext context = new();
+
+                List<TlibraryCategorie> tValues = idLibrary == null ? await context.TlibraryCategories.ToListAsync() : await context.TlibraryCategories.Where(s => s.IdLibrary == idLibrary).ToListAsync();
+                if (tValues == null || !tValues.Any())
+                {
+                    return true;
+                }
+
+                return await DeleteAsync(tValues, null);
+            }
+            catch (Exception ex)
+            {
+                Logs.Log(className: nameof(Category), exception: ex);
+                return false;
+            }
+        }
+
+        internal static async Task<bool> DeleteAsync(IEnumerable<TlibraryCategorie> tValues, long? idLibrary = null)
+        {
+            try
+            {
+                if (tValues == null || !tValues.Any())
+                {
+                    throw new ArgumentNullException(nameof(tValues), "La liste des modèles ne doit pas être null.");
+                }
+
+                List<TlibraryCategorie> _tValues = idLibrary == null ? tValues.ToList() : tValues.Where(s => s.IdLibrary == idLibrary).ToList();
+                if (_tValues == null || !_tValues.Any())
+                {
+                    return true;
+                }
+
+                using LibrarySqLiteDbContext context = new();
+
+                foreach (var tValue in _tValues)
+                {
+                    List<TlibraryCategorie>? recordChilds = await context.TlibraryCategories.Where(s => s.IdParentCategorie == tValue.Id).ToListAsync();
+                    if (recordChilds != null && recordChilds.Any())
+                    {
+                        recordChilds.ForEach(f => f.IdParentCategorie = null);
+                        context.TlibraryCategories.UpdateRange(recordChilds);
+                    }
+
+                    List<Tbook> tbooks = await context.Tbooks.Where(w => w.IdCategorie == tValue.Id).ToListAsync();
+                    if (tbooks != null && tbooks.Any())
+                    {
+                        tbooks.ForEach(f => f.IdCategorie = null);
+                        context.Tbooks.UpdateRange(tbooks);
+                    }
+                }
+
+                context.TlibraryCategories.RemoveRange(_tValues);
+                await context.SaveChangesAsync();
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Logs.Log(className: nameof(Category), exception: ex);
+                return false;
+            }
+        }
         #endregion
 
 
