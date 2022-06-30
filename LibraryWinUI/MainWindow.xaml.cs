@@ -63,7 +63,7 @@ namespace LibraryWinUI
             {
                 LibrariesOrBooksCollectionNavigation();
                 LibraryWebApi libApi = new();
-                var task = libApi.GetLibraryVMsAsync().GetAwaiter();
+                var task = libApi.GetAllLibrariesAsync().GetAwaiter();
                 task.OnCompleted(() =>
                 {
                     var result = task.GetResult();
