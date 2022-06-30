@@ -433,21 +433,10 @@ namespace LibApi.Services.Libraries
                     throw new NullReferenceException($"La bibliothèque n'existe pas avec l'id \"{Id}\".");
                 }
 
-
-                _ = await Collection.DeleteAsync(idLibrary:Id);
-
-
-                IEnumerable<Book> books = await Book.AllAsync(idLibrary: Id);
-                if (books != null && books.Any())
-                {
-                    foreach (Book book in books)
-                    {
-                        await book.DeleteAsync();
-                        await book.DisposeAsync();
-                    }
-
-                    books = Enumerable.Empty<Book>();
-                }
+                _ = await Book.DeleteAsync(idLibrary: Id);
+                _ = await Category.DeleteAsync(idLibrary: Id);
+                _ = await Collection.DeleteAsync(idLibrary: Id);
+                
 
                 context.Tlibraries.Remove(tlibrary);
                 _ = await context.SaveChangesAsync();

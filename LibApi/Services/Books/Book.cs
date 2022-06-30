@@ -500,7 +500,7 @@ namespace LibApi.Services.Books
         /// <summary>
         /// Supprime la bibliothèque de la base de données
         /// </summary>
-        /// <returns></returns>
+        /// <returns>True si la suppression s'est correctement effectuée sinon False</returns>
         public async Task<bool> DeleteAsync()
         {
             try
@@ -537,7 +537,7 @@ namespace LibApi.Services.Books
         /// Efface tous les enregistrement ou seulement ceux d'une bibliothèque spécifié.
         /// </summary>
         /// <param name="idLibrary">Identifiant de la bibliothèque</param>
-        /// <returns></returns>
+        /// <returns>True si la suppression s'est correctement effectuée sinon False</returns>
         internal static async Task<bool> DeleteAsync(long? idLibrary = null)
         {
             try

@@ -226,22 +226,11 @@ namespace LibApi.Services.Categories
                     throw new Exception($"La catégorie n'existe pas avec l'id \"{Id}\".");
                 }
 
-                List<TlibraryCategorie> recordChilds = await context.TlibraryCategories.Where(s => s.IdParentCategorie == Id).ToListAsync();
-                if (recordChilds.Any())
+                bool isDeleted = await DeleteAsync(tValues: new TlibraryCategorie[] { record }, null);
+                if (!isDeleted)
                 {
-                    recordChilds.ForEach(f => f.IdParentCategorie = null);
-                    context.TlibraryCategories.UpdateRange(recordChilds);
+                    throw new Exception("La catégorie n'a pas pû être supprimée.");
                 }
-
-                List<Tbook> tbooks = await context.Tbooks.Where(w => w.IdCategorie == record.Id).ToListAsync();
-                if (tbooks != null && tbooks.Any())
-                {
-                    tbooks.ForEach(f => f.IdCategorie = null);
-                    context.Tbooks.UpdateRange(tbooks);
-                }
-
-                context.TlibraryCategories.Remove(record);
-                _ = await context.SaveChangesAsync();
 
                 IsDeleted = true;
 
