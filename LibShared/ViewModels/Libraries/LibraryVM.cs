@@ -1,6 +1,6 @@
 ﻿namespace LibShared.ViewModels.Libraries;
 
-public class LibraryVM : GenericVM
+public abstract class LibraryVM : GenericVM
 {
     protected Guid _Guid = System.Guid.NewGuid();
     public Guid Guid

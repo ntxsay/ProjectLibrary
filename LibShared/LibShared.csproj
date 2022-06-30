@@ -16,4 +16,7 @@
   <ItemGroup>
     <Folder Include="ViewModels\Collections\" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\AppHelpers\AppHelpers.csproj" />
+  </ItemGroup>
 </Project>

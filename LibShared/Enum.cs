@@ -74,6 +74,12 @@ namespace LibShared
         Jusqua,
         DeTantATant,
     }
+
+    public enum EditMode
+    {
+        Create,
+        Edit,
+    }
     #endregion
 
     #region List
