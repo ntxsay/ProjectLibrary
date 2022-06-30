@@ -344,6 +344,72 @@ namespace AppHelpers.Serialization
         }
 
 
+        public static bool SerializeAsync(object value, string filePath)
+        {
+            try
+            {
+                if (filePath.IsStringNullOrEmptyOrWhiteSpace())
+                {
+                    throw new ArgumentNullException(nameof(filePath), "Le chemin d'accès au fichier n'est pas valide : il ne peut pas être vide ou ne contenir que des espaces blancs.");
+                }
+
+                // serialize JSON directly to a file
+                using StreamWriter file = File.CreateText(filePath);
+                JsonSerializer serializer = new();
+                serializer.Serialize(file, value);
+                file.Close();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Logs.Log(className, nameof(SerializeClassToFileAsync), ex);
+                return false;
+            }
+        }
+
+        public static bool SerializeAsync(object value, FileInfo fileInfo)
+        {
+            try
+            {
+                if (fileInfo == null)
+                {
+                    throw new ArgumentNullException(nameof(fileInfo), "Le paramètre ne peut pas être null.");
+                }
+
+                if (!fileInfo.Exists)
+                {
+                    // serialize JSON directly to a file
+                    using StreamWriter file = fileInfo.CreateText();
+                    JsonSerializer serializer = new();
+                    serializer.Serialize(file, value);
+                    file.Close();
+                }
+                else
+                {
+                    if (fileInfo.IsReadOnly)
+                    {
+                        throw new Exception("Le fichier spécifié existe mais il est en lecture seule.");
+                    }
+
+                    // serialize JSON directly to a file
+                    using FileStream file = fileInfo.OpenWrite();
+                    using StreamWriter sw  = new (file);
+                    JsonSerializer serializer = new();
+                    serializer.Serialize(sw, value);
+                    sw.Close();
+                    file.Close();
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Logs.Log(className: className, exception:ex);
+                return false;
+            }
+        }
+
+
         public static async Task<T?> DeserializeSingleFromPathAsync<T>(string configFilePath)
         {
             try

@@ -6,7 +6,6 @@
       <HashCode>AAECAAogACJiAIACIABASAQQgBAABAiACAAAgYAAAIQ=</HashCode>
       <FileName>Services\Libraries\Library.cs</FileName>
     </TypeIdentifier>
-    <Lollipop Position="0.2" Collapsed="true" />
   </Class>
   <Class Name="LibApi.Services.Collections.Collection">
     <Position X="4" Y="0.5" Width="4.75" />

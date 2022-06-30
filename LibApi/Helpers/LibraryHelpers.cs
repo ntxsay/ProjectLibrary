@@ -1,7 +1,11 @@
 ﻿using AppHelpers;
+using AppHelpers.Serialization;
 using AppHelpers.Strings;
 using LibApi.Models.Local.SQLite;
 using LibShared;
+using LibShared.ViewModels.Books;
+using LibShared.ViewModels.Contacts;
+using LibShared.ViewModels.Libraries;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -188,6 +192,55 @@ namespace LibApi.Helpers
             {
                 Logs.Log(nameof(LibraryHelpers), nameof(CountPages), ex);
                 return 0;
+            }
+        }
+
+        public bool SaveToJson<T>(T viewModel) where T : class
+        {
+            try
+            {
+                if (viewModel == null)
+                {
+                    throw new ArgumentNullException(nameof(viewModel), "Le modèle de vue est null.");
+                }
+
+                InputOutput inputOutput = new ();
+                string? filePath = null;
+
+                if (viewModel is LibraryVM library)
+                {
+                    filePath = inputOutput.GetItemModelConfigFilePath(library.Guid, DefaultFolders.Libraries);
+                }
+                else if (viewModel is BookVM book)
+                {
+                    filePath = inputOutput.GetItemModelConfigFilePath(book.Guid, DefaultFolders.Books);
+                }
+                else if (viewModel is ContactVM contact)
+                {
+                    filePath = inputOutput.GetItemModelConfigFilePath(contact.Guid, DefaultFolders.Contacts);
+                }
+                else
+                {
+                    throw new ArgumentException("Le type n'est pas valide dans ce contexte.", nameof(viewModel));
+                }
+
+                if (filePath.IsStringNullOrEmptyOrWhiteSpace())
+                {
+                    throw new Exception("Le chemin d'accès au fichier de configuration n'est pas valide");
+                }
+
+                bool isSaved = JsonSerialization.SerializeAsync(viewModel, filePath);
+                if (isSaved == false)
+                {
+                    throw new Exception("Le fichier n'a pas été enregistré.");
+                }
+
+                return isSaved;
+            }
+            catch (Exception ex)
+            {
+                Logs.Log(className:nameof(LibraryHelpers), exception:ex);
+                return false;
             }
         }
 

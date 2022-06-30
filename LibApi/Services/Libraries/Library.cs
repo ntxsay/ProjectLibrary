@@ -324,10 +324,14 @@ namespace LibApi.Services.Libraries
                 await context.Tlibraries.AddAsync(record);
                 await context.SaveChangesAsync();
 
-                InputOutput inputOutput = new();
-                inputOutput.GetOrCreateDefaultFolderItem(_guid, DefaultFolders.Libraries);
-
-                return ConvertToViewModel(record);
+                Library? vm = ConvertToViewModel(record);
+                if (vm != null)
+                {
+                    InputOutput inputOutput = new();
+                    inputOutput.SaveToJson(vm.Guid, DefaultFolders.Libraries, vm as LibraryVM);
+                }
+                
+                return vm;
             }
             catch (Exception ex)
             {
