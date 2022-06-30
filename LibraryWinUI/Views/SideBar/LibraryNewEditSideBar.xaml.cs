@@ -1,8 +1,10 @@
 ﻿using AppHelpers;
 using AppHelpers.Extensions;
 using AppHelpers.Strings;
+using LibraryWinUI.Code.WebApi;
 using LibraryWinUI.ViewModels.Libraries;
 using LibraryWinUI.ViewModels.SideBar;
+using LibraryWinUI.Views.ContentDialogs;
 using LibraryWinUI.Views.Pages;
 using LibShared;
 using LibShared.Services;
@@ -21,6 +23,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
+using Windows.ApplicationModel.Resources;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 
@@ -32,6 +35,7 @@ namespace LibraryWinUI.Views.SideBar
     public sealed partial class LibraryNewEditSideBar : PivotItem
     {
         public MainCollectionPage ParentPage { get; private set; }
+        ResourceLoader langResource = ResourceLoader.GetForViewIndependentUse("LibraryNewEditSideBarRessources");
 
         internal LibraryNewEditSideBarVM UiViewModel { get; set; } = new();
         public Guid ItemGuid { get; private set; } = Guid.NewGuid();
@@ -41,7 +45,7 @@ namespace LibraryWinUI.Views.SideBar
         public delegate void CancelModificationEventHandler(LibraryNewEditSideBar sender, ExecuteRequestedEventArgs e);
         public event CancelModificationEventHandler CancelModificationRequested;
 
-        internal delegate void ExecuteTaskEventHandler(LibraryNewEditSideBar sender, LibraryVM originalViewModel, OperationState e);
+        internal delegate void ExecuteTaskEventHandler(LibraryNewEditSideBar sender, LibraryVM originalViewModel, bool isSuccess);
         internal event ExecuteTaskEventHandler ExecuteTaskRequested;
 
         public LibraryNewEditSideBar()
@@ -66,7 +70,7 @@ namespace LibraryWinUI.Views.SideBar
                     EditMode = editMode,
                 };
 
-                UiViewModel.Header = $"{(UiViewModel.EditMode == EditMode.Create ? "Ajouter" : "Editer")} une bibliothèque";
+                UiViewModel.Header = UiViewModel.EditMode == EditMode.Create ? langResource.GetString("AddLibrary") : langResource.GetString("EditLibrary");
 
                 if (UiViewModel.EditMode == EditMode.Create)
                 {
@@ -146,7 +150,7 @@ namespace LibraryWinUI.Views.SideBar
                     return;
                 }
 
-                OperationState result = null;
+                bool result = false;
                 if (UiViewModel.EditMode == EditMode.Create)
                 {
                     result = await CreateAsync();
@@ -174,13 +178,13 @@ namespace LibraryWinUI.Views.SideBar
                 {
                     var dialog = new CheckModificationsStateCD(OriginalViewModel, viewModelsEqual)
                     {
-                        Title = "Enregistrer vos modifications"
+                        Title = langResource.GetString("SaveYourWork"),
                     };
 
                     var result = await dialog.ShowAsync();
                     if (result == ContentDialogResult.Primary)
                     {
-                        OperationState operationResult = null;
+                        bool operationResult = false;
                         if (UiViewModel.EditMode == EditMode.Create)
                         {
                             operationResult = await CreateAsync();
@@ -190,7 +194,7 @@ namespace LibraryWinUI.Views.SideBar
                             operationResult = await UpdateAsync();
                         }
 
-                        return operationResult.IsSuccess;
+                        return operationResult;
                     }
                     else if (result == ContentDialogResult.None)//Si l'utilisateur a appuyé sur le bouton annuler
                     {
@@ -230,72 +234,72 @@ namespace LibraryWinUI.Views.SideBar
             }
         }
 
-        private async Task<OperationState> CreateAsync()
+        private async Task<bool> CreateAsync()
         {
             try
             {
                 LibraryVM viewModel = this.UiViewModel.ViewModel;
 
-                OperationState result = await DbServices.Library.CreateAsync(viewModel);
-                if (result.IsSuccess)
+                LibraryWebApi libraryWebApi = new ();
+                LibShared.ViewModels.Libraries.LibraryVM result = await libraryWebApi.CreateAsync(viewModel);
+                if (result != null)
                 {
                     viewModel.Id = result.Id;
-                    this.UiViewModel.ResultMessageTitle = "Succès";
-                    this.UiViewModel.ResultMessage = result.Message;
+                    this.UiViewModel.ResultMessageTitle = langResource.GetString("Success");
+                    this.UiViewModel.ResultMessage = langResource.GetString("CreatingSuccess");
                     this.UiViewModel.ResultMessageSeverity = InfoBarSeverity.Success;
                     this.UiViewModel.IsResultMessageOpen = true;
-                    await eslibrary.SaveLibraryViewModelAsync(OriginalViewModel);
+                    return true;
                 }
                 else
                 {
                     //Erreur
-                    this.UiViewModel.ResultMessageTitle = "Une erreur s'est produite";
-                    this.UiViewModel.ResultMessage = result.Message;
+                    this.UiViewModel.ResultMessageTitle = langResource.GetString("AnErrorOccured");
+                    this.UiViewModel.ResultMessage = langResource.GetString("CreatingNotSuccess");
                     this.UiViewModel.ResultMessageSeverity = InfoBarSeverity.Error;
                     this.UiViewModel.IsResultMessageOpen = true;
+                    return false;
                 }
-
-                return result;
             }
             catch (Exception ex)
             {
                 Logs.Log(className: nameof(LibraryNewEditSideBar), exception: ex);
-                return null;
+                return false;
             }
         }
 
-        private async Task<OperationState> UpdateAsync()
+        private async Task<bool> UpdateAsync()
         {
             try
             {
                 LibraryVM viewModel = this.UiViewModel.ViewModel;
 
-                OperationState result = await DbServices.Library.UpdateAsync(viewModel);
-                if (result.IsSuccess)
+                LibraryWebApi libraryWebApi = new();
+                LibShared.ViewModels.Libraries.LibraryVM result = await libraryWebApi.UpdateAsync(viewModel);
+                if (result != null)
                 {
                     OriginalViewModel.DeepCopy(viewModel);
-                    await eslibrary.SaveLibraryViewModelAsync(OriginalViewModel);
 
-                    this.UiViewModel.ResultMessageTitle = "Succès";
-                    this.UiViewModel.ResultMessage = result.Message;
+                    this.UiViewModel.ResultMessageTitle = langResource.GetString("Success");
+                    this.UiViewModel.ResultMessage = langResource.GetString("UpdatingSuccess");
                     this.UiViewModel.ResultMessageSeverity = InfoBarSeverity.Success;
                     this.UiViewModel.IsResultMessageOpen = true;
+                    return true;
                 }
                 else
                 {
                     //Erreur
-                    this.UiViewModel.ResultMessageTitle = "Une erreur s'est produite";
-                    this.UiViewModel.ResultMessage = result.Message;
+                    this.UiViewModel.ResultMessageTitle = langResource.GetString("AnErrorOccured");
+                    this.UiViewModel.ResultMessage = langResource.GetString("UpdatingNotSuccess");
                     this.UiViewModel.ResultMessageSeverity = InfoBarSeverity.Error;
                     this.UiViewModel.IsResultMessageOpen = true;
+                    return false;
                 }
-
-                return result;
             }
             catch (Exception ex)
             {
                 Logs.Log(className: nameof(LibraryNewEditSideBar), exception: ex);
-                return null;
+                return false;
             }
         }
         

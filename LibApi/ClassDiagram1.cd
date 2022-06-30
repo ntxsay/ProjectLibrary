@@ -3,9 +3,10 @@
   <Class Name="LibApi.Services.Libraries.Library" BaseTypeListCollapsed="true">
     <Position X="0.5" Y="0.5" Width="3.25" />
     <TypeIdentifier>
-      <HashCode>AAECAAogACJiAIACIABASAQQgBAABAiACAAAgYAAAIQ=</HashCode>
+      <HashCode>AAECAAogACJCAIACAABASAAQABAABAiACAAAgYAAAIQ=</HashCode>
       <FileName>Services\Libraries\Library.cs</FileName>
     </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
   </Class>
   <Class Name="LibApi.Services.Collections.Collection">
     <Position X="4" Y="0.5" Width="4.75" />

@@ -1,7 +1,10 @@
 ﻿using AppHelpers;
 using LibraryWinUI.ViewModels;
+using LibraryWinUI.ViewModels.Libraries;
 using LibraryWinUI.ViewModels.Pages;
+using LibraryWinUI.Views.SideBar;
 using LibraryWinUI.Views.UserControls;
+using LibShared;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
@@ -14,6 +17,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 
@@ -31,6 +35,14 @@ namespace LibraryWinUI.Views.Pages
         public MainCollectionPage()
         {
             this.InitializeComponent();
+        }
+
+        protected async override void OnNavigatedTo(NavigationEventArgs e)
+        {
+            base.OnNavigatedTo(e);
+#warning Juste à des fins de tests
+            await LibraryNewEditAsync(new LibraryVM(), EditMode.Create);
+
         }
 
         private void ASB_SearchItem_QuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
@@ -75,6 +87,63 @@ namespace LibraryWinUI.Views.Pages
             //    return;
             //}
         }
+
+        #region Actions
+        #region Library
+        internal async Task LibraryNewEditAsync(LibraryVM viewModel, EditMode editMode = EditMode.Create)
+        {
+            try
+            {
+
+                if (this.PivotRightSideBar.Items.FirstOrDefault(f => f is LibraryNewEditSideBar item && item.UiViewModel.EditMode == editMode) is LibraryNewEditSideBar checkedItem)
+                {
+                    var isModificationStateChecked = await checkedItem.CheckModificationsStateAsync();
+                    if (isModificationStateChecked)
+                    {
+                        checkedItem.InitializeSideBar(this, viewModel, editMode);
+                        this.SelectItemSideBar(checkedItem);
+                    }
+                }
+                else
+                {
+                    LibraryNewEditSideBar userControl = new();
+                    userControl.InitializeSideBar(this, viewModel, editMode);
+
+                    userControl.CancelModificationRequested += LibraryNewEditSideBar_CancelModificationRequested; ;
+                    userControl.ExecuteTaskRequested += LibraryNewEditSideBar_ExecuteTaskRequested; ;
+
+                    this.AddItemToSideBar(userControl, new SideBarItemHeaderVM()
+                    {
+                        Glyph = userControl.UiViewModel.Glyph,
+                        Title = userControl.UiViewModel.Header,
+                        IdItem = userControl.ItemGuid,
+                    });
+                }
+                this.ViewModelPage.IsSplitViewOpen = true;
+            }
+            catch (Exception ex)
+            {
+                Logs.Log(className: nameof(MainCollectionPage), exception: ex);
+                return;
+            }
+        }
+
+        private void LibraryNewEditSideBar_ExecuteTaskRequested(LibraryNewEditSideBar sender, LibraryVM originalViewModel, bool isSuccess)
+        {
+            if (isSuccess)
+            {
+                //await this.RefreshItemsGrouping(this.GetSelectedPage, true);
+                this.RemoveItemToSideBar(sender);
+            }
+        }
+
+        private void LibraryNewEditSideBar_CancelModificationRequested(LibraryNewEditSideBar sender, ExecuteRequestedEventArgs e)
+        {
+            this.RemoveItemToSideBar(sender);
+        } 
+        #endregion
+
+        #endregion
 
         #region SideBar
         private void CmbxSideBarItemTitle_SelectionChanged(object sender, SelectionChangedEventArgs e)

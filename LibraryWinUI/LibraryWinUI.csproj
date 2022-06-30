@@ -19,6 +19,7 @@
     <Page Remove="Pages\**" />
   </ItemGroup>
   <ItemGroup>
+    <None Remove="Views\ContentDialogs\CheckModificationsStateCD.xaml" />
     <None Remove="Views\Pages\MainCollectionPage.xaml" />
     <None Remove="Views\SideBar\LibraryNewEditSideBar.xaml" />
     <None Remove="Views\UserControls\SideBarItemHeader.xaml" />
@@ -62,6 +63,11 @@
   </ItemGroup>
   <ItemGroup>
     <Content Remove="Assets\Backgrounds\Image1.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Views\ContentDialogs\CheckModificationsStateCD.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Page Update="Views\SideBar\LibraryNewEditSideBar.xaml">

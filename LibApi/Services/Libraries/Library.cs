@@ -6,8 +6,8 @@ using LibApi.Models.Local.SQLite;
 using LibApi.Services.Books;
 using LibApi.Services.Categories;
 using LibApi.Services.Collections;
+using LibApi.ViewModels;
 using LibShared;
-using LibShared.ViewModels.Libraries;
 using Microsoft.EntityFrameworkCore;
 
 namespace LibApi.Services.Libraries
@@ -26,73 +26,6 @@ namespace LibApi.Services.Libraries
         {
 
         }
-
-        #region Properties
-        public new long Id
-        {
-            get => _Id;
-            private set
-            {
-                if (_Id != value)
-                {
-                    _Id = value;
-                    OnPropertyChanged();
-                }
-            }
-        }
-
-        public new DateTime DateAjout
-        {
-            get => _DateAjout;
-            private set
-            {
-                if (_DateAjout != value)
-                {
-                    _DateAjout = value;
-                    OnPropertyChanged();
-                }
-            }
-        }
-
-        public new DateTime? DateEdition
-        {
-            get => _DateEdition;
-            private set
-            {
-                if (_DateEdition != value)
-                {
-                    _DateEdition = value;
-                    OnPropertyChanged();
-                }
-            }
-        }
-
-        public new string Name
-        {
-            get => _Name;
-            private set
-            {
-                if (_Name != value)
-                {
-                    _Name = value;
-                    OnPropertyChanged();
-                }
-            }
-        }
-
-        public new string? Description
-        {
-            get => _Description;
-            private set
-            {
-                if (_Description != value)
-                {
-                    _Description = value;
-                    OnPropertyChanged();
-                }
-            }
-        }
-        #endregion
 
         /// <summary>
         /// Obtient tous les livres de la bibliothèque trié par nom et par ordre croissant ou décroissant
@@ -268,11 +201,7 @@ namespace LibApi.Services.Libraries
                     throw new ArgumentNullException(nameof(name), "Le nom de la bibliothèque ne peut pas être nulle, vide ou ne contenir que des espaces blancs.");
                 }
 
-                return await CreateAsync(new LibraryVM()
-                {
-                    Name = name.Trim(),
-                    Description = description?.Trim()
-                }, openIfExist);
+                return await CreateAsync(new LibraryVM(name.Trim(), description?.Trim()), openIfExist);
             }
             catch (Exception ex)
             {
@@ -281,7 +210,7 @@ namespace LibApi.Services.Libraries
             }
         }
 
-        public static async Task<Library?> CreateAsync(LibraryVM viewModel, bool openIfExist = false)
+        public static async Task<Library?> CreateAsync(LibShared.ViewModels.Libraries.LibraryVM viewModel, bool openIfExist = false)
         {
             try
             {

@@ -8,7 +8,6 @@
     mc:Ignorable="d" xmlns:MUIXC="using:Microsoft.UI.Xaml.Controls">
 
     <Grid x:Name="gridMainContainer">
-        <Image x:Name="ImageBackground" Source="ms-appx:///Assets/Backgrounds/Image1.jpg" Stretch="UniformToFill" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Opacity="1"/>
         <MUIXC:NavigationView x:Name="PrincipalNaviguation" PaneDisplayMode="Left" IsTitleBarAutoPaddingEnabled="False" IsSettingsVisible="False" IsBackEnabled="True" 
                               IsBackButtonVisible="{x:Bind ViewModelPage.IsBackArrowVisible, Mode=OneWay}" IsPaneToggleButtonVisible="True" ItemInvoked="PrincipalNaviguation_ItemInvoked"
                               BackRequested="PrincipalNaviguation_BackRequested">

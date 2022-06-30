@@ -10,7 +10,8 @@ namespace LibraryWinUI.Code.WebApi
 {
     internal abstract class WebApiConfig
     {
-        protected string baseAPIUrl = "https://localhost:5001/";
+        //protected string baseAPIUrl = "https://localhost:5001/";
+        protected string baseAPIUrl = "https://localhost:7012/";
         protected HttpClient HttpClient()
         {
             try
@@ -25,7 +26,7 @@ namespace LibraryWinUI.Code.WebApi
                     }
                 };
 
-                using HttpClient client = new (handler);
+                HttpClient client = new (handler);
                 client.BaseAddress = new Uri(baseAPIUrl);
                 client.DefaultRequestHeaders.Accept.Clear();
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));

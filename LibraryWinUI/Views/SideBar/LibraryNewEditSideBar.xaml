@@ -79,7 +79,7 @@
                     <TextBlock Text="Mettre à jour" />
                 </StackPanel>
             </Button>
-            <Button Command="{StaticResource CancelModificationXUiCommand}">
+            <Button Command="{StaticResource CancelModificationXUiCmd}">
                 <StackPanel Orientation="Horizontal" Spacing="8">
                     <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE711;"/>
                     <TextBlock Text="Annuler" />

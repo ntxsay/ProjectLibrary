@@ -1,5 +1,5 @@
 ﻿using AppHelpers;
-using LibraryWinUI.ViewModels.Libraries;
+using LibShared.ViewModels.Libraries;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -46,7 +46,53 @@ namespace LibraryWinUI.Code.WebApi
 
                 string json = JsonConvert.SerializeObject(viewModel);
                 StringContent httpContent = new (json, Encoding.Default, "application/json");
-                
+
+                //Désactive la validation du certificat SSL auto-signé
+                using HttpClientHandler handler = new()
+                {
+                    ClientCertificateOptions = ClientCertificateOption.Manual,
+                    ServerCertificateCustomValidationCallback = (httpRequestMessage, cert, cetChain, policyErrors) =>
+                    {
+                        return true;
+                    }
+                };
+
+                using HttpClient client = new(handler);
+                client.BaseAddress = new Uri(baseAPIUrl);
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                HttpResponseMessage response = await client.PostAsync("api/v2/libraries/create/view-model", httpContent);
+                string httpResponseBody = "";
+
+                if (response.IsSuccessStatusCode)
+                {
+                    httpResponseBody = await response.Content.ReadAsStringAsync();
+                    var result = JsonConvert.DeserializeObject<LibraryVM>(httpResponseBody);
+                    return result;
+                }
+
+                return null;
+            }
+            catch (Exception ex)
+            {
+                Logs.Log(nameof(LibraryWebApi), exception: ex);
+                return null;
+            }
+        }
+
+        internal async Task<LibraryVM> UpdateAsync(LibraryVM viewModel)
+        {
+            try
+            {
+                if (viewModel == null)
+                {
+                    throw new ArgumentNullException(nameof(viewModel), "Le modèle de vue ne peut pas être null.");
+                }
+
+                string json = JsonConvert.SerializeObject(viewModel);
+                StringContent httpContent = new(json, Encoding.Default, "application/json");
+
                 HttpResponseMessage response = await HttpClient().PostAsync("api/v2/libraries/create/view-model", httpContent);
                 string httpResponseBody = "";
 
