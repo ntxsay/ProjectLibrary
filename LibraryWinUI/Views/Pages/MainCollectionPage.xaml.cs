@@ -1,4 +1,7 @@
-﻿using LibraryWinUI.ViewModels.Pages;
+﻿using AppHelpers;
+using LibraryWinUI.ViewModels;
+using LibraryWinUI.ViewModels.Pages;
+using LibraryWinUI.Views.UserControls;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
@@ -24,7 +27,7 @@ namespace LibraryWinUI.Views.Pages
     /// </summary>
     public sealed partial class MainCollectionPage : Page
     {
-        MainCollectionPageVM ViewModelPage = new ();
+        readonly MainCollectionPageVM ViewModelPage = new ();
         public MainCollectionPage()
         {
             this.InitializeComponent();
@@ -73,5 +76,175 @@ namespace LibraryWinUI.Views.Pages
             //}
         }
 
+        #region SideBar
+        private void CmbxSideBarItemTitle_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            try
+            {
+                if (sender is ComboBox cmbx && cmbx.SelectedItem is SideBarItemHeaderVM headerVM)
+                {
+                    foreach (var item in this.PivotRightSideBar.Items)
+                    {
+                        if (item is PivotItem pivotItem && pivotItem.Header is Grid grid && grid.Children[0] is SideBarItemHeader itemHeader)
+                        {
+                            if (itemHeader.Guid == headerVM.IdItem)
+                            {
+                                this.PivotRightSideBar.SelectedItem = item;
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Logs.Log(className: nameof(MainCollectionPage), exception: ex);
+                return;
+            }
+        }
+
+        private void AddItemToSideBar(PivotItem item, SideBarItemHeaderVM sideBarItem)
+        {
+            try
+            {
+                this.PivotRightSideBar.Items.Add(item);
+                this.PivotRightSideBar.SelectedItem = item;
+                ViewModelPage.ItemsSideBarHeader.Add(sideBarItem);
+                this.CmbxSideBarItemTitle.SelectedItem = sideBarItem;
+                if (PivotRightSideBar.Items.Count >= 2)
+                {
+                    this.CmbxSideBarItemTitle.Visibility = Visibility.Visible;
+                }
+                else
+                {
+                    this.CmbxSideBarItemTitle.Visibility = Visibility.Collapsed;
+                }
+            }
+            catch (Exception ex)
+            {
+                Logs.Log(className: nameof(MainCollectionPage), exception: ex);
+                return;
+            }
+        }
+
+        private void RemoveAllItemToSideBar()
+        {
+            try
+            {
+                if (this.CmbxSideBarItemTitle.Items.Count > 0)
+                {
+                    for (int i = 0; i < this.CmbxSideBarItemTitle.Items.Count; i++)
+                    {
+                        if (this.CmbxSideBarItemTitle.Items[i] is SideBarItemHeaderVM headerVM)
+                        {
+                            ViewModelPage.ItemsSideBarHeader.Remove(headerVM);
+                            i = 0;
+                            continue;
+                        }
+                    }
+                }
+
+                if (this.PivotRightSideBar.Items.Count > 0)
+                {
+                    for (int i = 0; i < this.PivotRightSideBar.Items.Count; i++)
+                    {
+                        this.PivotRightSideBar.Items.RemoveAt(i);
+                        i = 0;
+                        continue;
+                    }
+                }
+
+                this.ViewModelPage.IsSplitViewOpen = false;
+                this.CmbxSideBarItemTitle.Visibility = Visibility.Collapsed;
+            }
+            catch (Exception ex)
+            {
+                Logs.Log(className: nameof(MainCollectionPage), exception: ex);
+                return;
+            }
+        }
+
+
+        private void RemoveItemToSideBar(PivotItem item)
+        {
+            try
+            {
+                if (this.PivotRightSideBar.Items.Count == 1)
+                {
+                    this.ViewModelPage.IsSplitViewOpen = false;
+                }
+
+                if (this.CmbxSideBarItemTitle.Items.Count > 0)
+                {
+                    if (item.Header is Grid grid && grid.Children[0] is SideBarItemHeader itemHeader)
+                    {
+                        foreach (var cmbxItem in this.CmbxSideBarItemTitle.Items)
+                        {
+                            if (cmbxItem is SideBarItemHeaderVM headerVM)
+                            {
+                                if (itemHeader.Guid == headerVM.IdItem)
+                                {
+                                    ViewModelPage.ItemsSideBarHeader.Remove(headerVM);
+                                    break;
+                                }
+                            }
+                        }
+
+                    }
+                }
+
+                this.PivotRightSideBar.Items.Remove(item);
+                if (PivotRightSideBar.Items.Count < 2)
+                {
+                    this.CmbxSideBarItemTitle.Visibility = Visibility.Collapsed;
+                }
+                else
+                {
+                    this.CmbxSideBarItemTitle.Visibility = Visibility.Visible;
+                }
+            }
+            catch (Exception ex)
+            {
+                Logs.Log(className: nameof(MainCollectionPage), exception: ex);
+                return;
+            }
+        }
+
+        private void SelectItemSideBar(PivotItem item)
+        {
+            try
+            {
+                if (!this.PivotRightSideBar.Items.Contains(item))
+                {
+                    return;
+                }
+
+                this.PivotRightSideBar.SelectedItem = item;
+
+                if (this.CmbxSideBarItemTitle.Items.Count > 0)
+                {
+                    if (item.Header is Grid grid && grid.Children[0] is SideBarItemHeader itemHeader)
+                    {
+                        foreach (var cmbxItem in this.CmbxSideBarItemTitle.Items)
+                        {
+                            if (cmbxItem is SideBarItemHeaderVM headerVM)
+                            {
+                                if (itemHeader.Guid == headerVM.IdItem)
+                                {
+                                    this.CmbxSideBarItemTitle.SelectedItem = headerVM;
+                                    return;
+                                }
+                            }
+                        }
+
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Logs.Log(className: nameof(MainCollectionPage), exception: ex);
+                return;
+            }
+        }
+        #endregion
     }
 }

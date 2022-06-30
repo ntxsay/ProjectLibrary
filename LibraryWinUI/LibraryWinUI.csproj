@@ -20,6 +20,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Remove="Views\Pages\MainCollectionPage.xaml" />
+    <None Remove="Views\SideBar\LibraryNewEditSideBar.xaml" />
+    <None Remove="Views\UserControls\SideBarItemHeader.xaml" />
   </ItemGroup>
 
   <ItemGroup>
@@ -54,12 +56,21 @@
     <Folder Include="Strings\en-US\" />
     <Folder Include="ViewModels\CustomControls\" />
     <Folder Include="ViewModels\UserControls\" />
-    <Folder Include="Views\UserControls\" />
   </ItemGroup>
   <ItemGroup>
     <PRIResource Remove="Pages\**" />
   </ItemGroup>
   <ItemGroup>
     <Content Remove="Assets\Backgrounds\Image1.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Views\SideBar\LibraryNewEditSideBar.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Views\UserControls\SideBarItemHeader.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
 </Project>

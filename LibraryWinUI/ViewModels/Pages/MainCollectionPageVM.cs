@@ -1,6 +1,7 @@
 ﻿using Microsoft.UI.Xaml.Controls;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -16,6 +17,20 @@ namespace LibraryWinUI.ViewModels.Pages
         public MainCollectionPageVM()
         {
 
+        }
+
+        private ObservableCollection<SideBarItemHeaderVM> _ItemsSideBarHeader = new ();
+        public ObservableCollection<SideBarItemHeaderVM> ItemsSideBarHeader
+        {
+            get => this._ItemsSideBarHeader;
+            set
+            {
+                if (_ItemsSideBarHeader != value)
+                {
+                    this._ItemsSideBarHeader = value;
+                    this.OnPropertyChanged();
+                }
+            }
         }
 
         #region SplitView

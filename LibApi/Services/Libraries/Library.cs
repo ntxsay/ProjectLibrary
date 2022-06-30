@@ -436,7 +436,6 @@ namespace LibApi.Services.Libraries
                 _ = await Book.DeleteAsync(idLibrary: Id);
                 _ = await Category.DeleteAsync(idLibrary: Id);
                 _ = await Collection.DeleteAsync(idLibrary: Id);
-                
 
                 context.Tlibraries.Remove(tlibrary);
                 _ = await context.SaveChangesAsync();
