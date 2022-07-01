@@ -22,6 +22,7 @@
     <None Remove="Views\ContentDialogs\CheckModificationsStateCD.xaml" />
     <None Remove="Views\Pages\MainCollectionPage.xaml" />
     <None Remove="Views\SideBar\LibraryNewEditSideBar.xaml" />
+    <None Remove="Views\UserControls\ItemCollectionUC.xaml" />
     <None Remove="Views\UserControls\SideBarItemHeader.xaml" />
   </ItemGroup>
 
@@ -57,12 +58,18 @@
     <Folder Include="Strings\en-US\" />
     <Folder Include="ViewModels\CustomControls\" />
     <Folder Include="ViewModels\UserControls\" />
+    <Folder Include="Views\Pages\Intermediate\" />
   </ItemGroup>
   <ItemGroup>
     <PRIResource Remove="Pages\**" />
   </ItemGroup>
   <ItemGroup>
     <Content Remove="Assets\Backgrounds\Image1.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Views\UserControls\ItemCollectionUC.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Page Update="Views\ContentDialogs\CheckModificationsStateCD.xaml">

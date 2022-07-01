@@ -117,14 +117,20 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="AddLibrary" xml:space="preserve">
+  <data name="AddItem" xml:space="preserve">
     <value>Ajouter une bibliothèque</value>
   </data>
-  <data name="AddLibrarySubTitle" xml:space="preserve">
+  <data name="AddItemSubTitle" xml:space="preserve">
     <value>Vous êtes en train de créer une nouvelle bibliothèque</value>
   </data>
   <data name="AnErrorOccured" xml:space="preserve">
     <value>Une erreur s'est produite</value>
+  </data>
+  <data name="CancelButton.Text" xml:space="preserve">
+    <value>Annuler</value>
+  </data>
+  <data name="CreateButton.Text" xml:space="preserve">
+    <value>Créer</value>
   </data>
   <data name="CreatingNotSuccess" xml:space="preserve">
     <value>La bibliothèque n'a pas été créée.</value>
@@ -132,11 +138,17 @@
   <data name="CreatingSuccess" xml:space="preserve">
     <value>La bibliothèque a été créée avec succès.</value>
   </data>
-  <data name="EditLibrary" xml:space="preserve">
+  <data name="Description.PlaceholderText" xml:space="preserve">
+    <value>Description facultative de la bibliothèque</value>
+  </data>
+  <data name="EditItem" xml:space="preserve">
     <value>Editer une bibliothèque</value>
   </data>
-  <data name="EditLibrarySubTitle" xml:space="preserve">
+  <data name="EditItemSubTitle" xml:space="preserve">
     <value>Vous êtes en train d'éditer la bibliothèque | {x}</value>
+  </data>
+  <data name="Name.PlaceholderText" xml:space="preserve">
+    <value>Nom de la bibliothèque</value>
   </data>
   <data name="SaveYourWork" xml:space="preserve">
     <value>Sauvegarder vos modifications</value>
@@ -149,6 +161,9 @@
   </data>
   <data name="Success" xml:space="preserve">
     <value>Succès</value>
+  </data>
+  <data name="UpdateButton.Text" xml:space="preserve">
+    <value>Mettre à jour</value>
   </data>
   <data name="UpdatingNotSuccess" xml:space="preserve">
     <value>La bibliothèque n'a pas été mise à jour.</value>

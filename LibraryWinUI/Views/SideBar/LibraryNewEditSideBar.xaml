@@ -40,8 +40,8 @@
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
-            <TextBox Grid.Row="0" Text="{x:Bind UiViewModel.ViewModel.Name, Mode=TwoWay}" PlaceholderText="Nom de la bibliothèque"/>
-            <TextBox Grid.Row="1" Text="{x:Bind UiViewModel.ViewModel.Description, Mode=TwoWay}" MinHeight="100" PlaceholderText="Description facultative de la bibliothèque"
+            <TextBox Grid.Row="0" Text="{x:Bind UiViewModel.ViewModel.Name, Mode=TwoWay}" x:Uid="/LibraryNewEditSideBarRessources/Name"/>
+            <TextBox Grid.Row="1" Text="{x:Bind UiViewModel.ViewModel.Description, Mode=TwoWay}" MinHeight="100" x:Uid="/LibraryNewEditSideBarRessources/Description"
                  TextWrapping="Wrap" AcceptsReturn="True"/>
             <StackPanel Grid.Row="2" Orientation="Vertical" Spacing="10" Padding="0 30 0 0">
                 <Rectangle Height="1" Grid.Row="1" Fill="{ThemeResource SystemColorControlAccentBrush}" Margin="20 0 20 20"/>
@@ -70,19 +70,19 @@
             <Button Click="BtnExecuteAction_Click" Visibility="{x:Bind UiViewModel.CreateButtonVisibility, Mode=OneWay}">
                 <StackPanel Orientation="Horizontal" Spacing="8">
                     <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE710;"/>
-                    <TextBlock Text="Créer" />
+                    <TextBlock x:Uid="/LibraryNewEditSideBarRessources/CreateButton" />
                 </StackPanel>
             </Button>
             <Button Click="BtnExecuteAction_Click" Visibility="{x:Bind UiViewModel.EditButtonVisibility, Mode=OneWay}">
                 <StackPanel Orientation="Horizontal" Spacing="8">
                     <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xEB7E;"/>
-                    <TextBlock Text="Mettre à jour" />
+                    <TextBlock x:Uid="/LibraryNewEditSideBarRessources/UpdateButton" />
                 </StackPanel>
             </Button>
             <Button Command="{StaticResource CancelModificationXUiCmd}">
                 <StackPanel Orientation="Horizontal" Spacing="8">
                     <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE711;"/>
-                    <TextBlock Text="Annuler" />
+                    <TextBlock x:Uid="/LibraryNewEditSideBarRessources/CancelButton"/>
                 </StackPanel>
             </Button>
         </StackPanel>

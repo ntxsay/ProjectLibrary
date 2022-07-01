@@ -72,7 +72,7 @@ namespace LibraryWinUI.Views.SideBar
                     EditButtonVisibility = UiViewModel.EditMode == EditMode.Edit ? Visibility.Visible : Visibility.Collapsed,
                 };
 
-                UiViewModel.Header = UiViewModel.EditMode == EditMode.Create ? langResource.GetString("AddLibrary") : langResource.GetString("EditLibrary");
+                UiViewModel.Header = UiViewModel.EditMode == EditMode.Create ? langResource.GetString("AddItem") : langResource.GetString("EditItem");
 
                 if (UiViewModel.EditMode == EditMode.Create)
                 {
@@ -101,7 +101,7 @@ namespace LibraryWinUI.Views.SideBar
         {
             try
             {
-                string subTitle = UiViewModel.EditMode == EditMode.Create ? langResource.GetString("AddLibrarySubTitle") : langResource.GetString("EditLibrarySubTitle");
+                string subTitle = UiViewModel.EditMode == EditMode.Create ? langResource.GetString("AddItemSubTitle") : langResource.GetString("EditItemSubTitle");
                 if (!subTitle.IsStringNullOrEmptyOrWhiteSpace())
                 {
                     string[] splitSubTitle = subTitle.Split('|', StringSplitOptions.RemoveEmptyEntries);
