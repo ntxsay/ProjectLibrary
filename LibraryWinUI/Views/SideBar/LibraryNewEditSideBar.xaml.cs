@@ -225,8 +225,8 @@ namespace LibraryWinUI.Views.SideBar
             {
                 if (UiViewModel.ViewModel.Name.IsStringNullOrEmptyOrWhiteSpace())
                 {
-                    UiViewModel.ResultMessageTitle = "Vérifiez vos informations";
-                    UiViewModel.ResultMessage = $"Le nom de la bibliothèque ne peut pas être vide\nou ne contenir que des espaces blancs.";
+                    UiViewModel.ResultMessageTitle = langResource.GetString("SubmittingErrorTitle");
+                    UiViewModel.ResultMessage = langResource.GetString("SubmittingErrorMessage1"); ;
                     UiViewModel.ResultMessageSeverity = InfoBarSeverity.Warning;
                     UiViewModel.IsResultMessageOpen = true;
                     return false;
