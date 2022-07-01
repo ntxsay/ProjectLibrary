@@ -120,6 +120,9 @@
   <data name="AddLibrary" xml:space="preserve">
     <value>Ajouter une bibliothèque</value>
   </data>
+  <data name="AddLibrarySubTitle" xml:space="preserve">
+    <value>Vous êtes en train de créer une nouvelle bibliothèque</value>
+  </data>
   <data name="AnErrorOccured" xml:space="preserve">
     <value>Une erreur s'est produite</value>
   </data>
@@ -131,6 +134,9 @@
   </data>
   <data name="EditLibrary" xml:space="preserve">
     <value>Editer une bibliothèque</value>
+  </data>
+  <data name="EditLibrarySubTitle" xml:space="preserve">
+    <value>Vous êtes en train d'éditer la bibliothèque | {x}</value>
   </data>
   <data name="SaveYourWork" xml:space="preserve">
     <value>Sauvegarder vos modifications</value>

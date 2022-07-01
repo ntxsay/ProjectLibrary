@@ -125,16 +125,6 @@ namespace LibraryWinUI.ViewModels.SideBar
                 {
                     this._EditMode = value;
                     this.OnPropertyChanged();
-                    if (value == EditMode.Create)
-                    {
-                        CreateButtonVisibility = Visibility.Visible;
-                        EditButtonVisibility = Visibility.Collapsed;
-                    }
-                    else if (value == EditMode.Edit)
-                    {
-                        CreateButtonVisibility = Visibility.Collapsed;
-                        EditButtonVisibility = Visibility.Visible;
-                    }
                 }
             }
         }
@@ -143,7 +133,7 @@ namespace LibraryWinUI.ViewModels.SideBar
         public Visibility CreateButtonVisibility
         {
             get => this._CreateButtonVisibility;
-            private set
+            set
             {
                 if (this._CreateButtonVisibility != value)
                 {
@@ -157,7 +147,7 @@ namespace LibraryWinUI.ViewModels.SideBar
         public Visibility EditButtonVisibility
         {
             get => this._EditButtonVisibility;
-            private set
+            set
             {
                 if (this._EditButtonVisibility != value)
                 {

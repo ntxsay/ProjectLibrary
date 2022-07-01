@@ -68,6 +68,8 @@ namespace LibraryWinUI.Views.SideBar
                 UiViewModel = new ()
                 {
                     EditMode = editMode,
+                    CreateButtonVisibility = UiViewModel.EditMode == EditMode.Create ? Visibility.Visible : Visibility.Collapsed,
+                    EditButtonVisibility = UiViewModel.EditMode == EditMode.Edit ? Visibility.Visible : Visibility.Collapsed,
                 };
 
                 UiViewModel.Header = UiViewModel.EditMode == EditMode.Create ? langResource.GetString("AddLibrary") : langResource.GetString("EditLibrary");
@@ -99,6 +101,7 @@ namespace LibraryWinUI.Views.SideBar
         {
             try
             {
+                string? subTitle = UiViewModel.EditMode == EditMode.Create ? langResource.GetString("AddLibrarySubTitle") : langResource.GetString("EditLibrarySubTitle");
                 Run runTitle = new ()
                 {
                     Text = $"Vous êtes en train {(UiViewModel.EditMode == EditMode.Create ? "d'ajouter une nouvelle" : "d'éditer la")} bibliothèque",
