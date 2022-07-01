@@ -101,22 +101,27 @@ namespace LibraryWinUI.Views.SideBar
         {
             try
             {
-                string? subTitle = UiViewModel.EditMode == EditMode.Create ? langResource.GetString("AddLibrarySubTitle") : langResource.GetString("EditLibrarySubTitle");
-                Run runTitle = new ()
+                string subTitle = UiViewModel.EditMode == EditMode.Create ? langResource.GetString("AddLibrarySubTitle") : langResource.GetString("EditLibrarySubTitle");
+                if (!subTitle.IsStringNullOrEmptyOrWhiteSpace())
                 {
-                    Text = $"Vous êtes en train {(UiViewModel.EditMode == EditMode.Create ? "d'ajouter une nouvelle" : "d'éditer la")} bibliothèque",
-                    //FontWeight = FontWeights.Medium,
-                };
-                TbcInfos.Inlines.Add(runTitle);
-
-                if (UiViewModel.EditMode == EditMode.Edit)
-                {
-                    Run runCategorie = new ()
+                    string[] splitSubTitle = subTitle.Split('|', StringSplitOptions.RemoveEmptyEntries);
+                    if (splitSubTitle.Length > 0)
                     {
-                        Text = " " + OriginalViewModel.Name,
-                        FontWeight = FontWeights.Medium,
-                    };
-                    TbcInfos.Inlines.Add(runCategorie);
+                        foreach (string subTitleItem in splitSubTitle)
+                        {
+                            Run run = new()
+                            {
+                                Text = subTitleItem != "{x}" ? subTitleItem : OriginalViewModel.Name,
+                            };
+
+                            if (subTitleItem == "{x}")
+                            {
+                                run.FontWeight = FontWeights.Medium;
+                            }
+
+                            TbcInfos.Inlines.Add(run);
+                        }
+                    }
                 }
             }
             catch (Exception ex)
