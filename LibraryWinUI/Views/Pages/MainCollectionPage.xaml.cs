@@ -1,4 +1,5 @@
 ﻿using AppHelpers;
+using LibraryWinUI.Code.WebApi;
 using LibraryWinUI.ViewModels;
 using LibraryWinUI.ViewModels.Libraries;
 using LibraryWinUI.ViewModels.Pages;
@@ -42,8 +43,24 @@ namespace LibraryWinUI.Views.Pages
             base.OnNavigatedTo(e);
 #warning Juste à des fins de tests
             await LibraryNewEditAsync(new LibraryVM(), EditMode.Create);
-            ItemCollectionUC itemCollectionUC = new();
-            itemCollectionUC.InitializeCollection (Array.Empty<LibraryVM>())
+            await TestGetLibrariesAsync();
+        }
+
+        private async Task TestGetLibrariesAsync()
+        {
+            try
+            {
+                LibraryWebApi libApi = new();
+                var task = await libApi.GetAllLibrariesAsync();
+                ItemCollectionUC itemCollectionUC = new();
+                itemCollectionUC.InitializeCollection(task);
+                FrameContainer.Content = itemCollectionUC;
+            }
+            catch (Exception ex)
+            {
+                Logs.Log(nameof(MainCollectionPage), exception:ex);
+                return;
+            }
         }
 
         private void ASB_SearchItem_QuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)

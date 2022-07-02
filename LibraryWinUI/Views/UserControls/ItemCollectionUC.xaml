@@ -8,6 +8,48 @@
     mc:Ignorable="d">
 
     <Grid>
-
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <!--ItemsSource="{x:Bind ViewModelPage.GroupedRelatedViewModel.Collection, Mode=OneWay}"-->
+        <Pivot x:Name="PivotItems" x:FieldModifier="public" ItemsSource="{Binding Mode=OneWay}" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
+                               SelectedIndex="{x:Bind UiViewModel.SelectedPivotIndex, Mode=OneWay}" PivotItemLoaded="PivotItems_PivotItemLoaded">
+            <Pivot.OpacityTransition>
+                <ScalarTransition />
+            </Pivot.OpacityTransition>
+            <!--<Pivot.HeaderTemplate>
+                <DataTemplate>
+                    <TextBlock Text="{Binding Key}"></TextBlock>
+                </DataTemplate>
+            </Pivot.HeaderTemplate>-->
+        </Pivot>
+        <Grid Grid.Row="1">
+            <!--<ScrollViewer x:Name="scrollVPages" VerticalScrollMode="Disabled" HorizontalScrollBarVisibility="Auto" Padding="15 5 15 10">
+                <ItemsControl x:Name="itemControlPageList" ItemsSource="{x:Bind ViewModelPage.PagesList, Mode=OneWay}" HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Orientation="Horizontal" Spacing="4"/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="generalVm:PageSystemVM">
+                            <Button Command="{StaticResource GotoPageXUiCmd}" CommandParameter="{x:Bind CurrentPage, Mode=OneWay}" MTUUi:FrameworkElementExtensions.Cursor="Hand" Background="{x:Bind BackgroundColor, Mode=OneWay}">
+                                <TextBlock Text="{x:Bind CurrentPage, Mode=OneWay}" />
+                                <ToolTipService.ToolTip>
+                                    <ToolTip>
+                                        <TextBlock>
+                                            <Run Text="Accéder à la page" />
+                                            <Run Text="{x:Bind CurrentPage, Mode=OneWay}" FontWeight="Medium"/>
+                                        </TextBlock>
+                                    </ToolTip>
+                                </ToolTipService.ToolTip>
+                            </Button>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>-->
+        </Grid>
     </Grid>
+
 </UserControl>

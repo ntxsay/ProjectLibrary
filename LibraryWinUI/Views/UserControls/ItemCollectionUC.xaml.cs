@@ -9,6 +9,7 @@ using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Navigation;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
@@ -29,9 +30,14 @@ namespace LibraryWinUI.Views.UserControls
             this.InitializeComponent();
         }
 
-        public void InitializeCollection<T>(IEnumerable<GenericVM> dataList) where T : class
+        public void InitializeCollection<T>(IEnumerable<IGrouping<string, T>> dataList) where T : class
         {
-            UiViewModel.DataList = dataList;
+            this.DataContext = new ObservableCollection<IGrouping<string, T>>(dataList);
+        }
+
+        private void PivotItems_PivotItemLoaded(Pivot sender, PivotItemEventArgs args)
+        {
+
         }
     }
 }

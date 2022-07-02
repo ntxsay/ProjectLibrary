@@ -17,7 +17,23 @@ namespace LibraryWinUI.Code.WebApi
         {
             try
             {
-                using HttpResponseMessage response = await HttpClient().GetAsync("api/v2/libraries/all");
+                //Désactive la validation du certificat SSL auto-signé
+                using HttpClientHandler handler = new()
+                {
+                    ClientCertificateOptions = ClientCertificateOption.Manual,
+                    ServerCertificateCustomValidationCallback = (httpRequestMessage, cert, cetChain, policyErrors) =>
+                    {
+                        return true;
+                    }
+                };
+
+                using HttpClient client = new(handler);
+                client.BaseAddress = new Uri(baseAPIUrl);
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+
+                using HttpResponseMessage response = await client.GetAsync("api/v2/libraries/all");
                 string httpResponseBody = "";
                 if (response.IsSuccessStatusCode)
                 {
