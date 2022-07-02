@@ -111,10 +111,10 @@ namespace LibraryWinUI.Views.SideBar
                         {
                             Run run = new()
                             {
-                                Text = subTitleItem != "{x}" ? subTitleItem : OriginalViewModel.Name,
+                                Text = !subTitleItem.Contains("{x}") ? subTitleItem : OriginalViewModel.Name,
                             };
 
-                            if (subTitleItem == "{x}")
+                            if (subTitleItem.Contains("{x}"))
                             {
                                 run.FontWeight = FontWeights.Medium;
                             }

@@ -42,7 +42,8 @@ namespace LibraryWinUI.Views.Pages
             base.OnNavigatedTo(e);
 #warning Juste à des fins de tests
             await LibraryNewEditAsync(new LibraryVM(), EditMode.Create);
-
+            ItemCollectionUC itemCollectionUC = new();
+            itemCollectionUC.InitializeCollection (Array.Empty<LibraryVM>())
         }
 
         private void ASB_SearchItem_QuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)

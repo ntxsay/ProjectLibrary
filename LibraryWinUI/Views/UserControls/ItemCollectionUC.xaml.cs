@@ -1,4 +1,6 @@
-﻿using Microsoft.UI.Xaml;
+﻿using LibraryWinUI.ViewModels.UserControls;
+using LibShared.ViewModels;
+using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Data;
@@ -20,9 +22,16 @@ namespace LibraryWinUI.Views.UserControls
 {
     public sealed partial class ItemCollectionUC : UserControl
     {
+        internal ItemCollectionUCVM UiViewModel { get; set; } = new();
+
         public ItemCollectionUC()
         {
             this.InitializeComponent();
+        }
+
+        public void InitializeCollection<T>(IEnumerable<GenericVM> dataList) where T : class
+        {
+            UiViewModel.DataList = dataList;
         }
     }
 }
