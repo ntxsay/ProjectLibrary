@@ -1,10 +1,12 @@
-﻿using LibShared.ViewModels.Libraries;
+﻿using LibraryWinUI.Code.Helpers;
+using LibShared.ViewModels.Libraries;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Data;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
+using Microsoft.UI.Xaml.Media.Imaging;
 using Microsoft.UI.Xaml.Navigation;
 using System;
 using System.Collections.Generic;
@@ -13,6 +15,7 @@ using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
+using Windows.Storage;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -54,23 +57,19 @@ namespace LibraryWinUI.Views.UserControls.Components
 
         }
 
-        private void MFI_Change_Jaquette_Click(object sender, RoutedEventArgs e)
+        private async void MFI_Change_Jaquette_Click(object sender, RoutedEventArgs e)
         {
             try
             {
-                var result = await esAppBaseApi.ReplaceJaquetteAsync<LivreVM>(viewModel.Guid);
-                if (!result.IsSuccess)
+                InputOutputHelpers inputOutputHelpers = new ();
+                StorageFile file = await inputOutputHelpers.OpenFileAsync(AppHelpers.ES.FilesHelpers.Extensions.ImageExtensions);
+                if (file == null)
                 {
                     return;
                 }
 
-                UiViewModel.JaquettePath = result.Result?.ToString();// ?? EsGeneral.BookDefaultJaquette;
-                var image = uiServices.GetSelectedThumbnailImage<LivreVM>(viewModel.Id, PivotItems, "GridViewItems");
-                if (image != null)
-                {
-                    var bitmapImage = await Files.BitmapImageFromFileAsync(viewModel.JaquettePath);
-                    image.Source = bitmapImage;
-                }
+                BitmapImage bitmapImage = await inputOutputHelpers.BitmapImageFromFileAsync(file);
+                ImageThumbnail.Source = bitmapImage;
             }
             catch (Exception)
             {
