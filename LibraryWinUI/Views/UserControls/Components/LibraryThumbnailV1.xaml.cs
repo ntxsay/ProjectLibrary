@@ -16,6 +16,10 @@ using System.Runtime.InteropServices.WindowsRuntime;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.Storage;
+using AppHelpers.ES;
+using AppHelpers;
+using AppHelpers.Extensions;
+using LibraryWinUI.Code.WebApi;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -24,7 +28,7 @@ namespace LibraryWinUI.Views.UserControls.Components
 {
     public sealed partial class LibraryThumbnailV1 : Grid
     {
-        private LibraryVM UiViewModel { get; set; }
+        private LibraryVM UiViewModel { get; set; } = new();
         public LibraryThumbnailV1()
         {
             this.InitializeComponent();
@@ -43,7 +47,7 @@ namespace LibraryWinUI.Views.UserControls.Components
         {
             if (d is LibraryThumbnailV1 parent && e.NewValue is LibraryVM viewModel)
             {
-                parent.UiViewModel = viewModel;
+                parent.UiViewModel.DeepCopy(viewModel);
             }
         }
 
@@ -62,19 +66,24 @@ namespace LibraryWinUI.Views.UserControls.Components
             try
             {
                 InputOutputHelpers inputOutputHelpers = new ();
-                StorageFile file = await inputOutputHelpers.OpenFileAsync(AppHelpers.ES.FilesHelpers.Extensions.ImageExtensions);
+                StorageFile file = await inputOutputHelpers.OpenFileAsync(FilesHelpers.Extensions.ImageExtensions);
                 if (file == null)
                 {
                     return;
                 }
 
-                BitmapImage bitmapImage = await inputOutputHelpers.BitmapImageFromFileAsync(file);
-                ImageThumbnail.Source = bitmapImage;
+                LibraryWebApi libApi = new();
+                bool isSuccess = await libApi.UpdloadJaquette(UiViewModel.Id, file.Path);
+                if (isSuccess)
+                {
+                    BitmapImage bitmapImage = await inputOutputHelpers.BitmapImageFromFileAsync(file);
+                    ImageThumbnail.Source = bitmapImage;
+                }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
-                throw;
+                Logs.Log(className: nameof(LibraryThumbnailV1), exception: ex);
+                return;
             }
         }
 

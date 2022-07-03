@@ -12,6 +12,7 @@ namespace LibApi.Helpers
     {
         private const string mainRootName = "Ressources";
         public const string itemModelFile = "model.json";
+        public const string LibraryJaquette = "Library_Jaquette";
         public static string RessourcesPath => Path.Combine(Environment.CurrentDirectory, mainRootName);
 
         public static string LibrariesPath => $"{RessourcesPath}{Path.DirectorySeparatorChar}Libraries";
