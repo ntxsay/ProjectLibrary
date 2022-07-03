@@ -6,8 +6,77 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:customComponents="using:LibraryWinUI.Views.UserControls.Components"
+    xmlns:libraryVM="using:LibraryWinUI.ViewModels.Libraries"
+    xmlns:sharedLibraryVM="using:LibShared.ViewModels.Libraries"
     mc:Ignorable="d">
+    <UserControl.Resources>
+        <DataTemplate x:DataType="sharedLibraryVM:LibraryVM" x:Key="GridViewItemLibraryTemplate">
+            <customComponents:LibraryThumbnailV1 ViewModel="{x:Bind Mode=OneWay}" />
+        </DataTemplate>
 
+        <DataTemplate x:Key="GridViewLibraryTemplate" x:DataType="libraryVM:LibraryVM">
+            <ScrollViewer x:Name="scrollItems" HorizontalScrollMode="Disabled" Grid.Row="0">
+                <GridView x:Name="GridViewItems" ItemsSource="{Binding Mode=OneWay}" SelectionMode="Extended" IsItemClickEnabled="False" Padding="4,14" Loaded="GridViewItems_Loaded" Unloaded="GridViewItems_Unloaded"
+                             ScrollViewer.VerticalScrollMode="Disabled" IsMultiSelectCheckBoxEnabled="True" SingleSelectionFollowsFocus="True" ItemTemplate="{StaticResource GridViewItemLibraryTemplate}"
+                          KeyDown="GridViewItems_KeyDown" >
+                    <GridView.ItemContainerStyle>
+                        <Style TargetType="GridViewItem" >
+                            <Setter Property="Margin" Value="7" />
+                        </Style>
+                    </GridView.ItemContainerStyle>
+                    <GridView.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <ItemsWrapGrid  Orientation="Horizontal" HorizontalAlignment="Left"/>
+                        </ItemsPanelTemplate>
+                    </GridView.ItemsPanel>
+                    <GridView.ItemContainerTransitions>
+                        <TransitionCollection>
+                            <EntranceThemeTransition />
+                            <AddDeleteThemeTransition/>
+                            <NavigationThemeTransition/>
+                            <ContentThemeTransition/>
+                        </TransitionCollection>
+                    </GridView.ItemContainerTransitions>
+                    <!--<GridView.ItemTemplate>
+                        <DataTemplate x:DataType="libraryVM:LibraryVM">
+                            <Grid x:Name="simpleThumnailItemContainer" Height="282" Width="180" Translation="0,0,32">
+                                <Viewbox x:Name="ViewboxSimpleThumnailDatatemplate" Height="282" Width="180" Tag="{x:Bind Mode=OneWay}" PointerPressed="ViewboxSimpleThumnailDatatemplate_PointerPressed">
+                                    <Border Height="301" Width="192" Background="WhiteSmoke" BorderThickness="0" CornerRadius="8">
+                                        <Grid Height="301" Width="192">
+                                            <Image  Stretch="UniformToFill" Loaded="Image_Loaded"/>
+                                            <Grid Height="150" Width="150" VerticalAlignment="Top" HorizontalAlignment="Left">
+                                                <Polygon HorizontalAlignment="Left" VerticalAlignment="Top" Fill="LightBlue" Points="0,110, 0,70, 70,0, 110,0"/>
+                                                <Polygon HorizontalAlignment="Left" VerticalAlignment="Top" Fill="BlueViolet" Points="0,110, 0,71, 71,0, 110,0"/>
+                                                <TextBlock TextAlignment="Center" HorizontalAlignment="Left" VerticalAlignment="Top" RenderTransformOrigin="0.5,0.5" Margin="-28,35,0,0" 
+                                                   UseLayoutRounding="False" d:LayoutRounding="Auto" Width="140" FontSize="16" FontWeight="Bold" Foreground="White">
+                                    <Run Text="{x:Bind CountBooks, Mode=OneWay}" />
+                                    <Run Text="livre(s)" />
+                                                    <TextBlock.RenderTransform>
+                                                        <CompositeTransform Rotation="-45.15"/>
+                                                    </TextBlock.RenderTransform>
+                                                </TextBlock>
+                                            </Grid>
+                                        </Grid>
+                                    </Border>
+                                </Viewbox>
+
+                            </Grid>
+                        </DataTemplate>
+                    </GridView.ItemTemplate>-->
+                </GridView>
+            </ScrollViewer>
+        </DataTemplate>
+        <DataTemplate x:Key="ListViewLibraryTemplate" x:DataType="libraryVM:LibraryVM">
+            <ScrollViewer x:Name="scrollItems" HorizontalScrollMode="Disabled" Grid.Row="0">
+                <ListView x:Name="ListViewItems" ItemsSource="{Binding }" SelectionMode="Extended" IsItemClickEnabled="False" Padding="4,14"
+                             ScrollViewer.VerticalScrollMode="Disabled" IsMultiSelectCheckBoxEnabled="True" SingleSelectionFollowsFocus="True">
+                </ListView>
+            </ScrollViewer>
+        </DataTemplate>
+        <!--<dTemplateSelectors:DataViewModeTemplateSelector x:Key="dataViewModeTemplateSelector"
+        DataGridViewTemplate="{StaticResource DataGridViewTemplate}"
+        GridViewTemplate="{StaticResource GridViewTemplate}" />-->
+    </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
@@ -26,30 +95,6 @@
         </Pivot>
         <Grid Grid.Row="1">
             <customComponents:PagingBar Margin="15 5 15 10"/>
-            <!--<ScrollViewer x:Name="scrollVPages" VerticalScrollMode="Disabled" HorizontalScrollBarVisibility="Auto" Padding="15 5 15 10">
-                <ItemsControl x:Name="itemControlPageList" ItemsSource="{x:Bind ViewModelPage.PagesList, Mode=OneWay}" HorizontalAlignment="Center" VerticalAlignment="Center">
-                    <ItemsControl.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <StackPanel Orientation="Horizontal" Spacing="4"/>
-                        </ItemsPanelTemplate>
-                    </ItemsControl.ItemsPanel>
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate x:DataType="generalVm:PageSystemVM">
-                            <Button Command="{StaticResource GotoPageXUiCmd}" CommandParameter="{x:Bind CurrentPage, Mode=OneWay}" MTUUi:FrameworkElementExtensions.Cursor="Hand" Background="{x:Bind BackgroundColor, Mode=OneWay}">
-                                <TextBlock Text="{x:Bind CurrentPage, Mode=OneWay}" />
-                                <ToolTipService.ToolTip>
-                                    <ToolTip>
-                                        <TextBlock>
-                                            <Run Text="Accéder à la page" />
-                                            <Run Text="{x:Bind CurrentPage, Mode=OneWay}" FontWeight="Medium"/>
-                                        </TextBlock>
-                                    </ToolTip>
-                                </ToolTipService.ToolTip>
-                            </Button>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
-            </ScrollViewer>-->
         </Grid>
     </Grid>
 

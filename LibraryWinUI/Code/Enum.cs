@@ -10,5 +10,6 @@ namespace LibraryWinUI.Code
     {
         DataGridView,
         GridView,
+        ListView,
     }
 }

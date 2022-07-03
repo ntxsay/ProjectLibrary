@@ -14,7 +14,6 @@ namespace LibraryWinUI.Code.DaraTemplateSelectors
         public DataTemplate GridViewTemplate { get; set; }
         public DataTemplate DataGridViewTemplate { get; set; }
 
-
         protected override DataTemplate SelectTemplateCore(object item, DependencyObject container)
         {
             try
@@ -23,6 +22,17 @@ namespace LibraryWinUI.Code.DaraTemplateSelectors
                 var _Container = VisualHelpers.FindVisualAncestor<Pivot>(container);
                 if (_Container != null && _Container.Tag is DataViewMode dataViewMode)
                 {
+                    switch (dataViewMode)
+                    {
+                        case DataViewMode.DataGridView:
+                            break;
+                        case DataViewMode.GridView:
+                            break;
+                        case DataViewMode.ListView:
+                            break;
+                        default:
+                            break;
+                    }
                     if (dataViewMode == DataViewMode.DataGridView)
                     {
                         return DataGridViewTemplate;

@@ -1,4 +1,6 @@
-﻿namespace LibShared.ViewModels.Libraries;
+﻿using System.ComponentModel;
+
+namespace LibShared.ViewModels.Libraries;
 
 public  class LibraryVM : GenericVM
 {
@@ -67,6 +69,21 @@ public  class LibraryVM : GenericVM
             if (_Description != value)
             {
                 _Description = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    private long _CountBooks;
+    [DisplayName("Nombre de livres")]
+    public long CountBooks
+    {
+        get => _CountBooks;
+        set
+        {
+            if (_CountBooks != value)
+            {
+                _CountBooks = value;
                 OnPropertyChanged();
             }
         }

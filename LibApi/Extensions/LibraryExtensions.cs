@@ -72,34 +72,6 @@ namespace LibApi.Extensions
             }
         }
 
-        public static IEnumerable<IGrouping<string, T>> GroupItemsBy<T>(this IEnumerable<T> self, GroupBy groupBy = GroupBy.None) where T : class
-        {
-            try
-            {
-                LibraryHelpers libraryHelpers = new();
-                switch (groupBy)
-                {
-                    case GroupBy.None:
-                        return libraryHelpers.GroupItemsByNone(self);
-                    case GroupBy.Letter:
-                        return libraryHelpers.GroupItemsByAlphabeticAsync(self);
-                    case GroupBy.CreationYear:
-                        return libraryHelpers.GroupByCreationYear(self);
-                    case GroupBy.ParutionYear:
-                        break;
-                    default:
-                        break;
-                }
-
-                 return Enumerable.Empty<IGrouping<string, T>>();
-            }
-            catch (Exception ex)
-            {
-                Logs.Log(className: nameof(LibraryExtensions), exception: ex);
-                return Enumerable.Empty<IGrouping<string, T>>();
-            }
-        }
-
         /// <summary>
         /// Convertit un tableau de modèle en tableau de modèle de vue.
         /// </summary>
