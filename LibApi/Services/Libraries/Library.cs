@@ -428,32 +428,12 @@ namespace LibApi.Services.Libraries
         {
             try
             {
-                if (fileBytes == null || fileBytes.Length == 0)
-                {
-                    throw new ArgumentNullException(nameof(fileBytes), "Le modèle de vue ne peut pas être null.");
-                }
-
-                if (fileName.IsStringNullOrEmptyOrWhiteSpace())
-                {
-                    throw new ArgumentNullException(nameof(fileBytes), "Le modèle de vue ne peut pas être null.");
-                }
-
-                InputOutput inputOutput = new();
-                DirectoryInfo? directoryInfo = inputOutput.GetOrCreateDefaultFolderItem(Guid, DefaultFolders.Libraries);
-                if (directoryInfo == null || !directoryInfo.Exists)
-                {
-                    throw new Exception("");
-                }
-
-                string filePath = directoryInfo.FullName + Path.DirectorySeparatorChar + $"{InputOutput.LibraryJaquette}{Path.GetExtension(fileName)}";
-
-                await File.WriteAllBytesAsync(filePath, fileBytes);
-                return true;
+                
             }
             catch (Exception ex)
             {
                 Logs.Log(nameof(Library), exception: ex);
-                return false;
+                return Array.Empty<byte>();
             }
         }
 
