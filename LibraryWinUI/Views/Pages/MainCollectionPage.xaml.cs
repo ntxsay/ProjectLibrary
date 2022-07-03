@@ -6,6 +6,7 @@ using LibraryWinUI.ViewModels.Pages;
 using LibraryWinUI.Views.SideBar;
 using LibraryWinUI.Views.UserControls;
 using LibShared;
+using LibShared.Services;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
@@ -51,10 +52,13 @@ namespace LibraryWinUI.Views.Pages
             try
             {
                 LibraryWebApi libApi = new();
-                IEnumerable<IGrouping<string, LibShared.ViewModels.Libraries.LibraryVM>> groupedItems = await libApi.GetGroupedLibrariesAsync(groupBy: GroupBy.Letter, orderBy: OrderBy.Ascending, sortBy: SortBy.Name, maxItemsPerPage: 20, gotoPage: 1);
-                ItemCollectionUC itemCollectionUC = new();
-                itemCollectionUC.InitializeCollection(groupedItems);
-                FrameContainer.Content = itemCollectionUC;
+                LibShared.ViewModels.Libraries.LibraryRequestVM resquestResult = await libApi.GetLibrariesAsync(orderBy: OrderBy.Ascending, sortBy: SortBy.Name, maxItemsPerPage: 20, gotoPage: 1);
+                if (resquestResult != null)
+                {
+                    ItemCollectionUC itemCollectionUC = new();
+                    itemCollectionUC.InitializeCollection(resquestResult.List.GroupItemsBy(GroupBy.Letter));
+                    FrameContainer.Content = itemCollectionUC;
+                }
             }
             catch (Exception ex)
             {

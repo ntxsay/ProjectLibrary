@@ -1,4 +1,5 @@
 ﻿using LibraryWinUI.ViewModels.UserControls;
+using LibraryWinUI.Views.Pages;
 using LibShared.ViewModels;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -24,10 +25,16 @@ namespace LibraryWinUI.Views.UserControls
     public sealed partial class ItemCollectionUC : UserControl
     {
         internal ItemCollectionUCVM UiViewModel { get; set; } = new();
-
+        internal MainCollectionPage MainCollectionPage { get; init; }
         public ItemCollectionUC()
         {
             this.InitializeComponent();
+        }
+
+        public ItemCollectionUC(MainCollectionPage mainCollectionPage)
+        {
+            this.InitializeComponent();
+            this.MainCollectionPage = mainCollectionPage;
         }
 
         public void InitializeCollection<T>(IEnumerable<IGrouping<string, T>> dataList) where T : class

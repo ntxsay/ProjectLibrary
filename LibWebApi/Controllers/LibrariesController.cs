@@ -49,7 +49,7 @@ namespace LibWebApi.Controllers
 
         [Route("all/ordered")]
         [HttpGet]
-        public async Task<IEnumerable<LibraryVM>> GetAsync(OrderBy orderBy, SortBy sortBy, int maxItemsPerPage = 20, int gotoPage = 1)
+        public async Task<LibraryRequestVM?> GetAsync(OrderBy orderBy, SortBy sortBy, int maxItemsPerPage = 20, int gotoPage = 1)
         {
             try
             {
@@ -70,16 +70,21 @@ namespace LibWebApi.Controllers
                         }
 
                         IEnumerable<Library>? displayedItem = orderedItems.DisplayPage(maxItemsPerPage, gotoPage);
-                        return displayedItem ?? Enumerable.Empty<LibraryVM>();
+                        return new LibraryRequestVM()
+                        {
+                            List = displayedItem ?? Enumerable.Empty<LibraryVM>(),
+                            CurrentPage = gotoPage,
+                            NbPages = countPage,
+                        };
                     }
                 }
 
-                return Enumerable.Empty<LibraryVM>();
+                return null;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex.Message);
-                return Enumerable.Empty<LibraryVM>();
+                return null;
             }
         }
 

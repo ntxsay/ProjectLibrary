@@ -5,6 +5,7 @@
     xmlns:local="using:LibraryWinUI.Views.UserControls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:customComponents="using:LibraryWinUI.Views.UserControls.Components"
     mc:Ignorable="d">
 
     <Grid>
@@ -24,6 +25,7 @@
             </Pivot.HeaderTemplate>
         </Pivot>
         <Grid Grid.Row="1">
+            <customComponents:PagingBar Margin="15 5 15 10"/>
             <!--<ScrollViewer x:Name="scrollVPages" VerticalScrollMode="Disabled" HorizontalScrollBarVisibility="Auto" Padding="15 5 15 10">
                 <ItemsControl x:Name="itemControlPageList" ItemsSource="{x:Bind ViewModelPage.PagesList, Mode=OneWay}" HorizontalAlignment="Center" VerticalAlignment="Center">
                     <ItemsControl.ItemsPanel>
