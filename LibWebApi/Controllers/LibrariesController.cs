@@ -47,18 +47,40 @@ namespace LibWebApi.Controllers
             return all ?? Enumerable.Empty<LibraryVM>();
         }
 
-        [Route("all")]
+        [Route("all/ordered")]
         [HttpGet]
-        public async Task<IEnumerable<LibraryVM>> GetAsync(OrderBy orderBy, SortBy sortBy, int? maxItemPerPage = 20)
+        public async Task<IEnumerable<LibraryVM>> GetAsync(OrderBy orderBy, SortBy sortBy, int maxItemsPerPage = 20, int gotoPage = 1)
         {
-            IEnumerable<Library>? all = await Library.GetAllAsync();
-            if (all != null && all.Any())
+            try
             {
-                var orderedItems = all.OrderItemsBy(orderBy, sortBy);
-                int countPage = orderedItems.CountPages(maxitemPerPage);
+                IEnumerable<Library>? all = await Library.GetAllAsync();
+                if (all != null && all.Any())
+                {
+                    IEnumerable<Library>? orderedItems = all.OrderItemsBy(orderBy, sortBy);
+                    if (orderedItems != null && orderedItems.Any())
+                    {
+                        int countPage = orderedItems.CountPages(maxItemsPerPage);
+                        if (gotoPage > countPage)
+                        {
+                            gotoPage = countPage;
+                        }
+                        else if (gotoPage < countPage)
+                        {
+                            gotoPage = 1;
+                        }
 
+                        IEnumerable<Library>? displayedItem = orderedItems.DisplayPage(maxItemsPerPage, gotoPage);
+                        return displayedItem ?? Enumerable.Empty<LibraryVM>();
+                    }
+                }
+
+                return Enumerable.Empty<LibraryVM>();
             }
-            return all ?? Enumerable.Empty<LibraryVM>();
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                return Enumerable.Empty<LibraryVM>();
+            }
         }
 
         [Route("first")]

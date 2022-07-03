@@ -91,6 +91,35 @@ namespace LibApi.Helpers
                         throw new NotSupportedException($"{sortBy} n'est pas supporté dans le type {typeof(T)}.");
                     }
                 }
+                else if (modelList is IEnumerable<LibraryVM> librariesViewModel)
+                {
+                    if (sortBy == SortBy.Name)
+                    {
+                        if (orderBy == OrderBy.Ascending)
+                        {
+                            return librariesViewModel.Where(w => w != null && !w.Name.IsStringNullOrEmptyOrWhiteSpace()).OrderBy(o => o.Name).Select(s => (T)(object)s);
+                        }
+                        else if (orderBy == OrderBy.Descending)
+                        {
+                            return librariesViewModel.Where(w => w != null && !w.Name.IsStringNullOrEmptyOrWhiteSpace()).OrderByDescending(o => o.Name).Select(s => (T)(object)s);
+                        }
+                    }
+                    else if (sortBy == SortBy.DateCreation)
+                    {
+                        if (orderBy == OrderBy.Ascending)
+                        {
+                            return librariesViewModel.OrderBy(o => o.DateAjout).Select(s => (T)(object)s);
+                        }
+                        else if (orderBy == OrderBy.Descending)
+                        {
+                            return librariesViewModel.OrderByDescending(o => o.DateAjout).Select(s => (T)(object)s);
+                        }
+                    }
+                    else
+                    {
+                        throw new NotSupportedException($"{sortBy} n'est pas supporté dans le type {typeof(T)}.");
+                    }
+                }
                 else if (modelList is IEnumerable<Tbook> booksModel)
                 {
                     if (sortBy == SortBy.Name)

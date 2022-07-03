@@ -32,7 +32,7 @@ namespace LibApi.Extensions
             }
             catch (Exception ex)
             {
-                Logs.Log(nameof(LibraryExtensions), nameof(OrderItemsBy), ex);
+                Logs.Log(className: nameof(LibraryExtensions), exception:ex);
                 return Enumerable.Empty<T>();
             }
         }
@@ -46,7 +46,7 @@ namespace LibApi.Extensions
             }
             catch (Exception ex)
             {
-                Logs.Log(nameof(LibraryExtensions), nameof(DisplayPage), ex);
+                Logs.Log(className: nameof(LibraryExtensions), exception: ex);
                 return Enumerable.Empty<T>();
             }
         }
@@ -67,7 +67,7 @@ namespace LibApi.Extensions
             }
             catch (Exception ex)
             {
-                Logs.Log(nameof(LibraryExtensions), nameof(DisplayPage), ex);
+                Logs.Log(className: nameof(LibraryExtensions), exception: ex);
                 return 0;
             }
         }
@@ -85,7 +85,7 @@ namespace LibApi.Extensions
             }
             catch (Exception ex)
             {
-                Logs.Log(nameof(LibraryExtensions), nameof(ConvertToViewModel), ex);
+                Logs.Log(className: nameof(LibraryExtensions), exception: ex);
                 return Enumerable.Empty<LibraryVM>();
             }
         }
