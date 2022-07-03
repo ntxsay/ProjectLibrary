@@ -219,57 +219,136 @@ namespace LibApi.Helpers
             }
             catch (Exception ex)
             {
-                Logs.Log(nameof(LibraryHelpers), nameof(CountPages), ex);
+                Logs.Log(nameof(LibraryHelpers), exception: ex);
                 return 0;
             }
         }
 
-        public bool SaveToJson<T>(T viewModel) where T : class
+        public IEnumerable<IGrouping<string, T>> GroupItemsByNone<T>(IEnumerable<T> modelList) where T : class
         {
             try
             {
-                if (viewModel == null)
+                if (modelList == null || !modelList.Any())
                 {
-                    throw new ArgumentNullException(nameof(viewModel), "Le modèle de vue est null.");
+                    throw new ArgumentNullException(nameof(modelList), "La liste ne peut pas être null ou ne contenir aucune données");
                 }
 
-                InputOutput inputOutput = new ();
-                string? filePath = null;
+                IEnumerable<IGrouping<string, T>>? groupingItems = null;
 
-                if (viewModel is LibraryVM library)
+                if (typeof(T).IsAssignableFrom(typeof(LibraryVM)))
                 {
-                    filePath = inputOutput.GetItemModelConfigFilePath(library.Guid, DefaultFolders.Libraries);
+                    groupingItems = modelList.Select(q => (LibraryVM)(object)q).Where(w => !w.Name.IsStringNullOrEmptyOrWhiteSpace())?.GroupBy(g => "Vos bibliothèques").OrderBy(o => o.Key).Select(s => (IGrouping<string, T>)(object)s);
                 }
-                else if (viewModel is BookVM book)
+                else if (typeof(T).IsAssignableFrom(typeof(BookVM)))
                 {
-                    filePath = inputOutput.GetItemModelConfigFilePath(book.Guid, DefaultFolders.Books);
-                }
-                else if (viewModel is ContactVM contact)
-                {
-                    filePath = inputOutput.GetItemModelConfigFilePath(contact.Guid, DefaultFolders.Contacts);
+                    groupingItems = modelList.Select(q => (BookVM)(object)q).Where(w => !w.MainTitle.IsStringNullOrEmptyOrWhiteSpace())?.GroupBy(g => "Vos livres").OrderBy(o => o.Key).Select(s => (IGrouping<string, T>)(object)s);
                 }
                 else
                 {
-                    throw new ArgumentException("Le type n'est pas valide dans ce contexte.", nameof(viewModel));
+                    throw new NotSupportedException($"Le type : \"{typeof(T)}\" n'est pas supporté.");
                 }
 
-                if (filePath.IsStringNullOrEmptyOrWhiteSpace())
-                {
-                    throw new Exception("Le chemin d'accès au fichier de configuration n'est pas valide");
-                }
-
-                bool isSaved = JsonSerialization.SerializeAsync(viewModel, filePath);
-                if (isSaved == false)
-                {
-                    throw new Exception("Le fichier n'a pas été enregistré.");
-                }
-
-                return isSaved;
+                return groupingItems ?? Enumerable.Empty<IGrouping<string, T>>();
             }
             catch (Exception ex)
             {
-                Logs.Log(className:nameof(LibraryHelpers), exception:ex);
-                return false;
+                Logs.Log(nameof(LibraryHelpers), exception: ex);
+                return Enumerable.Empty<IGrouping<string, T>>();
+            }
+        }
+
+        public IEnumerable<IGrouping<string, T>> GroupItemsByAlphabeticAsync<T>(IEnumerable<T> modelList) where T : class
+        {
+            try
+            {
+                if (modelList == null || !modelList.Any())
+                {
+                    throw new ArgumentNullException(nameof(modelList), "La liste ne peut pas être null ou ne contenir aucune données");
+                }
+
+                IEnumerable<IGrouping<string, T>>? groupingItems = null;
+
+                if (typeof(T).IsAssignableFrom(typeof(LibraryVM)))
+                {
+                    groupingItems = modelList.Select(q => (LibraryVM)(object)q).Where(w => !w.Name.IsStringNullOrEmptyOrWhiteSpace())?.GroupBy(g => g.Name?.FirstOrDefault().ToString().ToUpper()).OrderBy(o => o.Key).Select(s => (IGrouping<string, T>)(object)s);
+                }
+                else if (typeof(T).IsAssignableFrom(typeof(BookVM)))
+                {
+                    groupingItems = modelList.Select(q => (BookVM)(object)q).Where(w => !w.MainTitle.IsStringNullOrEmptyOrWhiteSpace())?.GroupBy(g => g.MainTitle?.FirstOrDefault().ToString().ToUpper()).OrderBy(o => o.Key).Select(s => (IGrouping<string, T>)(object)s);
+                }
+                else
+                {
+                    throw new NotSupportedException($"Le type : \"{typeof(T)}\" n'est pas supporté.");
+                }
+
+                return groupingItems ?? Enumerable.Empty<IGrouping<string, T>>();
+            }
+            catch (Exception ex)
+            {
+                Logs.Log(nameof(LibraryHelpers), exception: ex);
+                return Enumerable.Empty<IGrouping<string, T>>();
+            }
+        }
+
+        public IEnumerable<IGrouping<string, T>> GroupByCreationYear<T>(IEnumerable<T> modelList) where T : class
+        {
+            try
+            {
+                if (modelList == null || !modelList.Any())
+                {
+                    throw new ArgumentNullException(nameof(modelList), "La liste ne peut pas être null ou ne contenir aucune données");
+                }
+
+                IEnumerable<IGrouping<string, T>>? groupingItems = null;
+
+                if (typeof(T).IsAssignableFrom(typeof(LibraryVM)))
+                {
+                    groupingItems = modelList.Select(q => (LibraryVM)(object)q).Where(w => !w.Name.IsStringNullOrEmptyOrWhiteSpace())?.GroupBy(g => g.DateAjout.Year.ToString() ?? "Année de création inconnue").OrderBy(o => o.Key).Select(s => (IGrouping<string, T>)(object)s);
+                }
+                else if (typeof(T).IsAssignableFrom(typeof(BookVM)))
+                {
+                    groupingItems = modelList.Select(q => (BookVM)(object)q).Where(w => !w.MainTitle.IsStringNullOrEmptyOrWhiteSpace())?.GroupBy(g => g.DateAjout.Year.ToString() ?? "Année de création inconnue").OrderBy(o => o.Key).Select(s => (IGrouping<string, T>)(object)s);
+                }
+                else
+                {
+                    throw new NotSupportedException($"Le type : \"{typeof(T)}\" n'est pas supporté.");
+                }
+
+                return groupingItems ?? Enumerable.Empty<IGrouping<string, T>>();
+            }
+            catch (Exception ex)
+            {
+                Logs.Log(nameof(LibraryHelpers), exception: ex);
+                return Enumerable.Empty<IGrouping<string, T>>();
+            }
+        }
+
+        public IEnumerable<IGrouping<string, T>> GroupByParutionYear<T>(IEnumerable<T> modelList) where T : class
+        {
+            try
+            {
+                if (modelList == null || !modelList.Any())
+                {
+                    throw new ArgumentNullException(nameof(modelList), "La liste ne peut pas être null ou ne contenir aucune données");
+                }
+
+                IEnumerable<IGrouping<string, T>>? groupingItems = null;
+
+                if (typeof(T).IsAssignableFrom(typeof(BookVM)))
+                {
+                    groupingItems = modelList.Select(q => (BookVM)(object)q).Where(w => !w.MainTitle.IsStringNullOrEmptyOrWhiteSpace())?.GroupBy(g => g.YearParution?.ToString() ?? "Année de parution inconnue").OrderBy(o => o.Key).Select(s => (IGrouping<string, T>)(object)s);
+                }
+                else
+                {
+                    throw new NotSupportedException($"Le type : \"{typeof(T)}\" n'est pas supporté.");
+                }
+
+                return groupingItems ?? Enumerable.Empty<IGrouping<string, T>>();
+            }
+            catch (Exception ex)
+            {
+                Logs.Log(nameof(LibraryHelpers), exception:ex);
+                return Enumerable.Empty<IGrouping<string, T>>();
             }
         }
 

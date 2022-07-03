@@ -51,9 +51,9 @@ namespace LibraryWinUI.Views.Pages
             try
             {
                 LibraryWebApi libApi = new();
-                var task = await libApi.GetAllLibrariesAsync();
+                IEnumerable<IGrouping<string, LibShared.ViewModels.Libraries.LibraryVM>> groupedItems = await libApi.GetGroupedLibrariesAsync(groupBy: GroupBy.Letter, orderBy: OrderBy.Ascending, sortBy: SortBy.Name, maxItemsPerPage: 20, gotoPage: 1);
                 ItemCollectionUC itemCollectionUC = new();
-                itemCollectionUC.InitializeCollection(task);
+                itemCollectionUC.InitializeCollection(groupedItems);
                 FrameContainer.Content = itemCollectionUC;
             }
             catch (Exception ex)
