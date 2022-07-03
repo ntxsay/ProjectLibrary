@@ -12,17 +12,16 @@
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
-        <!--ItemsSource="{x:Bind ViewModelPage.GroupedRelatedViewModel.Collection, Mode=OneWay}"-->
         <Pivot x:Name="PivotItems" x:FieldModifier="public" ItemsSource="{Binding Mode=OneWay}" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
                                SelectedIndex="{x:Bind UiViewModel.SelectedPivotIndex, Mode=OneWay}" PivotItemLoaded="PivotItems_PivotItemLoaded">
             <Pivot.OpacityTransition>
                 <ScalarTransition />
             </Pivot.OpacityTransition>
-            <!--<Pivot.HeaderTemplate>
+            <Pivot.HeaderTemplate>
                 <DataTemplate>
                     <TextBlock Text="{Binding Key}"></TextBlock>
                 </DataTemplate>
-            </Pivot.HeaderTemplate>-->
+            </Pivot.HeaderTemplate>
         </Pivot>
         <Grid Grid.Row="1">
             <!--<ScrollViewer x:Name="scrollVPages" VerticalScrollMode="Disabled" HorizontalScrollBarVisibility="Auto" Padding="15 5 15 10">

@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using LibShared.ViewModels.Libraries;
+using LibShared.ViewModels.Books;
 
 namespace LibShared
 {
@@ -20,12 +22,12 @@ namespace LibShared
         /// <summary>
         /// Trie l'objet par son nom.
         /// </summary>
-        /// <remarks>Remarques : Ce paramètre fonctionne avec <see cref="Tlibrary.Name"/>, <see cref="Tbook.MainTitle"/></remarks>
+        /// <remarks>Remarques : Ce paramètre fonctionne avec <see cref="LibraryVM.Name"/>, <see cref="BookVM.MainTitle"/></remarks>
         Name,
         /// <summary>
         /// Trie l'objet par date de création.
         /// </summary>
-        /// <remarks>Remarques : Ce paramètre fonctionne avec <see cref="Tlibrary.DateAjout"/>, <see cref="Tbook.DateAjout"/></remarks>
+        /// <remarks>Remarques : Ce paramètre fonctionne avec <see cref="LibraryVM.DateAjout"/>, <see cref="BookVM.DateAjout"/></remarks>
         DateCreation,
     }
 

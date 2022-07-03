@@ -1,4 +1,5 @@
 ﻿using AppHelpers.Strings;
+using LibApi.Extensions;
 using LibApi.Services.Books;
 using LibApi.Services.Categories;
 using LibApi.Services.Collections;
@@ -43,6 +44,20 @@ namespace LibWebApi.Controllers
         public async Task<IEnumerable<LibraryVM>> GetAsync()
         {
             IEnumerable<Library>? all = await Library.GetAllAsync();
+            return all ?? Enumerable.Empty<LibraryVM>();
+        }
+
+        [Route("all")]
+        [HttpGet]
+        public async Task<IEnumerable<LibraryVM>> GetAsync(OrderBy orderBy, SortBy sortBy, int? maxItemPerPage = 20)
+        {
+            IEnumerable<Library>? all = await Library.GetAllAsync();
+            if (all != null && all.Any())
+            {
+                var orderedItems = all.OrderItemsBy(orderBy, sortBy);
+                int countPage = orderedItems.CountPages(maxitemPerPage);
+
+            }
             return all ?? Enumerable.Empty<LibraryVM>();
         }
 
