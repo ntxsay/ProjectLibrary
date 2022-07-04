@@ -9,9 +9,17 @@ namespace AppHelpers.ES
 {
     public partial class FilesHelpers
     {
+        public enum FileSearchOptions
+        {
+            StartWith,
+            Contains,
+            EndWith,
+            Egal,
+        }
+
         public struct Extentions
         {
-
+            
             public enum AuthorizedDocsExtension : byte
             {
                 pdf,

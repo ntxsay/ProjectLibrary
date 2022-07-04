@@ -17,7 +17,7 @@
     <Viewbox x:Name="ViewboxSimpleThumnailDatatemplate" Height="282" Width="180" PointerPressed="ViewboxSimpleThumnailDatatemplate_PointerPressed">
         <Border Height="301" Width="192" Background="WhiteSmoke" BorderThickness="0" CornerRadius="8">
             <Grid Height="301" Width="192">
-                <Image x:Name="ImageThumbnail" Stretch="UniformToFill" Loaded="Image_Loaded"/>
+                <Image x:Name="ImageThumbnail"  Stretch="UniformToFill" Loaded="Image_Loaded"/>
                 <Grid Height="150" Width="150" VerticalAlignment="Top" HorizontalAlignment="Left">
                     <Polygon HorizontalAlignment="Left" VerticalAlignment="Top" Fill="LightBlue" Points="0,110, 0,70, 70,0, 110,0"/>
                     <Polygon HorizontalAlignment="Left" VerticalAlignment="Top" Fill="BlueViolet" Points="0,110, 0,71, 71,0, 110,0"/>

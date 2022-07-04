@@ -2,6 +2,7 @@
 using LibShared;
 using LibShared.Services;
 using LibShared.ViewModels.Libraries;
+using Microsoft.UI.Xaml.Media.Imaging;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -230,6 +231,58 @@ namespace LibraryWinUI.Code.WebApi
                 return false;
             }
         }
+
+        internal async Task<BitmapImage> GetJaquetteBitmap(long id)
+        {
+            try
+            {
+
+                //Désactive la validation du certificat SSL auto-signé
+                using HttpClientHandler handler = new()
+                {
+                    ClientCertificateOptions = ClientCertificateOption.Manual,
+                    ServerCertificateCustomValidationCallback = (httpRequestMessage, cert, cetChain, policyErrors) =>
+                    {
+                        return true;
+                    }
+                };
+
+                using HttpClient client = new(handler);
+                client.BaseAddress = new Uri(baseAPIUrl);
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                using HttpResponseMessage response = await client.GetAsync($"api/v2/libraries/jaquette?idLibrary={id}");
+                string httpResponseBody = "";
+                if (response.IsSuccessStatusCode)
+                {
+                    httpResponseBody = await response.Content.ReadAsStringAsync();
+                    byte[] result = JsonConvert.DeserializeObject<byte[]>(httpResponseBody);
+
+                    if (result == null || result.Length == 0)
+                    {
+                        throw new Exception("Le tableau de bytes ne peut pas être null ou vide.");
+                    }
+
+                    BitmapImage image = new();
+
+                    using MemoryStream memoryStream = new(result);
+                    using (IRandomAccessStream stream = memoryStream.AsRandomAccessStream())
+                    {
+                        await image.SetSourceAsync(stream);
+                    }
+                    return image;
+                }
+
+                return null;
+            }
+            catch (Exception ex)
+            {
+                Logs.Log(nameof(LibraryWebApi), exception: ex);
+                return null;
+            }
+        }
+
 
     }
 }

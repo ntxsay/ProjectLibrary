@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Security.AccessControl;
 using AppHelpers;
 using AppHelpers.Serialization;
@@ -271,11 +272,175 @@ namespace LibApi.Helpers
             }
             catch (Exception ex)
             {
-                Logs.Log(className: nameof(LibraryHelpers), exception: ex);
+                Logs.Log(className: nameof(InputOutput), exception: ex);
                 return false;
             }
         }
 
+        public async Task<bool> CopyJaquetteFileAsync(Guid guid, DefaultFolders defaultFolder, byte[] fileBytes, string fileName)
+        {
+            try
+            {
+                if (guid == Guid.Empty)
+                {
+                    throw new ArgumentNullException(nameof(guid), "Le GUID n'est pas valide.");
+                }
+
+                if (fileBytes == null || fileBytes.Length == 0)
+                {
+                    throw new ArgumentNullException(nameof(fileBytes), "Ce parmètre ne peut pas être null.");
+                }
+
+                if (fileName.IsStringNullOrEmptyOrWhiteSpace())
+                {
+                    throw new ArgumentNullException(nameof(fileName), "Ce parmètre ne peut pas être null ou ne contenir que des espaces blancs.");
+                }
+
+                bool isOlderDeleted = RemoveJaquetteFile(guid, defaultFolder);
+                if (!isOlderDeleted)
+                {
+                    throw new Exception();
+                }
+
+                DirectoryInfo? directoryInfo = GetOrCreateDefaultFolderItem(guid, defaultFolder);
+                if (directoryInfo == null || !directoryInfo.Exists)
+                {
+                    throw new Exception("Le dossier n'est pas valide ou n'existe pas.");
+                }
+
+                string filePath = directoryInfo.FullName + Path.DirectorySeparatorChar + $"{LibraryJaquette}{Path.GetExtension(fileName)}";
+
+                await File.WriteAllBytesAsync(filePath, fileBytes);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Logs.Log(className: nameof(InputOutput), exception: ex);
+                return false;
+            }
+        }
+
+        public async Task<byte[]> GetJaquetteFileAsync(Guid guid, DefaultFolders defaultFolder)
+        {
+            try
+            {
+                if (guid == Guid.Empty)
+                {
+                    throw new ArgumentNullException(nameof(guid), "Le GUID n'est pas valide.");
+                }
+
+                DirectoryInfo? directoryInfo = GetOrCreateDefaultFolderItem(guid, defaultFolder);
+                if (directoryInfo == null || !directoryInfo.Exists)
+                {
+                    throw new Exception("Le dossier n'est pas valide ou n'existe pas.");
+                }
+
+                FileInfo? fileInfo = directoryInfo.EnumerateFiles().FirstOrDefault(s => s.Name.ToLower().StartsWith(LibraryJaquette.ToLower()));
+                if (fileInfo == null || !fileInfo.Exists)
+                {
+                    throw new Exception("Le fichier n'est pas valide ou n'existe pas.");
+                }
+               
+                using FileStream fileStream = fileInfo.OpenRead();
+                using MemoryStream memoryStream = new ();
+                await fileStream.CopyToAsync(memoryStream);
+                byte[] byteArray = memoryStream.ToArray();
+
+                return byteArray;
+            }
+            catch (Exception ex)
+            {
+                Logs.Log(className: nameof(InputOutput), exception: ex);
+                return Array.Empty<byte>();
+            }
+        }
+
+
+        public bool RemoveJaquetteFile(Guid guid, DefaultFolders defaultFolder)
+        {
+            try
+            {
+                if (guid == Guid.Empty)
+                {
+                    throw new ArgumentNullException(nameof(guid), "Le GUID n'est pas valide.");
+                }
+
+                DirectoryInfo? directoryInfo = GetOrCreateDefaultFolderItem(guid, defaultFolder);
+                if (directoryInfo == null || !directoryInfo.Exists)
+                {
+                    throw new Exception("Le dossier n'est pas valide ou n'existe pas.");
+                }
+
+                switch (defaultFolder)
+                {
+                    case DefaultFolders.Libraries:
+                        return RemoveFile(LibraryJaquette, directoryInfo, AppHelpers.ES.FilesHelpers.FileSearchOptions.StartWith);
+                    case DefaultFolders.Books:
+                        break;
+                    case DefaultFolders.Contacts:
+                        break;
+                    default:
+                        break;
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Logs.Log(className: nameof(InputOutput), exception: ex);
+                return false;
+            }
+        }
+
+        public bool RemoveFile(string baseName, DirectoryInfo folderInfo, AppHelpers.ES.FilesHelpers.FileSearchOptions options = AppHelpers.ES.FilesHelpers.FileSearchOptions.StartWith)
+        {
+            try
+            {
+                if (baseName.IsStringNullOrEmptyOrWhiteSpace())
+                {
+                    throw new ArgumentNullException(nameof(baseName), "Le chemin d'accès au fichier ne peut pas être vide ou ne contenir que des espaces blancs.");
+                }
+
+                if (folderInfo == null || !folderInfo.Exists)
+                {
+                    throw new ArgumentNullException(nameof(folderInfo), "Le dossier n'est pas valide ou n'existe pas.");
+                }
+
+                IEnumerable<FileInfo> fileInfosToDelete = Enumerable.Empty<FileInfo>();
+                switch (options)
+                {
+                    case AppHelpers.ES.FilesHelpers.FileSearchOptions.StartWith:
+                        fileInfosToDelete = folderInfo.GetFiles().Where(s => s.Name.ToLower().StartsWith(baseName.ToLower()));
+                        break;
+                    case AppHelpers.ES.FilesHelpers.FileSearchOptions.Contains:
+                        fileInfosToDelete = folderInfo.GetFiles().Where(s => s.Name.ToLower().Contains(baseName.ToLower()));
+                        break;
+                    case AppHelpers.ES.FilesHelpers.FileSearchOptions.EndWith:
+                        fileInfosToDelete = folderInfo.GetFiles().Where(s => s.Name.ToLower().EndsWith(baseName.ToLower()));
+                        break;
+                    case AppHelpers.ES.FilesHelpers.FileSearchOptions.Egal:
+                        fileInfosToDelete = folderInfo.GetFiles().Where(s => s.Name.ToLower() == baseName.ToLower());
+                        break;
+                }
+
+                if (fileInfosToDelete == null || !fileInfosToDelete.Any())
+                {
+                    return true;
+                }
+
+                foreach (var file in fileInfosToDelete)
+                {
+                    file.Delete();
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Logs.Log(className: nameof(InputOutput), exception: ex);
+                return false;
+            }
+        }
     }
 }
 

@@ -397,25 +397,16 @@ namespace LibApi.Services.Libraries
             {
                 if (fileBytes == null || fileBytes.Length == 0)
                 {
-                    throw new ArgumentNullException(nameof(fileBytes), "Le modèle de vue ne peut pas être null.");
+                    throw new ArgumentNullException(nameof(fileBytes), "Ce parmètre ne peut pas être null.");
                 }
 
                 if (fileName.IsStringNullOrEmptyOrWhiteSpace())
                 {
-                    throw new ArgumentNullException(nameof(fileBytes), "Le modèle de vue ne peut pas être null.");
+                    throw new ArgumentNullException(nameof(fileName), "Ce parmètre ne peut pas être null ou ne contenir que des espaces blancs.");
                 }
 
                 InputOutput inputOutput = new();
-                DirectoryInfo? directoryInfo = inputOutput.GetOrCreateDefaultFolderItem(Guid, DefaultFolders.Libraries);
-                if (directoryInfo == null || !directoryInfo.Exists)
-                {
-                    throw new Exception("");
-                }
-
-                string filePath = directoryInfo.FullName + Path.DirectorySeparatorChar + $"{InputOutput.LibraryJaquette}{Path.GetExtension(fileName)}";
-
-                await File.WriteAllBytesAsync(filePath, fileBytes);
-                return true;
+                return await inputOutput.CopyJaquetteFileAsync(Guid, DefaultFolders.Libraries, fileBytes, fileName);
             }
             catch (Exception ex)
             {
@@ -424,11 +415,12 @@ namespace LibApi.Services.Libraries
             }
         }
 
-        public async Task<byte[]> GetJaquetteAsync()
+        public async Task<byte[]> GetJaquetteBytesAsync()
         {
             try
             {
-                
+                InputOutput inputOutput = new();
+                return await inputOutput.GetJaquetteFileAsync(Guid, DefaultFolders.Libraries);
             }
             catch (Exception ex)
             {

@@ -99,6 +99,36 @@ namespace LibraryWinUI.Code.Helpers
             }
         }
 
+        internal async Task<StorageFile> SaveFileAsync(PickerLocationId pickerLocationId = PickerLocationId.Downloads)
+        {
+            try
+            {
+                FileSavePicker savePicker = new ();
+
+                // Retrieve the window handle (HWND) of the current WinUI 3 window.
+                IntPtr hWnd = WindowNative.GetWindowHandle(window);
+
+                // Initialize the folder picker with the window handle (HWND).
+                WinRT.Interop.InitializeWithWindow.Initialize(savePicker, hWnd);
+
+                savePicker.SuggestedStartLocation = pickerLocationId;
+
+                StorageFile file = await savePicker.PickSaveFileAsync();
+                if (file == null)
+                {
+                    throw new Exception("Le fichier n'a pas pû être récupérer.");
+                }
+
+                return file;
+            }
+            catch (Exception ex)
+            {
+                Logs.Log(className: nameof(InputOutputHelpers), exception: ex);
+                return null;
+            }
+        }
+
+
         internal async Task<BitmapImage> BitmapImageFromFileAsync(string imageFileName)
         {
             try

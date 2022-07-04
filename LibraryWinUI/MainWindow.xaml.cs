@@ -61,14 +61,7 @@ namespace LibraryWinUI
         {
             try
             {
-                LibrariesOrBooksCollectionNavigation();
-                LibraryWebApi libApi = new();
-                var task = libApi.GetAllLibrariesAsync().GetAwaiter();
-                task.OnCompleted(() =>
-                {
-                    var result = task.GetResult();
-                    Console.WriteLine(result);
-                });
+                MainCollectionNavigation(typeof(LibraryVM));
             }
             catch (Exception ex)
             {
@@ -80,42 +73,6 @@ namespace LibraryWinUI
         #region TitleBar
         
         #endregion
-
-        private async void Button_Click(object sender, RoutedEventArgs e)
-        {
-            //StorageFolder localFolder = ApplicationData.Current.LocalFolder;
-            //var result = localFolder.CreateFolderAsync("HHH").GetAwaiter().GetResult();
-            //var path = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + System.IO.Path.DirectorySeparatorChar + "G2H";
-            //System.IO.Directory.CreateDirectory(path);
-
-            //FileSavePicker savePicker = new FileSavePicker();
-            FileOpenPicker openPicker = new FileOpenPicker();
-
-            // Retrieve the window handle (HWND) of the current WinUI 3 window.
-            IntPtr hWnd = WindowNative.GetWindowHandle(this);
-
-            // Initialize the folder picker with the window handle (HWND).
-            WinRT.Interop.InitializeWithWindow.Initialize(openPicker, hWnd);
-
-            openPicker.ViewMode = PickerViewMode.Thumbnail;
-            openPicker.SuggestedStartLocation = PickerLocationId.PicturesLibrary;
-            openPicker.FileTypeFilter.Add(".jpg");
-            openPicker.FileTypeFilter.Add(".jpeg");
-            openPicker.FileTypeFilter.Add(".png");
-
-            var files = await openPicker.PickMultipleFilesAsync();
-            if (files != null)
-            {
-                foreach (var file in files)
-                {
-
-                }
-            }
-            else
-            {
-                //OutputTextBlock.Text = "Operation cancelled.";
-            }
-        }
 
         public NavigationViewItem _lastItemMUCX;
         private void PrincipalNaviguation_ItemInvoked(NavigationView sender, NavigationViewItemInvokedEventArgs args)
@@ -149,10 +106,9 @@ namespace LibraryWinUI
                     return;
                 }
 
-                //ResourceLoader langResource = ResourceLoader.GetForViewIndependentUse("MainWindowRessources");
                 if (itemTag == langResource.GetString("LibraryNavViewMenuItem/Tag"))
                 {
-                    LibrariesOrBooksCollectionNavigation();
+                    MainCollectionNavigation(typeof(LibraryVM));
                 }
 
                 item.IsSelected = true;
@@ -169,12 +125,17 @@ namespace LibraryWinUI
             this.GoToBack();
         }
 
-        internal bool LibrariesOrBooksCollectionNavigation(LibraryVM library = null)
+        internal bool MainCollectionNavigation(Type type)
         {
             try
             {
                 //this.ChangeAppTitle(ViewModelPage.MainTitleBar);
-                return NavigateToView(typeof(MainCollectionPage), null);
+                if (MainFrameContainer.Content is not MainCollectionPage)
+                {
+                    return NavigateToView(typeof(MainCollectionPage), type);
+                }
+
+                return false;
             }
             catch (Exception ex)
             {

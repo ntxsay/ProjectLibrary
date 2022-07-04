@@ -88,6 +88,19 @@ namespace LibWebApi.Controllers
             }
         }
 
+        [Route("jaquette")]
+        [HttpGet]
+        public async Task<byte[]?> GetJaquetteAsync([FromQuery] long idLibrary)
+        {
+            using Library? library = await Library.GetSingleAsync(idLibrary);
+            if (library == null)
+            {
+                return null;
+            }
+
+            return await library.GetJaquetteBytesAsync();
+        }
+
         [Route("first")]
         [HttpGet]
         public async Task<LibraryVM?> GetFirstAsync()

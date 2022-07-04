@@ -34,6 +34,7 @@ namespace LibraryWinUI.Views.Pages
     public sealed partial class MainCollectionPage : Page
     {
         readonly MainCollectionPageVM ViewModelPage = new ();
+        internal Type TypeOfMainCollection { get; private set; }
         public MainCollectionPage()
         {
             this.InitializeComponent();
@@ -42,9 +43,13 @@ namespace LibraryWinUI.Views.Pages
         protected async override void OnNavigatedTo(NavigationEventArgs e)
         {
             base.OnNavigatedTo(e);
+            if (e.Parameter is LibShared.ViewModels.Libraries.LibraryVM)
+            {
+                TypeOfMainCollection = typeof(LibShared.ViewModels.Libraries.LibraryVM);
 #warning Juste à des fins de tests
-            await LibraryNewEditAsync(new LibraryVM(), EditMode.Create);
-            await TestGetLibrariesAsync();
+                await LibraryNewEditAsync(new LibraryVM(), EditMode.Create);
+                await TestGetLibrariesAsync();
+            }
         }
 
         private async Task TestGetLibrariesAsync()

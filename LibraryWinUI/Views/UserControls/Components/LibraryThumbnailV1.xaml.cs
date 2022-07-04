@@ -43,11 +43,20 @@ namespace LibraryWinUI.Views.UserControls.Components
         public static readonly DependencyProperty OnViewModelChangedProperty = DependencyProperty.Register(nameof(ViewModel), typeof(LibraryVM),
                                                                 typeof(LibraryThumbnailV1), new PropertyMetadata(null, new PropertyChangedCallback(OnViewModelChanged)));
 
-        private static void OnViewModelChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        private static async void OnViewModelChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             if (d is LibraryThumbnailV1 parent && e.NewValue is LibraryVM viewModel)
             {
                 parent.UiViewModel.DeepCopy(viewModel);
+                //if (parent.UiViewModel != null)
+                //{
+                //    LibraryWebApi libApi = new();
+                //    BitmapImage bitmapImage = await libApi.GetJaquetteBitmap(parent.UiViewModel.Id);
+                //    if (bitmapImage != null)
+                //    {
+                //        parent.ImageThumbnail.Source = bitmapImage;
+                //    }
+                //}
             }
         }
 
@@ -56,9 +65,25 @@ namespace LibraryWinUI.Views.UserControls.Components
 
         }
 
-        private void Image_Loaded(object sender, RoutedEventArgs e)
+        private async void Image_Loaded(object sender, RoutedEventArgs e)
         {
-
+            try
+            {
+                if (sender is Image imageCtrl)
+                {
+                    LibraryWebApi libApi = new();
+                    BitmapImage bitmapImage = await libApi.GetJaquetteBitmap(UiViewModel.Id);
+                    if (bitmapImage != null)
+                    {
+                        ImageThumbnail.Source = bitmapImage;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Logs.Log(className: nameof(LibraryThumbnailV1), exception: ex);
+                return;
+            }
         }
 
         private async void MFI_Change_Jaquette_Click(object sender, RoutedEventArgs e)
