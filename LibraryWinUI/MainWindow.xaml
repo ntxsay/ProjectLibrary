@@ -17,7 +17,12 @@
                         <FontIcon Glyph="&#xe721;"/>
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
-
+                <NavigationViewItemSeparator />
+                <NavigationViewItem Content="Services" Tag="services">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xe721;"/>
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
             </NavigationView.MenuItems>
             <NavigationView.FooterMenuItems>
             </NavigationView.FooterMenuItems>

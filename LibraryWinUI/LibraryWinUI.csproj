@@ -26,6 +26,7 @@
     <None Remove="Views\UserControls\Components\PagingBar.xaml" />
     <None Remove="Views\UserControls\ItemCollectionUC.xaml" />
     <None Remove="Views\UserControls\SideBarItemHeader.xaml" />
+    <None Remove="Views\Windows\HtmlServicesWindow.xaml" />
   </ItemGroup>
 
   <ItemGroup>
@@ -40,6 +41,7 @@
 
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.WinUI.UI.Controls" Version="7.1.2" />
+    <PackageReference Include="HtmlAgilityPack" Version="1.11.43" />
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.1.0" />
     <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.22000.197" />
     <Manifest Include="$(ApplicationManifest)" />
@@ -66,6 +68,11 @@
   </ItemGroup>
   <ItemGroup>
     <Content Remove="Assets\Backgrounds\Image1.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Views\Windows\HtmlServicesWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Page Update="Views\UserControls\Components\LibraryThumbnailV1.xaml">

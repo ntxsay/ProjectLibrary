@@ -2,6 +2,7 @@
 using AppHelpers.Strings;
 using LibraryWinUI.ViewModels;
 using LibraryWinUI.Views.Pages;
+using LibraryWinUI.Views.Windows;
 using LibShared.ViewModels.Libraries;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Windowing;
@@ -116,6 +117,10 @@ namespace LibraryWinUI
                 {
                     MainCollectionNavigation(typeof(LibraryVM));
                 }
+                else if (itemTag == "services")
+                {
+                    OpenHtmlWindow();
+                }
 
                 item.IsSelected = true;
             }
@@ -207,6 +212,12 @@ namespace LibraryWinUI
             }
         }
 
-        
+
+        private void OpenHtmlWindow()
+        {
+            HtmlServicesWindow newWindow = new HtmlServicesWindow();
+            newWindow.Activate();
+
+        }
     }
 }
