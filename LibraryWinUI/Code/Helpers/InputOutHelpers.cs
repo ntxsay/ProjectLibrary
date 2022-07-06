@@ -99,20 +99,25 @@ namespace LibraryWinUI.Code.Helpers
             }
         }
 
-        internal async Task<StorageFile> SaveFileAsync(PickerLocationId pickerLocationId = PickerLocationId.Downloads)
+        internal async Task<StorageFile> SaveFileAsync(string suggestedFileName, Dictionary<string, IList<string>> fileTypeFilter, PickerLocationId pickerLocationId = PickerLocationId.Downloads, Window _window = null)
         {
             try
             {
                 FileSavePicker savePicker = new ();
 
                 // Retrieve the window handle (HWND) of the current WinUI 3 window.
-                IntPtr hWnd = WindowNative.GetWindowHandle(window);
+                IntPtr hWnd = WindowNative.GetWindowHandle(_window ?? window);
 
                 // Initialize the folder picker with the window handle (HWND).
                 WinRT.Interop.InitializeWithWindow.Initialize(savePicker, hWnd);
 
                 savePicker.SuggestedStartLocation = pickerLocationId;
+                savePicker.SuggestedFileName = suggestedFileName;
 
+                foreach (var fileType in fileTypeFilter)
+                {
+                    savePicker.FileTypeChoices.Add(fileType); //ex: ".jpg";
+                }
                 StorageFile file = await savePicker.PickSaveFileAsync();
                 if (file == null)
                 {

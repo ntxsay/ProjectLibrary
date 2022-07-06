@@ -11,15 +11,47 @@
     <Grid>
         <Grid>
             <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+
                 <RowDefinition Height="*"/>
-                <RowDefinition Height="*"/>
-                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
-            <controls:WebView2 x:Name="MyWebView2" HorizontalAlignment="Stretch" NavigationStarting="MyWebView2_NavigationStarting" NavigationCompleted="MyWebView2_NavigationCompleted"
-                               VerticalAlignment="Stretch" Grid.Row="0" />
-            <TextBox x:Name="TbxResult" AcceptsReturn="True" TextWrapping="Wrap" Grid.Row="1">
+            <Grid Grid.Row="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBox x:Name="TbxSearch" AcceptsReturn="True" TextWrapping="Wrap" Grid.Column="0">
+
+                </TextBox>
+                <Button x:Name="BtnGo" Click="BtnGo_Click" Grid.Column="1">
+                    <TextBlock Text="Go" />
+                </Button>
+            </Grid>
+            <Grid Grid.Row="1" x:Name="grid">
+                <controls:WebView2 x:Name="MyWebView2" HorizontalAlignment="Stretch" NavigationStarting="MyWebView2_NavigationStarting" NavigationCompleted="MyWebView2_NavigationCompleted"
+                               VerticalAlignment="Stretch"  />
+            </Grid>
+            <TextBox x:Name="TbxResult" AcceptsReturn="True" TextWrapping="Wrap" Grid.Row="2">
                 
             </TextBox>
+            <Grid Grid.Row="3">
+                <StackPanel Orientation="Horizontal">
+                    <Button x:Name="BtnTranslate" Click="BtnTranslate_Click">
+                        <TextBlock Text="Traduire" />
+                    </Button>
+                    <Button  x:Name="BtnPrintToPdf" Click="BtnPrintToPdf_Click">
+                        <TextBlock Text="Exporter en pdf"></TextBlock>
+                    </Button>
+                    <Button Click="Button_Click">
+                        <TextBlock Text="Selenium"></TextBlock>
+                    </Button>
+                    <Button x:Name="Btn_AllInOne" Click="Btn_AllInOne_Click">
+                        <TextBlock Text="All in one"></TextBlock>
+                    </Button>
+                </StackPanel>
+            </Grid>
         </Grid>
     </Grid>
 </Window>
