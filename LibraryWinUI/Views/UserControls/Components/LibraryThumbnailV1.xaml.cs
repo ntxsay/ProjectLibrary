@@ -29,6 +29,8 @@ namespace LibraryWinUI.Views.UserControls.Components
     public sealed partial class LibraryThumbnailV1 : Grid
     {
         private LibraryVM UiViewModel { get; set; } = new();
+        public delegate void EditItemEventHandler(LibraryThumbnailV1 sender, LibraryVM viewModel);
+        public event EditItemEventHandler EditItemRequested;
         public LibraryThumbnailV1()
         {
             this.InitializeComponent();
@@ -36,7 +38,8 @@ namespace LibraryWinUI.Views.UserControls.Components
 
         public LibraryVM ViewModel
         {
-            get { return (LibraryVM)GetValue(OnViewModelChangedProperty); }
+            //get { return (LibraryVM)GetValue(OnViewModelChangedProperty); }
+            get => UiViewModel;
             set { SetValue(OnViewModelChangedProperty, value); }
         }
 
@@ -119,7 +122,7 @@ namespace LibraryWinUI.Views.UserControls.Components
 
         private void MFI_Edit_Item_Click(object sender, RoutedEventArgs e)
         {
-
+            EditItemRequested?.Invoke(this, UiViewModel);
         }
 
         private void MFI_Delete_Item_Click(object sender, RoutedEventArgs e)

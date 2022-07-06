@@ -140,7 +140,7 @@ namespace LibraryWinUI.Code.WebApi
             }
         }
 
-        internal async Task<LibraryVM> UpdateAsync(LibraryVM viewModel)
+        internal async Task<LibraryVM> UpdateAsync(long id, LibraryVM viewModel)
         {
             try
             {
@@ -152,7 +152,22 @@ namespace LibraryWinUI.Code.WebApi
                 string json = JsonConvert.SerializeObject(viewModel);
                 StringContent httpContent = new(json, Encoding.Default, "application/json");
 
-                HttpResponseMessage response = await HttpClient().PostAsync("api/v2/libraries/create/view-model", httpContent);
+                //Désactive la validation du certificat SSL auto-signé
+                using HttpClientHandler handler = new()
+                {
+                    ClientCertificateOptions = ClientCertificateOption.Manual,
+                    ServerCertificateCustomValidationCallback = (httpRequestMessage, cert, cetChain, policyErrors) =>
+                    {
+                        return true;
+                    }
+                };
+
+                using HttpClient client = new(handler);
+                client.BaseAddress = new Uri(baseAPIUrl);
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                HttpResponseMessage response = await client.PutAsync($"api/v2/libraries/update/vm?id={id}", httpContent);
                 string httpResponseBody = "";
 
                 if (response.IsSuccessStatusCode)

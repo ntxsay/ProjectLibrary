@@ -1,34 +1,15 @@
 ﻿using AppHelpers;
 using AppHelpers.Strings;
 using LibraryWinUI.ViewModels;
-using LibraryWinUI.ViewModels.Pages;
+using LibraryWinUI.Views.Pages;
 using LibShared.ViewModels.Libraries;
-using Microsoft.UI;
+using Microsoft.UI.Dispatching;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Controls.Primitives;
-using Microsoft.UI.Xaml.Data;
-using Microsoft.UI.Xaml.Input;
-using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Animation;
-using Microsoft.UI.Xaml.Navigation;
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Runtime.InteropServices.WindowsRuntime;
-using System.Threading.Tasks;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
-using Windows.Storage;
-using Windows.Storage.Pickers;
-using WinRT.Interop;
-using Microsoft.UI.Dispatching;
-using LibraryWinUI.Views.Pages;
 using Windows.ApplicationModel.Resources;
-using LibraryWinUI.Code.WebApi;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -46,6 +27,8 @@ namespace LibraryWinUI
         public MainWindow()
         {
             this.InitializeComponent();
+            m_AppWindow = GetAppWindowForCurrentWindow();
+            m_AppWindow.Closing += M_AppWindow_Closing;
 
             this.InitializeAppTitleBar();
 
@@ -56,6 +39,29 @@ namespace LibraryWinUI
                 this.InitializeWindow();
             }));
         }
+
+        private async void M_AppWindow_Closing(AppWindow sender, AppWindowClosingEventArgs args)
+        {
+            try
+            {
+                args.Cancel = true;
+                if (MainFrameContainer.Content is MainCollectionPage mainCollectionPage)
+                {
+                    bool isCheckedBeforeClose = await mainCollectionPage.CheckAndCloseSidebarsAsync();
+                    if (isCheckedBeforeClose)
+                    {
+                        App.Current.Exit();
+                    }
+                }
+
+            }
+            catch (Exception ex)
+            {
+                Logs.Log(nameof(MainWindow), exception: ex);
+                return;
+            }
+        }
+
 
         private void InitializeWindow()
         {

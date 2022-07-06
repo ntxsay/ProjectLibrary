@@ -1,12 +1,13 @@
 ﻿using AppHelpers;
 using LibraryWinUI.Code.WebApi;
 using LibraryWinUI.ViewModels;
-using LibraryWinUI.ViewModels.Libraries;
 using LibraryWinUI.ViewModels.Pages;
 using LibraryWinUI.Views.SideBar;
 using LibraryWinUI.Views.UserControls;
+using LibraryWinUI.Views.UserControls.Components;
 using LibShared;
 using LibShared.Services;
+using LibShared.ViewModels.Libraries;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
@@ -43,12 +44,16 @@ namespace LibraryWinUI.Views.Pages
         protected async override void OnNavigatedTo(NavigationEventArgs e)
         {
             base.OnNavigatedTo(e);
-            if (e.Parameter is LibShared.ViewModels.Libraries.LibraryVM)
+            if (e.Parameter is Type type)
             {
-                TypeOfMainCollection = typeof(LibShared.ViewModels.Libraries.LibraryVM);
+                TypeOfMainCollection = type;
+
+                if (type == typeof(LibraryVM))
+                {
 #warning Juste à des fins de tests
-                await LibraryNewEditAsync(new LibraryVM(), EditMode.Create);
-                await TestGetLibrariesAsync();
+                    await LibraryNewEditAsync(new LibraryVM(), EditMode.Create);
+                    await TestGetLibrariesAsync();
+                }
             }
         }
 
@@ -60,8 +65,8 @@ namespace LibraryWinUI.Views.Pages
                 LibShared.ViewModels.Libraries.LibraryRequestVM resquestResult = await libApi.GetLibrariesAsync(orderBy: OrderBy.Ascending, sortBy: SortBy.Name, maxItemsPerPage: 20, gotoPage: 1);
                 if (resquestResult != null)
                 {
-                    ItemCollectionUC itemCollectionUC = new();
-                    itemCollectionUC.InitializeCollection(resquestResult.List.GroupItemsBy(GroupBy.Letter));
+                    ItemCollectionUC itemCollectionUC = new (this);
+                    itemCollectionUC.InitializeCollection(resquestResult.List.GroupItemsBy(GroupBy.None));
                     FrameContainer.Content = itemCollectionUC;
                 }
             }
@@ -116,7 +121,46 @@ namespace LibraryWinUI.Views.Pages
         }
 
         #region Actions
+
         #region Library
+        internal async Task LibraryNewEditAsync(LibraryThumbnailV1 element, EditMode editMode = EditMode.Create)
+        {
+            try
+            {
+
+                if (this.PivotRightSideBar.Items.FirstOrDefault(f => f is LibraryNewEditSideBar item && item.UiViewModel.EditMode == editMode) is LibraryNewEditSideBar checkedItem)
+                {
+                    var isModificationStateChecked = await checkedItem.CheckModificationsStateAsync();
+                    if (isModificationStateChecked)
+                    {
+                        checkedItem.InitializeSideBar(this, element, editMode);
+                        this.SelectItemSideBar(checkedItem);
+                    }
+                }
+                else
+                {
+                    LibraryNewEditSideBar userControl = new();
+                    userControl.InitializeSideBar(this, element, editMode);
+
+                    userControl.CancelModificationRequested += LibraryNewEditSideBar_CancelModificationRequested; ;
+                    userControl.ExecuteTaskRequested += LibraryNewEditSideBar_ExecuteTaskRequested; ;
+
+                    this.AddItemToSideBar(userControl, new SideBarItemHeaderVM()
+                    {
+                        Glyph = userControl.UiViewModel.Glyph,
+                        Title = userControl.UiViewModel.Header,
+                        IdItem = userControl.ItemGuid,
+                    });
+                }
+                this.ViewModelPage.IsSplitViewOpen = true;
+            }
+            catch (Exception ex)
+            {
+                Logs.Log(className: nameof(MainCollectionPage), exception: ex);
+                return;
+            }
+        }
+
         internal async Task LibraryNewEditAsync(LibraryVM viewModel, EditMode editMode = EditMode.Create)
         {
             try
@@ -155,10 +199,24 @@ namespace LibraryWinUI.Views.Pages
             }
         }
 
-        private void LibraryNewEditSideBar_ExecuteTaskRequested(LibraryNewEditSideBar sender, LibraryVM originalViewModel, bool isSuccess)
+
+        private void LibraryNewEditSideBar_ExecuteTaskRequested(LibraryNewEditSideBar sender, LibraryVM originalViewModel, LibraryVM editedViewModel)
         {
-            if (isSuccess)
+            if (editedViewModel != null)
             {
+                switch (sender.UiViewModel.EditMode)
+                {
+                    case EditMode.Create:
+                        break;
+                    case EditMode.Edit:
+                        if (sender.ThumbnailV1 != null)
+                        {
+                            sender.ThumbnailV1.ViewModel = editedViewModel;
+                        }
+                        break;
+                    default:
+                        break;
+                }
                 //await this.RefreshItemsGrouping(this.GetSelectedPage, true);
                 this.RemoveItemToSideBar(sender);
             }
@@ -339,6 +397,37 @@ namespace LibraryWinUI.Views.Pages
             {
                 Logs.Log(className: nameof(MainCollectionPage), exception: ex);
                 return;
+            }
+        }
+
+        internal async Task<bool> CheckAndCloseSidebarsAsync()
+        {
+            try
+            {
+                for (int i = 0; i < this.PivotRightSideBar.Items.Count; i++)
+                {
+                    if (this.PivotRightSideBar.Items[i] is LibraryNewEditSideBar libraryNewEditSideBar)
+                    {
+                        bool isModificationStateChecked = await libraryNewEditSideBar.CheckModificationsStateAsync();
+                        if (isModificationStateChecked)
+                        {
+                            this.RemoveItemToSideBar(libraryNewEditSideBar);
+                            i = -1;
+                            continue;
+                        }
+                        else
+                        {
+                            return false;
+                        }
+                    }
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Logs.Log(className: nameof(MainCollectionPage), exception: ex);
+                return false;
             }
         }
         #endregion

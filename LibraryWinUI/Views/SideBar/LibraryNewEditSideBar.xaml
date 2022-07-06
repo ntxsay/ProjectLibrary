@@ -40,8 +40,8 @@
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
-            <TextBox Grid.Row="0" Text="{x:Bind UiViewModel.ViewModel.Name, Mode=TwoWay}" x:Uid="/LibraryNewEditSideBarRessources/Name"/>
-            <TextBox Grid.Row="1" Text="{x:Bind UiViewModel.ViewModel.Description, Mode=TwoWay}" MinHeight="100" x:Uid="/LibraryNewEditSideBarRessources/Description"
+            <TextBox Grid.Row="0" Text="{x:Bind UiViewModel.ViewModel.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" x:Uid="/LibraryNewEditSideBarRessources/Name"/>
+            <TextBox Grid.Row="1" Text="{x:Bind UiViewModel.ViewModel.Description, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" MinHeight="100" x:Uid="/LibraryNewEditSideBarRessources/Description"
                  TextWrapping="Wrap" AcceptsReturn="True"/>
             <StackPanel Grid.Row="2" Orientation="Vertical" Spacing="10" Padding="0 30 0 0">
                 <Rectangle Height="1" Grid.Row="1" Fill="{ThemeResource SystemColorControlAccentBrush}" Margin="20 0 20 20"/>

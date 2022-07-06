@@ -1,4 +1,5 @@
-﻿using LibraryWinUI.Code;
+﻿using AppHelpers;
+using LibraryWinUI.Code;
 using LibraryWinUI.ViewModels.UserControls;
 using LibraryWinUI.Views.Pages;
 using LibShared.ViewModels;
@@ -27,7 +28,7 @@ namespace LibraryWinUI.Views.UserControls
     public sealed partial class ItemCollectionUC : UserControl
     {
         internal ItemCollectionUCVM UiViewModel { get; set; } = new();
-        internal MainCollectionPage MainCollectionPage { get; init; }
+        internal MainCollectionPage MainCollectionPage { get; private set; }
         internal DataViewMode DataViewMode { get; set; }
         public ItemCollectionUC()
         {
@@ -84,12 +85,30 @@ namespace LibraryWinUI.Views.UserControls
 
         }
 
-        private void Image_Loaded(object sender, RoutedEventArgs e)
-        {
+        //private void Image_Loaded(object sender, RoutedEventArgs e)
+        //{
 
+        //}
+
+        //private void ViewboxSimpleThumnailDatatemplate_PointerPressed(object sender, PointerRoutedEventArgs e)
+        //{
+
+        //}
+
+        private async void LibraryThumbnailV1_EditItemRequested(Components.LibraryThumbnailV1 sender, LibraryVM viewModel)
+        {
+            try
+            {
+                await this.MainCollectionPage.LibraryNewEditAsync(sender, LibShared.EditMode.Edit);
+            }
+            catch (Exception ex)
+            {
+                Logs.Log(className:nameof(ItemCollectionUC), exception:ex);
+                return;
+            }
         }
 
-        private void ViewboxSimpleThumnailDatatemplate_PointerPressed(object sender, PointerRoutedEventArgs e)
+        private void LibraryThumbnailV1_EditItemRequested_1(Components.LibraryThumbnailV1 sender, LibraryVM viewModel)
         {
 
         }

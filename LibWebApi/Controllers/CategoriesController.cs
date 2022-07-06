@@ -50,7 +50,7 @@ namespace LibWebApi.Controllers
                 return null;
             }
 
-            using Library? library = await Library.GetSingleAsync(idLibrary);
+            using Library? library = await Library.SingleAsync(idLibrary);
             if (library == null)
             {
                 _logger.LogError("La bibliothèque n'existe pas.");

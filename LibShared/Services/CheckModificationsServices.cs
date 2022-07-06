@@ -11,12 +11,13 @@ namespace LibShared.Services
 {
     public class CheckModificationsServices
     {
-        public static List<PropertiesChangedVM>? GetPropertiesChanged(LibraryVM viewModelA, LibraryVM viewModelB)
+        public static IEnumerable<PropertiesChangedVM> GetPropertiesChanged(LibraryVM viewModelA, LibraryVM viewModelB)
         {
             try
             {
-                if (viewModelA == null) return null;
-                if (viewModelB == null) return null;
+                if (viewModelA == null) return Enumerable.Empty<PropertiesChangedVM>();
+                if (viewModelB == null) return Enumerable.Empty<PropertiesChangedVM>();
+
                 List<PropertiesChangedVM> list = new ();
 
                 if (viewModelA.Name != viewModelB.Name)
@@ -42,7 +43,7 @@ namespace LibShared.Services
             catch (Exception ex)
             {
                 Logs.Log(className: nameof(CheckModificationsServices), exception: ex);
-                return null;
+                return Enumerable.Empty<PropertiesChangedVM>();
             }
         }
 

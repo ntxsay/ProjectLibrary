@@ -10,15 +10,16 @@
     xmlns:sharedLibraryVM="using:LibShared.ViewModels.Libraries"
     mc:Ignorable="d">
     <UserControl.Resources>
+        <ThemeShadow x:Name="BackgroundGridShadow"/>
         <DataTemplate x:DataType="sharedLibraryVM:LibraryVM" x:Key="GridViewItemLibraryTemplate">
-            <customComponents:LibraryThumbnailV1 ViewModel="{x:Bind Mode=OneWay}" />
+            <customComponents:LibraryThumbnailV1 Shadow="{StaticResource BackgroundGridShadow}" ViewModel="{x:Bind Mode=OneWay}" EditItemRequested="LibraryThumbnailV1_EditItemRequested" />
         </DataTemplate>
 
         <DataTemplate x:Key="GridViewLibraryTemplate" x:DataType="libraryVM:LibraryVM">
             <ScrollViewer x:Name="scrollItems" HorizontalScrollMode="Disabled" Grid.Row="0">
-                <GridView x:Name="GridViewItems" ItemsSource="{Binding Mode=OneWay}" SelectionMode="Extended" IsItemClickEnabled="False" Padding="4,14" Loaded="GridViewItems_Loaded" Unloaded="GridViewItems_Unloaded"
+                <GridView x:Name="GridViewItems" ItemsSource="{Binding Mode=OneWay}" SelectionMode="Extended" IsItemClickEnabled="False" Padding="4 14 4 50" Loaded="GridViewItems_Loaded" Unloaded="GridViewItems_Unloaded"
                              ScrollViewer.VerticalScrollMode="Disabled" IsMultiSelectCheckBoxEnabled="True" SingleSelectionFollowsFocus="True" ItemTemplate="{StaticResource GridViewItemLibraryTemplate}"
-                          KeyDown="GridViewItems_KeyDown" >
+                          KeyDown="GridViewItems_KeyDown">
                     <GridView.ItemContainerStyle>
                         <Style TargetType="GridViewItem" >
                             <Setter Property="Margin" Value="7" />
@@ -37,32 +38,6 @@
                             <ContentThemeTransition/>
                         </TransitionCollection>
                     </GridView.ItemContainerTransitions>
-                    <!--<GridView.ItemTemplate>
-                        <DataTemplate x:DataType="libraryVM:LibraryVM">
-                            <Grid x:Name="simpleThumnailItemContainer" Height="282" Width="180" Translation="0,0,32">
-                                <Viewbox x:Name="ViewboxSimpleThumnailDatatemplate" Height="282" Width="180" Tag="{x:Bind Mode=OneWay}" PointerPressed="ViewboxSimpleThumnailDatatemplate_PointerPressed">
-                                    <Border Height="301" Width="192" Background="WhiteSmoke" BorderThickness="0" CornerRadius="8">
-                                        <Grid Height="301" Width="192">
-                                            <Image  Stretch="UniformToFill" Loaded="Image_Loaded"/>
-                                            <Grid Height="150" Width="150" VerticalAlignment="Top" HorizontalAlignment="Left">
-                                                <Polygon HorizontalAlignment="Left" VerticalAlignment="Top" Fill="LightBlue" Points="0,110, 0,70, 70,0, 110,0"/>
-                                                <Polygon HorizontalAlignment="Left" VerticalAlignment="Top" Fill="BlueViolet" Points="0,110, 0,71, 71,0, 110,0"/>
-                                                <TextBlock TextAlignment="Center" HorizontalAlignment="Left" VerticalAlignment="Top" RenderTransformOrigin="0.5,0.5" Margin="-28,35,0,0" 
-                                                   UseLayoutRounding="False" d:LayoutRounding="Auto" Width="140" FontSize="16" FontWeight="Bold" Foreground="White">
-                                    <Run Text="{x:Bind CountBooks, Mode=OneWay}" />
-                                    <Run Text="livre(s)" />
-                                                    <TextBlock.RenderTransform>
-                                                        <CompositeTransform Rotation="-45.15"/>
-                                                    </TextBlock.RenderTransform>
-                                                </TextBlock>
-                                            </Grid>
-                                        </Grid>
-                                    </Border>
-                                </Viewbox>
-
-                            </Grid>
-                        </DataTemplate>
-                    </GridView.ItemTemplate>-->
                 </GridView>
             </ScrollViewer>
         </DataTemplate>
@@ -73,15 +48,12 @@
                 </ListView>
             </ScrollViewer>
         </DataTemplate>
-        <!--<dTemplateSelectors:DataViewModeTemplateSelector x:Key="dataViewModeTemplateSelector"
-        DataGridViewTemplate="{StaticResource DataGridViewTemplate}"
-        GridViewTemplate="{StaticResource GridViewTemplate}" />-->
     </UserControl.Resources>
     <Grid>
-        <Grid.RowDefinitions>
+        <!--<Grid.RowDefinitions>
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
-        </Grid.RowDefinitions>
+        </Grid.RowDefinitions>-->
         <Pivot x:Name="PivotItems" x:FieldModifier="public" ItemsSource="{Binding Mode=OneWay}" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
                                SelectedIndex="{x:Bind UiViewModel.SelectedPivotIndex, Mode=OneWay}" PivotItemLoaded="PivotItems_PivotItemLoaded">
             <Pivot.OpacityTransition>
@@ -93,7 +65,7 @@
                 </DataTemplate>
             </Pivot.HeaderTemplate>
         </Pivot>
-        <Grid Grid.Row="1">
+        <Grid VerticalAlignment="Bottom">
             <customComponents:PagingBar Margin="15 5 15 10"/>
         </Grid>
     </Grid>

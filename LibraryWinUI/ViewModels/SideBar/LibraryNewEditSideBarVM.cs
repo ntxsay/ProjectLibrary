@@ -101,8 +101,8 @@ namespace LibraryWinUI.ViewModels.SideBar
             }
         }
 
-        private LibraryVM _ViewModel;
-        public LibraryVM ViewModel
+        private LibShared.ViewModels.Libraries.LibraryVM _ViewModel;
+        public LibShared.ViewModels.Libraries.LibraryVM ViewModel
         {
             get => this._ViewModel;
             set

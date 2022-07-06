@@ -64,7 +64,7 @@ namespace LibApi.Services.Libraries
         /// </summary>
         /// <param name="idLibrary"></param>
         /// <returns></returns>
-        public static async Task<Library?> GetSingleAsync(long idLibrary)
+        public static async Task<Library?> SingleAsync(long idLibrary)
         {
             try
             {
@@ -286,10 +286,32 @@ namespace LibApi.Services.Libraries
                     throw new InvalidOperationException($"La bibliothèque {Name} a déjà été supprimée.");
                 }
 
-                //S'il n'y a pas de nouveau nom et que la modification de la description est ignoré, alors génère une erreur.
-                if (newName.IsStringNullOrEmptyOrWhiteSpace() && newDescription == null)
+                return await UpdateAsync(new LibShared.ViewModels.Libraries.LibraryVM()
                 {
-                    throw new InvalidOperationException("Le nouveau nom de la bibliothèque ou sa nouvelle description doit être renseignée.");
+                    Name = newName,
+                    Description = newDescription,
+                });
+            }
+            catch (Exception ex)
+            {
+                Logs.Log(nameof(Library), exception: ex);
+                return false;
+            }
+        }
+
+        public async Task<bool> UpdateAsync(LibShared.ViewModels.Libraries.LibraryVM viewModel)
+        {
+            try
+            {
+                if (IsDeleted)
+                {
+                    throw new InvalidOperationException($"La bibliothèque {Name} a déjà été supprimée.");
+                }
+
+                //S'il n'y a pas de nouveau nom et que la modification de la description est ignoré, alors génère une erreur.
+                if (viewModel == null)
+                {
+                    throw new InvalidOperationException("Le modèle de vue n'est pas valide.");
                 }
 
                 Tlibrary? tlibrary = await context.Tlibraries.SingleOrDefaultAsync(s => s.Id == Id);
@@ -298,25 +320,25 @@ namespace LibApi.Services.Libraries
                     throw new NullReferenceException($"La bibliothèque n'existe pas avec l'id \"{Id}\".");
                 }
 
-                if (!newName.IsStringNullOrEmptyOrWhiteSpace())
+                if (!viewModel.Name.IsStringNullOrEmptyOrWhiteSpace())
                 {
-                    bool isExist = await context.Tlibraries.AnyAsync(c => c.Id != Id && c.Name.ToLower() == newName.Trim().ToLower())!;
+                    bool isExist = await context.Tlibraries.AnyAsync(c => c.Id != Id && c.Name.ToLower() == viewModel.Name.Trim().ToLower())!;
                     if (isExist)
                     {
-                        Logs.Log(nameof(Library), nameof(UpdateAsync), "Cette bibliothèque existe déjà");
+                        Logs.Log(nameof(Library), message:"Cette bibliothèque existe déjà");
                         return false;
                     }
                 }
 
-                if (!newName.IsStringNullOrEmptyOrWhiteSpace())
+                if (!viewModel.Name.IsStringNullOrEmptyOrWhiteSpace())
                 {
-                    tlibrary.Name = newName.Trim();
+                    tlibrary.Name = viewModel.Name.Trim();
                 }
 
                 //La mise à jour de la description n'est pas ignorée si elle est différent de null.
-                if (newDescription != null)
+                if (viewModel.Description != null)
                 {
-                    tlibrary.Description = newDescription?.Trim();
+                    tlibrary.Description = viewModel.Description?.Trim();
                 }
 
                 DateTime dateEdition = DateTime.Now;
@@ -327,13 +349,13 @@ namespace LibApi.Services.Libraries
 
                 DateEdition = dateEdition;
 
-                if (!newName.IsStringNullOrEmptyOrWhiteSpace())
+                if (!viewModel.Name.IsStringNullOrEmptyOrWhiteSpace())
                 {
                     Name = tlibrary.Name;
                 }
 
                 //La mise à jour de la description n'est pas ignorée si elle est différent de null.
-                if (newDescription != null)
+                if (viewModel.Description != null)
                 {
                     Description = tlibrary.Description;
                 }
@@ -346,6 +368,7 @@ namespace LibApi.Services.Libraries
                 return false;
             }
         }
+
 
         /// <summary>
         /// Supprime la bibliothèque de la base de données

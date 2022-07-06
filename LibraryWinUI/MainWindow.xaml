@@ -5,26 +5,26 @@
     xmlns:local="using:LibraryWinUI"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="d" xmlns:MUIXC="using:Microsoft.UI.Xaml.Controls">
+    mc:Ignorable="d">
 
     <Grid x:Name="gridMainContainer">
-        <MUIXC:NavigationView x:Name="PrincipalNaviguation" PaneDisplayMode="Left" IsTitleBarAutoPaddingEnabled="False" IsSettingsVisible="False" IsBackEnabled="True" 
+        <NavigationView x:Name="PrincipalNaviguation" PaneDisplayMode="Left" IsTitleBarAutoPaddingEnabled="False" IsSettingsVisible="False" IsBackEnabled="True" 
                               IsBackButtonVisible="{x:Bind ViewModelPage.IsBackArrowVisible, Mode=OneWay}" IsPaneToggleButtonVisible="True" ItemInvoked="PrincipalNaviguation_ItemInvoked"
                               BackRequested="PrincipalNaviguation_BackRequested">
-            <MUIXC:NavigationView.MenuItems>
-                <MUIXC:NavigationViewItem x:Uid="/MainWindowRessources/LibraryNavViewMenuItem">
-                    <MUIXC:NavigationViewItem.Icon>
+            <NavigationView.MenuItems>
+                <NavigationViewItem x:Uid="/MainWindowRessources/LibraryNavViewMenuItem">
+                    <NavigationViewItem.Icon>
                         <FontIcon Glyph="&#xe721;"/>
-                    </MUIXC:NavigationViewItem.Icon>
-                </MUIXC:NavigationViewItem>
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
 
-            </MUIXC:NavigationView.MenuItems>
-            <MUIXC:NavigationView.FooterMenuItems>
-            </MUIXC:NavigationView.FooterMenuItems>
-            <MUIXC:NavigationView.Content>
+            </NavigationView.MenuItems>
+            <NavigationView.FooterMenuItems>
+            </NavigationView.FooterMenuItems>
+            <NavigationView.Content>
                 <Frame x:Name="MainFrameContainer" x:FieldModifier="Public"></Frame>
-            </MUIXC:NavigationView.Content>
-        </MUIXC:NavigationView>
+            </NavigationView.Content>
+        </NavigationView>
         <!--TitleBar-->
         <Grid x:Name="AppTitleBar" Height="48" VerticalAlignment="Top" Margin="80, 0, 0, 0">
             <Grid.ColumnDefinitions>

@@ -29,7 +29,7 @@ namespace LibWebApi.Controllers
         [HttpGet]
         public async Task<IEnumerable<LibraryVM>> GetAsync(long id)
         {
-            using Library? library = await Library.GetSingleAsync(id);
+            using Library? library = await Library.SingleAsync(id);
             if (library == null)
             {
                 _logger.LogWarning("La bibliothèque n'existe pas.");
@@ -92,7 +92,7 @@ namespace LibWebApi.Controllers
         [HttpGet]
         public async Task<byte[]?> GetJaquetteAsync([FromQuery] long idLibrary)
         {
-            using Library? library = await Library.GetSingleAsync(idLibrary);
+            using Library? library = await Library.SingleAsync(idLibrary);
             if (library == null)
             {
                 return null;
@@ -113,7 +113,7 @@ namespace LibWebApi.Controllers
         [HttpGet]
         public async Task<IEnumerable<CollectionVM>> GetCollectionsAsync(long idLibrary)
         {
-            using Library? library = await Library.GetSingleAsync(idLibrary);
+            using Library? library = await Library.SingleAsync(idLibrary);
             if (library == null)
             {
                 return Enumerable.Empty<CollectionVM>();
@@ -125,7 +125,7 @@ namespace LibWebApi.Controllers
         [HttpGet]
         public async Task<IEnumerable<BookVM>> GetBooksAsync(long idLibrary)
         {
-            using Library? library = await Library.GetSingleAsync(idLibrary);
+            using Library? library = await Library.SingleAsync(idLibrary);
             if (library == null)
             {
                 return Enumerable.Empty<BookVM>();
@@ -143,7 +143,7 @@ namespace LibWebApi.Controllers
                 return null;
             }
 
-            using Library? library = await Library.GetSingleAsync(idLibrary);
+            using Library? library = await Library.SingleAsync(idLibrary);
             if (library == null)
             {
                 _logger.LogWarning("Le livre n'a pas pu être trouvé.");
@@ -204,7 +204,7 @@ namespace LibWebApi.Controllers
                 return false;
             }
 
-            using Library? library = await Library.GetSingleAsync(form.Id);
+            using Library? library = await Library.SingleAsync(form.Id);
             if (library == null)
             {
                 return false;
@@ -230,7 +230,7 @@ namespace LibWebApi.Controllers
                 return null;
             }
 
-            using Library? library = await Library.GetSingleAsync(idLibrary);
+            using Library? library = await Library.SingleAsync(idLibrary);
             if (library == null)
             {
                 return null;
@@ -256,7 +256,7 @@ namespace LibWebApi.Controllers
                 return null;
             }
 
-            using Library? library = await Library.GetSingleAsync(idLibrary);
+            using Library? library = await Library.SingleAsync(idLibrary);
             if (library == null)
             {
                 return null;
@@ -282,7 +282,7 @@ namespace LibWebApi.Controllers
                 return null;
             }
 
-            using Library? library = await Library.GetSingleAsync(idLibrary);
+            using Library? library = await Library.SingleAsync(idLibrary);
             if (library == null)
             {
                 _logger.LogWarning("Le livre n'a pas pu être créée.");
@@ -293,7 +293,7 @@ namespace LibWebApi.Controllers
             return book;
         }
 
-        [Route("edit")]
+        [Route("update")]
         [HttpPut]
         public async Task<LibraryVM?> EditAsync([FromQuery] long id, [FromQuery] string? newName, [FromQuery] string? newDescription = null)
         {
@@ -303,7 +303,7 @@ namespace LibWebApi.Controllers
                 return null;
             }
 
-            using Library? library = await Library.GetSingleAsync(id);
+            using Library? library = await Library.SingleAsync(id);
             if (library == null)
             {
                 _logger.LogWarning("La bibliothèque n'existe pas.");
@@ -315,6 +315,32 @@ namespace LibWebApi.Controllers
             {
                 return null;
             }
+            return library;
+        }
+
+        [Route("update/vm")]
+        [HttpPut]
+        public async Task<LibraryVM?> EditAsync([FromQuery] long id,  LibraryVM viewModel)
+        {
+            if (viewModel == null)
+            {
+                _logger.LogWarning("Le modèle de vue n'est pas valide.");
+                return null;
+            }
+
+            using Library? library = await Library.SingleAsync(id);
+            if (library == null)
+            {
+                _logger.LogWarning("La bibliothèque n'a pas pu être trouvée.");
+                return null;
+            }
+
+            if (await library.UpdateAsync(viewModel) == false)
+            {
+                _logger.LogWarning("La bibliothèque n'a pas pu être mise à jour.");
+                return null;
+            }
+
             return library;
         }
 
