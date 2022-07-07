@@ -1,8 +1,10 @@
 ﻿using AppHelpers;
 using LibraryWinUI.Code;
+using LibraryWinUI.Code.Helpers;
 using LibraryWinUI.ViewModels.UserControls;
 using LibraryWinUI.Views.Pages;
 using LibShared.ViewModels;
+using LibShared.ViewModels.Books;
 using LibShared.ViewModels.Libraries;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -45,7 +47,24 @@ namespace LibraryWinUI.Views.UserControls
         {
             DataViewMode = dataViewMode;
 
-            if (typeof(T) == typeof(LibraryVM))
+            if (typeof(T) == typeof(BookVM))
+            {
+                switch (dataViewMode)
+                {
+                    case DataViewMode.DataGridView:
+                        break;
+                    case DataViewMode.GridView:
+                        this.PivotItems.ItemTemplate = (DataTemplate)this.Resources["GridViewBookTemplate"];
+                        break;
+                    case DataViewMode.ListView:
+                        //this.PivotItems.ItemTemplate = (DataTemplate)this.Resources["ListViewLibraryTemplate"];
+                        break;
+                    default:
+                        this.PivotItems.ItemTemplate = (DataTemplate)this.Resources["GridViewBookTemplate"];
+                        break;
+                }
+            }
+            else if (typeof(T) == typeof(LibraryVM))
             {
                 switch (dataViewMode)
                 {
@@ -108,9 +127,22 @@ namespace LibraryWinUI.Views.UserControls
             }
         }
 
+        private void LibraryThumbnailV1_OpenItemRequested(Components.LibraryThumbnailV1 sender, LibraryVM viewModel)
+        {
+            InputOutputHelpers inputOutputHelpers = new();
+            inputOutputHelpers.window.MainCollectionNavigation(viewModel.Id, typeof(BookVM));
+        }
+
         private void LibraryThumbnailV1_EditItemRequested_1(Components.LibraryThumbnailV1 sender, LibraryVM viewModel)
         {
 
         }
+
+        private void BookThumbnailV1_EditItemRequested(Components.BookThumbnailV1 sender, LibShared.ViewModels.Books.BookVM viewModel)
+        {
+
+        }
+
+        
     }
 }

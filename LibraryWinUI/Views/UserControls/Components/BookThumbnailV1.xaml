@@ -5,7 +5,14 @@
     xmlns:local="using:LibraryWinUI.Views.UserControls.Components"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="d" Height="282" Width="180"  Translation="0,0,32">
+    mc:Ignorable="d" Height="282" Width="180"  Translation="0,0,32"
+    xmlns:CTWUConverters="using:CommunityToolkit.WinUI.UI.Converters"
+    xmlns:customConverters="using:LibraryWinUI.Code.Converters">
+    <Grid.Resources>
+        <CTWUConverters:BoolToObjectConverter x:Key="BoolToVisibilityConverter" TrueValue="Visible" FalseValue="Collapsed"/>
+        <CTWUConverters:BoolToObjectConverter x:Key="InvertBoolToVisibilityConverter" TrueValue="Collapsed" FalseValue="Visible"/>
+        <customConverters:IntToVisibilityConverter x:Key="intToVisibilityConverter" />
+    </Grid.Resources>
     <ToolTipService.ToolTip>
         <ToolTip>
             <TextBlock MaxWidth="400" MaxHeight="500" TextWrapping="Wrap" ScrollViewer.VerticalScrollBarVisibility="Auto" IsTextSelectionEnabled="True">
@@ -17,7 +24,7 @@
     <Viewbox x:Name="ViewboxSimpleThumnailDatatemplate" Height="282" Width="180" PointerPressed="ViewboxSimpleThumnailDatatemplate_PointerPressed">
         <Border Height="301" Width="192" Background="WhiteSmoke" BorderThickness="0" CornerRadius="8">
             <Grid Height="301" Width="192">
-                <Image Source="{x:Bind UiViewModel.JaquettePath, Mode=OneWay}" Tag="{x:Bind UiViewModel.JaquettePath, Mode=OneWay}" Stretch="UniformToFill" Loaded="Image_Loaded_1"/>
+                <Image x:Name="ImageThumbnail" Stretch="UniformToFill" Loaded="Image_Loaded"/>
                 <Grid Height="150" Width="150" VerticalAlignment="Top" HorizontalAlignment="Left" Visibility="{x:Bind UiViewModel.NbPrets, Converter={StaticResource intToVisibilityConverter}, Mode=OneWay}">
                     <Polygon HorizontalAlignment="Left" VerticalAlignment="Top" Fill="LightBlue" Points="0,110, 0,70, 70,0, 110,0"/>
                     <Polygon HorizontalAlignment="Left" VerticalAlignment="Top" Fill="BlueViolet" Points="0,110, 0,71, 71,0, 110,0"/>
@@ -59,47 +66,42 @@
                         <MenuFlyoutSubItem.Icon>
                             <FontIcon Glyph="&#xEB9F;"/>
                         </MenuFlyoutSubItem.Icon>
-                        <MenuFlyoutItem Text="Changer l'image" Command="{StaticResource ChangeJaquetteXamlUICommand}" CommandParameter="{x:Bind }">
+                        <MenuFlyoutItem Text="Changer l'image" Click="MFI_Change_Jaquette_Click">
                             <MenuFlyoutItem.Icon>
                                 <FontIcon Glyph="&#xE8E5;"/>
                             </MenuFlyoutItem.Icon>
                         </MenuFlyoutItem>
                         <MenuFlyoutSeparator />
-                        <MenuFlyoutItem Text="Supprimer l'image" Foreground="OrangeRed" Command="{StaticResource DeleteJaquetteXamlUICommand}" CommandParameter="{x:Bind }">
+                        <MenuFlyoutItem Text="Supprimer l'image" Foreground="OrangeRed" Click="MFI_Delete_Jaquette_Click">
                             <MenuFlyoutItem.Icon>
                                 <FontIcon Glyph="&#xE74D;" Foreground="OrangeRed"/>
                             </MenuFlyoutItem.Icon>
                         </MenuFlyoutItem>
                     </MenuFlyoutSubItem>
                     <MenuFlyoutSeparator />
-                    <MenuFlyoutItem Text="Exemplaires" Command="{StaticResource BookExemplaryListXUiCmd}" CommandParameter="{x:Bind }">
+                    <MenuFlyoutItem Text="Exemplaires" >
                         <MenuFlyoutItem.Icon>
                             <FontIcon Glyph="&#xF5ED;"/>
                         </MenuFlyoutItem.Icon>
                     </MenuFlyoutItem>
-                    <MenuFlyoutItem Text="Emprunts" Command="{StaticResource NewBookPretXUiCmd}" CommandParameter="{x:Bind }">
+                    <MenuFlyoutItem Text="Emprunts" >
                         <MenuFlyoutItem.Icon>
                             <FontIcon Glyph="&#xE748;"/>
                         </MenuFlyoutItem.Icon>
                     </MenuFlyoutItem>
                     <MenuFlyoutSeparator />
-                    <!--<MenuFlyoutItem Text="Ouvrir ce livre">
-                                    <MenuFlyoutItem.Icon>
-                                        <FontIcon Glyph="&#xE8A7;"/>
-                                    </MenuFlyoutItem.Icon>
-                                </MenuFlyoutItem>-->
-                    <MenuFlyoutItem Text="Exporter ce livre" Command="{StaticResource ExportThisBookXamlUICommand}" CommandParameter="{x:Bind }">
+                    <MenuFlyoutItem Text="Exporter ce livre" >
                         <MenuFlyoutItem.Icon>
                             <FontIcon Glyph="&#xEDE1;"/>
                         </MenuFlyoutItem.Icon>
                     </MenuFlyoutItem>
-                    <MenuFlyoutItem Text="Editer ce livre" Command="{StaticResource EditBookInfosXamlUICommand}" CommandParameter="{x:Bind Mode=OneWay}">
+                    <MenuFlyoutItem Text="Editer ce livre" Click="MFI_Edit_Item_Click">
                         <MenuFlyoutItem.Icon>
                             <FontIcon Glyph="&#xE70F;"/>
                         </MenuFlyoutItem.Icon>
                     </MenuFlyoutItem>
                     <MenuFlyoutSeparator />
-                    <MenuFlyoutItem Text="Supprimer ce livre" Command="{StaticResource DeleteBookXUiCmd}" CommandParameter="{x:Bind }" Foreground="OrangeRed">
+                    <MenuFlyoutItem Text="Supprimer ce livre" Click="MFI_Delete_Item_Click" Foreground="OrangeRed">
                         <MenuFlyoutItem.Icon>
                             <FontIcon Glyph="&#xE74D;" Foreground="OrangeRed"/>
                         </MenuFlyoutItem.Icon>

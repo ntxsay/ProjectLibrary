@@ -155,6 +155,19 @@ namespace LibraryWinUI
             }
         }
 
+        internal bool MainCollectionNavigation(long id, Type type)
+        {
+            try
+            {
+                return NavigateToView(typeof(MainCollectionPage), new Tuple<long, Type>(id, type));
+            }
+            catch (Exception ex)
+            {
+                Logs.Log(nameof(MainWindow), nameof(CheckBackArrowVisibility), ex);
+                return false;
+            }
+        }
+
         internal bool NavigateToView(Type pageType, object parameters = null)
         {
             try

@@ -7,6 +7,7 @@ using LibraryWinUI.Views.UserControls;
 using LibraryWinUI.Views.UserControls.Components;
 using LibShared;
 using LibShared.Services;
+using LibShared.ViewModels.Books;
 using LibShared.ViewModels.Libraries;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -55,6 +56,15 @@ namespace LibraryWinUI.Views.Pages
                     await TestGetLibrariesAsync();
                 }
             }
+            else if (e.Parameter is Tuple<long, Type> param1)
+            {
+                TypeOfMainCollection = param1.Item2;
+
+                if (param1.Item2 == typeof(BookVM))
+                {
+                    await TestGetBooksAsync(param1.Item1);
+                }
+            }
         }
 
         private async Task TestGetLibrariesAsync()
@@ -62,7 +72,7 @@ namespace LibraryWinUI.Views.Pages
             try
             {
                 LibraryWebApi libApi = new();
-                LibShared.ViewModels.Libraries.LibraryRequestVM resquestResult = await libApi.GetLibrariesAsync(orderBy: OrderBy.Ascending, sortBy: SortBy.Name, maxItemsPerPage: 20, gotoPage: 1);
+                LibraryRequestVM resquestResult = await libApi.GetLibrariesAsync(orderBy: OrderBy.Ascending, sortBy: SortBy.Name, maxItemsPerPage: 20, gotoPage: 1);
                 if (resquestResult != null)
                 {
                     ItemCollectionUC itemCollectionUC = new (this);
@@ -76,6 +86,27 @@ namespace LibraryWinUI.Views.Pages
                 return;
             }
         }
+
+        private async Task TestGetBooksAsync(long idLibrary)
+        {
+            try
+            {
+                BookWebApi bookApi = new();
+                BookRequestVM resquestResult = await bookApi.GetBooksAsync(idLibrary: idLibrary, orderBy: OrderBy.Ascending, sortBy: SortBy.Name, maxItemsPerPage: 20, gotoPage: 1);
+                if (resquestResult != null)
+                {
+                    ItemCollectionUC itemCollectionUC = new(this);
+                    itemCollectionUC.InitializeCollection(resquestResult.List.GroupItemsBy(GroupBy.None));
+                    FrameContainer.Content = itemCollectionUC;
+                }
+            }
+            catch (Exception ex)
+            {
+                Logs.Log(nameof(MainCollectionPage), exception: ex);
+                return;
+            }
+        }
+
 
         private void ASB_SearchItem_QuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
         {

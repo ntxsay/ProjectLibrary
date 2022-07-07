@@ -29,8 +29,12 @@ namespace LibraryWinUI.Views.UserControls.Components
     public sealed partial class LibraryThumbnailV1 : Grid
     {
         private LibraryVM UiViewModel { get; set; } = new();
+        public delegate void OpenItemEventHandler(LibraryThumbnailV1 sender, LibraryVM viewModel);
+        public event OpenItemEventHandler OpenItemRequested;
+
         public delegate void EditItemEventHandler(LibraryThumbnailV1 sender, LibraryVM viewModel);
         public event EditItemEventHandler EditItemRequested;
+
         public LibraryThumbnailV1()
         {
             this.InitializeComponent();
@@ -46,26 +50,17 @@ namespace LibraryWinUI.Views.UserControls.Components
         public static readonly DependencyProperty OnViewModelChangedProperty = DependencyProperty.Register(nameof(ViewModel), typeof(LibraryVM),
                                                                 typeof(LibraryThumbnailV1), new PropertyMetadata(null, new PropertyChangedCallback(OnViewModelChanged)));
 
-        private static async void OnViewModelChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        private static void OnViewModelChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             if (d is LibraryThumbnailV1 parent && e.NewValue is LibraryVM viewModel)
             {
                 parent.UiViewModel.DeepCopy(viewModel);
-                //if (parent.UiViewModel != null)
-                //{
-                //    LibraryWebApi libApi = new();
-                //    BitmapImage bitmapImage = await libApi.GetJaquetteBitmap(parent.UiViewModel.Id);
-                //    if (bitmapImage != null)
-                //    {
-                //        parent.ImageThumbnail.Source = bitmapImage;
-                //    }
-                //}
             }
         }
 
         private void ViewboxSimpleThumnailDatatemplate_PointerPressed(object sender, PointerRoutedEventArgs e)
         {
-
+            OpenItemRequested?.Invoke(this, UiViewModel);
         }
 
         private async void Image_Loaded(object sender, RoutedEventArgs e)

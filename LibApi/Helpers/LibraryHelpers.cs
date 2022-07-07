@@ -145,6 +145,31 @@ namespace LibApi.Helpers
                         }
                     }
                 }
+                else if (modelList is IEnumerable<BookVM> booksViewModel)
+                {
+                    if (sortBy == SortBy.Name)
+                    {
+                        if (orderBy == OrderBy.Ascending)
+                        {
+                            return booksViewModel.Where(w => w != null && !w.MainTitle.IsStringNullOrEmptyOrWhiteSpace()).OrderBy(o => o.MainTitle).Select(s => (T)(object)s);
+                        }
+                        else if (orderBy == OrderBy.Descending)
+                        {
+                            return booksViewModel.Where(w => w != null && !w.MainTitle.IsStringNullOrEmptyOrWhiteSpace()).OrderByDescending(o => o.MainTitle).Select(s => (T)(object)s);
+                        }
+                    }
+                    else if (sortBy == SortBy.DateCreation)
+                    {
+                        if (orderBy == OrderBy.Ascending)
+                        {
+                            return booksViewModel.OrderBy(o => o.DateAjout).Select(s => (T)(object)s);
+                        }
+                        else if (orderBy == OrderBy.Descending)
+                        {
+                            return booksViewModel.OrderByDescending(o => o.DateAjout).Select(s => (T)(object)s);
+                        }
+                    }
+                }
 
                 throw new NotSupportedException($"Le type {typeof(T)} n'est pas supporté dans la méthode {nameof(Order)}.");
                 //return Enumerable.Empty<T>();
@@ -197,7 +222,7 @@ namespace LibApi.Helpers
             }
             catch (Exception ex)
             {
-                Logs.Log(nameof(LibraryHelpers), nameof(GetPaginatedItems), ex);
+                Logs.Log(nameof(LibraryHelpers), exception:ex);
                 return Enumerable.Empty<T>();
             }
         }

@@ -8,13 +8,16 @@
     xmlns:customComponents="using:LibraryWinUI.Views.UserControls.Components"
     xmlns:libraryVM="using:LibraryWinUI.ViewModels.Libraries"
     xmlns:sharedLibraryVM="using:LibShared.ViewModels.Libraries"
+    xmlns:sharedBookVM="using:LibShared.ViewModels.Books"
     mc:Ignorable="d">
     <UserControl.Resources>
         <ThemeShadow x:Name="BackgroundGridShadow"/>
         <DataTemplate x:DataType="sharedLibraryVM:LibraryVM" x:Key="GridViewItemLibraryTemplate">
-            <customComponents:LibraryThumbnailV1 Shadow="{StaticResource BackgroundGridShadow}" ViewModel="{x:Bind Mode=OneWay}" EditItemRequested="LibraryThumbnailV1_EditItemRequested" />
+            <customComponents:LibraryThumbnailV1 Shadow="{StaticResource BackgroundGridShadow}" ViewModel="{x:Bind Mode=OneWay}" EditItemRequested="LibraryThumbnailV1_EditItemRequested" OpenItemRequested="LibraryThumbnailV1_OpenItemRequested"/>
         </DataTemplate>
-
+        <DataTemplate x:DataType="sharedBookVM:BookVM" x:Key="GridViewItemBookTemplate">
+            <customComponents:BookThumbnailV1 Shadow="{StaticResource BackgroundGridShadow}" ViewModel="{x:Bind Mode=OneWay}" EditItemRequested="BookThumbnailV1_EditItemRequested" />
+        </DataTemplate>
         <DataTemplate x:Key="GridViewLibraryTemplate" x:DataType="libraryVM:LibraryVM">
             <ScrollViewer x:Name="scrollItems" HorizontalScrollMode="Disabled" Grid.Row="0">
                 <GridView x:Name="GridViewItems" ItemsSource="{Binding Mode=OneWay}" SelectionMode="Extended" IsItemClickEnabled="False" Padding="4 14 4 50" Loaded="GridViewItems_Loaded" Unloaded="GridViewItems_Unloaded"
@@ -41,6 +44,33 @@
                 </GridView>
             </ScrollViewer>
         </DataTemplate>
+        <DataTemplate x:Key="GridViewBookTemplate" x:DataType="libraryVM:BookVM">
+            <ScrollViewer x:Name="scrollItems" HorizontalScrollMode="Disabled" Grid.Row="0">
+                <GridView x:Name="GridViewItems" ItemsSource="{Binding Mode=OneWay}" SelectionMode="Extended" IsItemClickEnabled="False" Padding="4 14 4 50" Loaded="GridViewItems_Loaded" Unloaded="GridViewItems_Unloaded"
+                             ScrollViewer.VerticalScrollMode="Disabled" IsMultiSelectCheckBoxEnabled="True" SingleSelectionFollowsFocus="True" ItemTemplate="{StaticResource GridViewItemBookTemplate}"
+                          KeyDown="GridViewItems_KeyDown">
+                    <GridView.ItemContainerStyle>
+                        <Style TargetType="GridViewItem" >
+                            <Setter Property="Margin" Value="7" />
+                        </Style>
+                    </GridView.ItemContainerStyle>
+                    <GridView.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <ItemsWrapGrid  Orientation="Horizontal" HorizontalAlignment="Left"/>
+                        </ItemsPanelTemplate>
+                    </GridView.ItemsPanel>
+                    <GridView.ItemContainerTransitions>
+                        <TransitionCollection>
+                            <EntranceThemeTransition />
+                            <AddDeleteThemeTransition/>
+                            <NavigationThemeTransition/>
+                            <ContentThemeTransition/>
+                        </TransitionCollection>
+                    </GridView.ItemContainerTransitions>
+                </GridView>
+            </ScrollViewer>
+        </DataTemplate>
+
         <DataTemplate x:Key="ListViewLibraryTemplate" x:DataType="libraryVM:LibraryVM">
             <ScrollViewer x:Name="scrollItems" HorizontalScrollMode="Disabled" Grid.Row="0">
                 <ListView x:Name="ListViewItems" ItemsSource="{Binding }" SelectionMode="Extended" IsItemClickEnabled="False" Padding="4,14"

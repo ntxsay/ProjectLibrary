@@ -69,10 +69,15 @@ namespace LibWebApi.Controllers
                             gotoPage = 1;
                         }
 
-                        IEnumerable<Library>? displayedItem = orderedItems.DisplayPage(maxItemsPerPage, gotoPage);
+                        List<Library>? displayedItems = orderedItems.DisplayPage(maxItemsPerPage, gotoPage)?.ToList();
+                        if (displayedItems != null && displayedItems.Any())
+                        {
+                            displayedItems.ForEach(async f => f.CountBooks = await f.CountBooksAsync());
+                        }
+                        
                         return new LibraryRequestVM()
                         {
-                            List = displayedItem ?? Enumerable.Empty<LibraryVM>(),
+                            List = displayedItems ?? Enumerable.Empty<LibraryVM>(),
                             CurrentPage = gotoPage,
                             NbPages = countPage,
                         };

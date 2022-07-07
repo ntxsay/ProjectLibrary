@@ -36,8 +36,11 @@ namespace AppHelpers.Extensions
             Type type = typeof(T);
             foreach (PropertyInfo pi in type.GetProperties(BindingFlags.Public | BindingFlags.Instance))
             {
-                object? sourceValue = type.GetProperty(pi.Name)?.GetValue(source, null);
-                type.GetProperty(pi.Name)?.SetValue(self, sourceValue);
+                if (type.GetProperty(pi.Name)?.CanWrite == true)
+                {
+                    object? sourceValue = type.GetProperty(pi.Name)?.GetValue(source, null);
+                    type.GetProperty(pi.Name)?.SetValue(self, sourceValue);
+                }
             }
 
             return self;

@@ -1,6 +1,8 @@
-﻿using LibApi.Services.Books;
+﻿using LibApi.Extensions;
+using LibApi.Services.Books;
 using LibApi.Services.Categories;
 using LibApi.Services.Libraries;
+using LibShared;
 using LibShared.ViewModels.Books;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -39,6 +41,48 @@ namespace LibWebApi.Controllers
             IEnumerable<Book>? all = await Book.AllAsync();
             return all ?? Enumerable.Empty<BookVM>();
         }
+
+        [Route("all/ordered")]
+        [HttpGet]
+        public async Task<BookRequestVM?> GetAsync(long idLibrary, OrderBy orderBy, SortBy sortBy, int maxItemsPerPage = 20, int gotoPage = 1)
+        {
+            try
+            {
+                IEnumerable<Book>? all = await Book.AllAsync(idLibrary);
+                if (all != null && all.Any())
+                {
+                    IEnumerable<Book>? orderedItems = all.OrderItemsBy(orderBy, sortBy);
+                    if (orderedItems != null && orderedItems.Any())
+                    {
+                        int countPage = orderedItems.CountPages(maxItemsPerPage);
+                        if (gotoPage > countPage)
+                        {
+                            gotoPage = countPage;
+                        }
+                        else if (gotoPage < countPage)
+                        {
+                            gotoPage = 1;
+                        }
+
+                        IEnumerable<Book>? displayedItem = orderedItems.DisplayPage(maxItemsPerPage, gotoPage);
+                        return new BookRequestVM()
+                        {
+                            List = displayedItem ?? Enumerable.Empty<BookVM>(),
+                            CurrentPage = gotoPage,
+                            NbPages = countPage,
+                        };
+                    }
+                }
+
+                return null;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                return null;
+            }
+        }
+
 
         [Route("single/categorie")]
         [HttpGet]

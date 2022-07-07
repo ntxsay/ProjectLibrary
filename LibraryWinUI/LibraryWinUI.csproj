@@ -59,7 +59,6 @@
     <ProjectReference Include="..\LibApi\LibApi.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Code\Converters\" />
     <Folder Include="Strings\en-US\" />
     <Folder Include="ViewModels\CustomControls\" />
     <Folder Include="Views\Pages\Intermediate\" />
