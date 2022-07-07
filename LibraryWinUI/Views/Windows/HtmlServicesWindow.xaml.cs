@@ -254,18 +254,23 @@ namespace LibraryWinUI.Views.Windows
 
                 HtmlDocument htmlDocument = new();
                 htmlDocument.LoadHtml(sUrlDecoded);
-                foreach (HtmlNode link in htmlDocument.DocumentNode.SelectNodes("//a[@href]"))
-                {
-                    if (!link.HasAttributes || link.Attributes["href"] == null || link.Attributes["href"].Value.IsStringNullOrEmptyOrWhiteSpace())
-                    {
-                        continue;
-                    }
 
-                    while (!isWebPageLoaded)
+                var linkedPages = htmlDocument.DocumentNode.Descendants("a")
+                                                  .Where(w => w.HasAttributes)
+                                                  .Select(a => a.GetAttributeValue("href", null))
+                                                  .Where(u => !u.IsStringNullOrEmptyOrWhiteSpace());
+
+                if (linkedPages != null && linkedPages.Any())
+                {
+                    foreach (string link in linkedPages)
                     {
-                        continue;
+                        while (!isWebPageLoaded)
+                        {
+                            continue;
+                        }
+
+                        MyWebView2.CoreWebView2.Navigate(link);
                     }
-                    MyWebView2.CoreWebView2.Navigate(link.InnerText);
                 }
             }
             catch (Exception)
@@ -279,12 +284,98 @@ namespace LibraryWinUI.Views.Windows
         {
             try
             {
-                if (isWebPageLoaded)
+                while (!isWebPageLoaded)
                 {
-                    
-                    await MyWebView2.CoreWebView2.PrintToPdfAsync(@$"C:\Users\loicbastaraud\Downloads\{DateTime.Now:yyyyMMddHHmmss}.pdf", null);
+                    if (isWebPageLoaded)
+                    {
+                        break;
+                    }
 
+                    continue;
+                }
 
+                await MyWebView2.CoreWebView2.PrintToPdfAsync(@$"C:\Users\loicbastaraud\Downloads\{DateTime.Now:yyyyMMddHHmmss}.pdf", null);
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
+        private async void Btn_AllInOneBG_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (TbxSearch.Text.IsStringNullOrEmptyOrWhiteSpace())
+                {
+                    return;
+                }
+
+                await LoadHtml($"https://translate.google.com/translate?sl=en&tl=fr&hl=fr&u={TbxSearch.Text.Trim()}&client=webapp");
+
+                //HtmlWeb hw = new HtmlWeb();
+                //HtmlDocument doc = hw.Load($"https://translate.google.com/translate?sl=en&tl=fr&hl=fr&u={TbxSearch.Text.Trim()}&client=webapp");
+
+                //doc.OptionAutoCloseOnEnd = true;
+                //doc.OptionFixNestedTags = true;
+                //doc.OptionWriteEmptyNodes = true;
+
+                //var linkedPages = htmlDocument.DocumentNode.Descendants("a")
+                //                                  .Where(w => w.HasAttributes)
+                //                                  .Select(a => a.GetAttributeValue("href", null))
+                //                                  .Where(u => !u.IsStringNullOrEmptyOrWhiteSpace());
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+        }
+
+        private async Task LoadHtml(string url)
+        {
+            try
+            {
+                try
+                {
+                    if (url.IsStringNullOrEmptyOrWhiteSpace())
+                    {
+                        return;
+                    }
+
+                    HtmlWeb hw = new HtmlWeb();
+                    HtmlDocument htmlDocument = hw.Load(url);
+
+                    htmlDocument.OptionAutoCloseOnEnd = true;
+                    htmlDocument.OptionFixNestedTags = true;
+                    htmlDocument.OptionWriteEmptyNodes = true;
+
+                    await MyWebView2.EnsureCoreWebView2Async();
+                    MyWebView2.CoreWebView2.NavigateToString(htmlDocument.DocumentNode.OuterHtml);
+
+                    var linkedPages = htmlDocument.DocumentNode.Descendants("a")
+                                                      .Where(w => w.HasAttributes)
+                                                      .Select(a => a.GetAttributeValue("href", null))
+                                                      .Where(u => !u.IsStringNullOrEmptyOrWhiteSpace());
+
+                    if (linkedPages != null && linkedPages.Any())
+                    {
+                        //foreach (string link in linkedPages)
+                        //{
+                        //    while (!isWebPageLoaded)
+                        //    {
+                        //        continue;
+                        //    }
+
+                        //    MyWebView2.CoreWebView2.Navigate(link);
+                        //}
+                    }
+                }
+                catch (Exception ex)
+                {
+
+                    throw;
                 }
             }
             catch (Exception)
