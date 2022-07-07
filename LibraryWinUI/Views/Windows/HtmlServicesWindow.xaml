@@ -55,6 +55,9 @@
                     <Button x:Name="Btn_AllInOneBG" Click="Btn_AllInOneBG_Click">
                         <TextBlock Text="All in one InBackground"></TextBlock>
                     </Button>
+                    <Button x:Name="BtnCancelAllTasks" Click="BtnCancelAllTasks_Click">
+                        <TextBlock Text="Cancel all tasks"></TextBlock>
+                    </Button>
                 </StackPanel>
             </Grid>
         </Grid>

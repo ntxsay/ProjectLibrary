@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace LibShared.ViewModels.Books
 {
-    public abstract class BookVM : GenericVM
+    public class BookVM : GenericVM
     {
         [JsonIgnore]
         public long IdLibrary { get; protected set; }

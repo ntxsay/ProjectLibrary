@@ -46,6 +46,8 @@ namespace LibraryWinUI.Views.Windows
         [DllImport("Shcore.dll", SetLastError = true)]
         internal static extern int GetDpiForMonitor(IntPtr hmonitor, Monitor_DPI_Type dpiType, out uint dpiX, out uint dpiY);
         bool isWebPageLoaded = false;
+        bool IsCancelled = false;
+        bool IsBusy = false;
         public HtmlServicesWindow()
         {
             this.InitializeComponent();
@@ -273,7 +275,7 @@ namespace LibraryWinUI.Views.Windows
         }
 
 
-        BackgroundWorker backgroundworker = new BackgroundWorker();
+        BackgroundWorker backgroundworker;
 
         private async void Btn_AllInOneBG_Click(object sender, RoutedEventArgs e)
         {
@@ -292,21 +294,27 @@ namespace LibraryWinUI.Views.Windows
                 htmlDocument.OptionWriteEmptyNodes = true;
 
                 string html = htmlDocument.DocumentNode.OuterHtml;
-                string sUrlDecoded = HttpUtility.HtmlDecode(html);
 
                 await MyWebView2.EnsureCoreWebView2Async();
                 TbxResult.Text = html;
-                MyWebView2.CoreWebView2.NavigateToString(sUrlDecoded);
+                MyWebView2.CoreWebView2.NavigateToString(html);
+
 
                 using BackgroundWorker worker = new BackgroundWorker()
                 {
-                    WorkerSupportsCancellation = false,
+                    WorkerSupportsCancellation = true,
                     WorkerReportsProgress = false,
                 };
                 worker.DoWork += (s, e) =>
                 {
                     while (!isWebPageLoaded)
                     {
+                        if (IsCancelled)
+                        {
+                            e.Cancel = true;
+                            return;
+                        }
+
                         if (isWebPageLoaded)
                         {
                             break;
@@ -318,69 +326,63 @@ namespace LibraryWinUI.Views.Windows
 
                 worker.RunWorkerCompleted += async (s, e) =>
                 {
-                    string isFullyLoaded = await MyWebView2.ExecuteScriptAsync("document.readyState === 'complete';");
-                    if (isFullyLoaded != null && isFullyLoaded == "true")
+                    if (e.Cancelled)
                     {
-                        string scrollToBottom = await MyWebView2.ExecuteScriptAsync("window.scrollTo(0, document.body.scrollHeight);");
-
-                        //window.scrollTo(0, document.body.scrollHeight);
-                        await PrintToPdfAsync();
+                        IsCancelled = false;
                     }
-                        //DispatcherTimer dispatcherTimer = new DispatcherTimer()
-                        //{
-                        //    Interval = new TimeSpan(0, 0, 3),
-                        //};
+                    else if (e.Error != null)
+                    {
 
-                        //dispatcherTimer.Tick += (t, f) =>
-                        //{
-                        //    ParentPage.Parameters.MainPage.CloseBusyLoader();
-                        //    dispatcherTimer.Stop();
-                        //    dispatcherTimer = null;
-                        //    MainPage.CallGarbageCollector();
-                        //};
+                    }
+                    else
+                    {
+                        string isFullyLoaded = await MyWebView2.ExecuteScriptAsync("document.readyState === 'complete';");
+                        if (isFullyLoaded != null && isFullyLoaded == "true")
+                        {
+                            string scrollToBottom = await MyWebView2.ExecuteScriptAsync("window.scrollTo(0, document.body.scrollHeight);");
+                            Thread.Sleep(1000);
+                            await PrintToPdfAsync();
+                        }
+                        DispatcherTimer dispatcherTimer = new DispatcherTimer()
+                        {
+                            Interval = new TimeSpan(0, 0, 2),
+                        };
 
-                        //dispatcherTimer.Start();
+                        dispatcherTimer.Tick += async (t, f) =>
+                        {
+                            var linkedPages = htmlDocument.DocumentNode.Descendants("a")
+                                                      .Where(w => w.HasAttributes)
+                                                      .Select(a => a.GetAttributeValue("href", null))
+                                                      .Where(u => !u.IsStringNullOrEmptyOrWhiteSpace());
+
+                            if (linkedPages != null && linkedPages.Any())
+                            {
+                                foreach (string link in linkedPages)
+                                {
+                                    string uu = link.Replace("&amp;", "&");
+                                    await LoadHtml(uu);
+                                    if (backgroundworker != null && backgroundworker.IsBusy)
+                                    {
+                                        while (backgroundworker.IsBusy)
+                                        {
+                                            if (backgroundworker == null || !backgroundworker.IsBusy)
+                                            {
+                                                break;
+                                            }
+                                                continue;
+                                        }
+                                    }
+                                    Thread.Sleep(1000);
+                                }
+                            }
+                        };
+
+                        dispatcherTimer.Start();
+                    }
+                        
                 };
 
                 worker.RunWorkerAsync();
-
-                return;
-                
-                var linkedPages = htmlDocument.DocumentNode.Descendants("a")
-                                                  .Where(w => w.HasAttributes)
-                                                  .Select(a => a.GetAttributeValue("href", null))
-                                                  .Where(u => !u.IsStringNullOrEmptyOrWhiteSpace());
-
-                if (linkedPages != null && linkedPages.Any())
-                {
-                    foreach (string link in linkedPages)
-                    {
-                        while (!isWebPageLoaded)
-                        {
-                            if (isWebPageLoaded)
-                            {
-                                break;
-                            }
-
-                            continue;
-                        }
-                        Thread.Sleep(1000);
-                        await LoadHtml($"https://translate.google.com/translate?sl=en&tl=fr&hl=fr&u={link.Trim()}&client=webapp");
-                    }
-                }
-
-
-                //HtmlWeb hw = new HtmlWeb();
-                //HtmlDocument doc = hw.Load($"https://translate.google.com/translate?sl=en&tl=fr&hl=fr&u={TbxSearch.Text.Trim()}&client=webapp");
-
-                //doc.OptionAutoCloseOnEnd = true;
-                //doc.OptionFixNestedTags = true;
-                //doc.OptionWriteEmptyNodes = true;
-
-                //var linkedPages = htmlDocument.DocumentNode.Descendants("a")
-                //                                  .Where(w => w.HasAttributes)
-                //                                  .Select(a => a.GetAttributeValue("href", null))
-                //                                  .Where(u => !u.IsStringNullOrEmptyOrWhiteSpace());
             }
             catch (Exception ex)
             {
@@ -393,35 +395,83 @@ namespace LibraryWinUI.Views.Windows
         {
             try
             {
-                try
+                if (url.IsStringNullOrEmptyOrWhiteSpace())
                 {
-                    if (url.IsStringNullOrEmptyOrWhiteSpace())
+                    return;
+                }
+
+                HtmlWeb hw = new HtmlWeb();
+                HtmlDocument htmlDocument = hw.Load(url);
+
+                htmlDocument.OptionAutoCloseOnEnd = true;
+                htmlDocument.OptionFixNestedTags = true;
+                htmlDocument.OptionWriteEmptyNodes = true;
+                string html = htmlDocument.DocumentNode.OuterHtml;
+
+                await MyWebView2.EnsureCoreWebView2Async();
+                TbxResult.Text = html;
+
+                MyWebView2.CoreWebView2.NavigateToString(html);
+
+                using BackgroundWorker worker = new ()
+                {
+                    WorkerSupportsCancellation = true,
+                    WorkerReportsProgress = false,
+                };
+                worker.DoWork += (s, e) =>
+                {
+                    while (!isWebPageLoaded)
                     {
-                        return;
+                        if (IsCancelled)
+                        {
+                            e.Cancel = true;
+                            return;
+                        }
+
+                        if (isWebPageLoaded)
+                        {
+                            break;
+                        }
+
+                        continue;
+                    }
+                };
+
+                worker.RunWorkerCompleted += async (s, e) =>
+                {
+                    if (e.Cancelled)
+                    {
+                        IsCancelled = false;
+                    }
+                    else if (e.Error != null)
+                    {
+
+                    }
+                    else
+                    {
+                        string isFullyLoaded = await MyWebView2.ExecuteScriptAsync("document.readyState === 'complete';");
+                        if (isFullyLoaded != null && isFullyLoaded == "true")
+                        {
+                            string scrollToBottom = await MyWebView2.ExecuteScriptAsync("window.scrollTo(0, document.body.scrollHeight);");
+
+                            //window.scrollTo(0, document.body.scrollHeight);
+                            await PrintToPdfAsync();
+                        }
                     }
 
-                    HtmlWeb hw = new HtmlWeb();
-                    HtmlDocument htmlDocument = hw.Load(url);
+                    backgroundworker.Dispose();
+                    backgroundworker = null;
+                };
+                backgroundworker = worker;
+                worker.RunWorkerAsync();
 
-                    htmlDocument.OptionAutoCloseOnEnd = true;
-                    htmlDocument.OptionFixNestedTags = true;
-                    htmlDocument.OptionWriteEmptyNodes = true;
-
-                    await MyWebView2.EnsureCoreWebView2Async();
-                    MyWebView2.CoreWebView2.NavigateToString(htmlDocument.DocumentNode.OuterHtml);
-
-                }
-                catch (Exception ex)
-                {
-
-                    throw;
-                }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
 
                 throw;
             }
+
         }
 
 
@@ -445,7 +495,6 @@ namespace LibraryWinUI.Views.Windows
                 var desktop = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
                 await MyWebView2.CoreWebView2.PrintToPdfAsync(@$"{desktop}\{DateTime.Now:yyyyMMddHHmmss}.pdf", printSettings);
                 isWebPageLoaded = false;
-                await Task.Delay(1000);
             }
             catch (Exception)
             {
@@ -466,9 +515,25 @@ namespace LibraryWinUI.Views.Windows
             {
 
             }
+
+            string sURL = sender.Source.ToString();
+            TbxSearch.Text = sURL;
             //document.readyState === 'complete'
             //string isFullyLoaded = await sender.ExecuteScriptAsync("document.readyState === 'complete';");
             isWebPageLoaded = true;
+        }
+
+        private void BtnCancelAllTasks_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                IsCancelled = true;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
         }
     }
 }

@@ -1,0 +1,111 @@
+﻿<Grid
+    x:Class="LibraryWinUI.Views.UserControls.Components.BookThumbnailV1"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:LibraryWinUI.Views.UserControls.Components"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d" Height="282" Width="180"  Translation="0,0,32">
+    <ToolTipService.ToolTip>
+        <ToolTip>
+            <TextBlock MaxWidth="400" MaxHeight="500" TextWrapping="Wrap" ScrollViewer.VerticalScrollBarVisibility="Auto" IsTextSelectionEnabled="True">
+                            <Run Text="{x:Bind UiViewModel.MainTitle, Mode=OneWay}" FontWeight="Medium" FontSize="16"/>
+                            <LineBreak /><Run Text="{x:Bind UiViewModel.Resume, Mode=OneWay}" FontSize="14"/>
+            </TextBlock>
+        </ToolTip>
+    </ToolTipService.ToolTip>
+    <Viewbox x:Name="ViewboxSimpleThumnailDatatemplate" Height="282" Width="180" PointerPressed="ViewboxSimpleThumnailDatatemplate_PointerPressed">
+        <Border Height="301" Width="192" Background="WhiteSmoke" BorderThickness="0" CornerRadius="8">
+            <Grid Height="301" Width="192">
+                <Image Source="{x:Bind UiViewModel.JaquettePath, Mode=OneWay}" Tag="{x:Bind UiViewModel.JaquettePath, Mode=OneWay}" Stretch="UniformToFill" Loaded="Image_Loaded_1"/>
+                <Grid Height="150" Width="150" VerticalAlignment="Top" HorizontalAlignment="Left" Visibility="{x:Bind UiViewModel.NbPrets, Converter={StaticResource intToVisibilityConverter}, Mode=OneWay}">
+                    <Polygon HorizontalAlignment="Left" VerticalAlignment="Top" Fill="LightBlue" Points="0,110, 0,70, 70,0, 110,0"/>
+                    <Polygon HorizontalAlignment="Left" VerticalAlignment="Top" Fill="BlueViolet" Points="0,110, 0,71, 71,0, 110,0"/>
+                    <TextBlock TextAlignment="Center" HorizontalAlignment="Left" VerticalAlignment="Top" RenderTransformOrigin="0.5,0.5" Margin="-28,35,0,0" 
+                                                   UseLayoutRounding="False" d:LayoutRounding="Auto" Width="140" FontSize="16" FontWeight="Bold" Foreground="White">
+                                    <Run Text="{x:Bind UiViewModel.NbPrets, Mode=OneWay}" />
+                                    <Run Text="prêt(s)" />
+                        <TextBlock.RenderTransform>
+                            <CompositeTransform Rotation="-45.15"/>
+                        </TextBlock.RenderTransform>
+                    </TextBlock>
+                </Grid>
+            </Grid>
+        </Border>
+    </Viewbox>
+    <Grid x:Name="GridActions" Margin="1,0,1,1" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" Background="{ThemeResource SystemControlChromeLowAcrylicElementBrush}" 
+                      Padding="4, 8" BorderThickness="0" CornerRadius="8 8 8 8" ColumnSpacing="2">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="22"/>
+        </Grid.ColumnDefinitions>
+        <TextBlock Grid.Column="0" Text="{x:Bind UiViewModel.MainTitle, Mode=OneWay}" TextWrapping="WrapWholeWords" FontSize="16" VerticalAlignment="Center" MaxLines="2"/>
+        <Button x:Name="BtnActions" BorderBrush="Transparent" BorderThickness="0" Background="Transparent" Grid.Column="1" ToolTipService.ToolTip="Plus d'informations" 
+                            Padding="0" Width="22" HorizontalAlignment="Right">
+            <Border CornerRadius="14" Height="20" Width="20" BorderThickness="1" HorizontalAlignment="Center">
+                <Border.BorderBrush>
+                    <LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1">
+                        <GradientStop Color="Yellow" Offset="0.0" />
+                        <GradientStop Color="Red" Offset="0.25" />
+                        <GradientStop Color="Blue" Offset="0.75" />
+                        <GradientStop Color="LimeGreen" Offset="1.0" />
+                    </LinearGradientBrush>
+                </Border.BorderBrush>
+                <FontIcon FontSize="12" FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xE712;"  />
+            </Border>
+            <Button.Flyout>
+                <MenuFlyout Placement="BottomEdgeAlignedLeft">
+                    <MenuFlyoutSubItem Text="Première de couverture">
+                        <MenuFlyoutSubItem.Icon>
+                            <FontIcon Glyph="&#xEB9F;"/>
+                        </MenuFlyoutSubItem.Icon>
+                        <MenuFlyoutItem Text="Changer l'image" Command="{StaticResource ChangeJaquetteXamlUICommand}" CommandParameter="{x:Bind }">
+                            <MenuFlyoutItem.Icon>
+                                <FontIcon Glyph="&#xE8E5;"/>
+                            </MenuFlyoutItem.Icon>
+                        </MenuFlyoutItem>
+                        <MenuFlyoutSeparator />
+                        <MenuFlyoutItem Text="Supprimer l'image" Foreground="OrangeRed" Command="{StaticResource DeleteJaquetteXamlUICommand}" CommandParameter="{x:Bind }">
+                            <MenuFlyoutItem.Icon>
+                                <FontIcon Glyph="&#xE74D;" Foreground="OrangeRed"/>
+                            </MenuFlyoutItem.Icon>
+                        </MenuFlyoutItem>
+                    </MenuFlyoutSubItem>
+                    <MenuFlyoutSeparator />
+                    <MenuFlyoutItem Text="Exemplaires" Command="{StaticResource BookExemplaryListXUiCmd}" CommandParameter="{x:Bind }">
+                        <MenuFlyoutItem.Icon>
+                            <FontIcon Glyph="&#xF5ED;"/>
+                        </MenuFlyoutItem.Icon>
+                    </MenuFlyoutItem>
+                    <MenuFlyoutItem Text="Emprunts" Command="{StaticResource NewBookPretXUiCmd}" CommandParameter="{x:Bind }">
+                        <MenuFlyoutItem.Icon>
+                            <FontIcon Glyph="&#xE748;"/>
+                        </MenuFlyoutItem.Icon>
+                    </MenuFlyoutItem>
+                    <MenuFlyoutSeparator />
+                    <!--<MenuFlyoutItem Text="Ouvrir ce livre">
+                                    <MenuFlyoutItem.Icon>
+                                        <FontIcon Glyph="&#xE8A7;"/>
+                                    </MenuFlyoutItem.Icon>
+                                </MenuFlyoutItem>-->
+                    <MenuFlyoutItem Text="Exporter ce livre" Command="{StaticResource ExportThisBookXamlUICommand}" CommandParameter="{x:Bind }">
+                        <MenuFlyoutItem.Icon>
+                            <FontIcon Glyph="&#xEDE1;"/>
+                        </MenuFlyoutItem.Icon>
+                    </MenuFlyoutItem>
+                    <MenuFlyoutItem Text="Editer ce livre" Command="{StaticResource EditBookInfosXamlUICommand}" CommandParameter="{x:Bind Mode=OneWay}">
+                        <MenuFlyoutItem.Icon>
+                            <FontIcon Glyph="&#xE70F;"/>
+                        </MenuFlyoutItem.Icon>
+                    </MenuFlyoutItem>
+                    <MenuFlyoutSeparator />
+                    <MenuFlyoutItem Text="Supprimer ce livre" Command="{StaticResource DeleteBookXUiCmd}" CommandParameter="{x:Bind }" Foreground="OrangeRed">
+                        <MenuFlyoutItem.Icon>
+                            <FontIcon Glyph="&#xE74D;" Foreground="OrangeRed"/>
+                        </MenuFlyoutItem.Icon>
+                    </MenuFlyoutItem>
+                </MenuFlyout>
+            </Button.Flyout>
+        </Button>
+    </Grid>
+</Grid>
