@@ -48,7 +48,7 @@ namespace LibTest
         [Fact]
         public async void GetSingleLibraryById()
         {
-            Library? library = await Library.GetSingleAsync(1);
+            Library? library = await Library.SingleAsync(1);
             if (library != null)
             {
                 //...
@@ -147,7 +147,7 @@ namespace LibTest
         [Fact]
         public async void GetSingleLibrary()
         {
-            Library? library = await Library.GetSingleAsync(1);
+            Library? library = await Library.SingleAsync(1);
             if (library != null)
             {
                 //...

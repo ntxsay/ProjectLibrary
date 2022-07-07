@@ -12,9 +12,7 @@
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
-
                 <RowDefinition Height="*"/>
-                <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
             <Grid Grid.Row="0">
@@ -30,13 +28,17 @@
                 </Button>
             </Grid>
             <Grid Grid.Row="1" x:Name="grid">
-                <controls:WebView2 x:Name="MyWebView2" HorizontalAlignment="Stretch" NavigationStarting="MyWebView2_NavigationStarting" NavigationCompleted="MyWebView2_NavigationCompleted"
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <controls:WebView2 Grid.Column="0" x:Name="MyWebView2" HorizontalAlignment="Stretch" NavigationStarting="MyWebView2_NavigationStarting" NavigationCompleted="MyWebView2_NavigationCompleted"
                                VerticalAlignment="Stretch"  />
+                <TextBox x:Name="TbxResult" AcceptsReturn="True" TextWrapping="Wrap" Grid.Column="1">
+
+                </TextBox>
             </Grid>
-            <TextBox x:Name="TbxResult" AcceptsReturn="True" TextWrapping="Wrap" Grid.Row="2">
-                
-            </TextBox>
-            <Grid Grid.Row="3">
+            <Grid Grid.Row="2">
                 <StackPanel Orientation="Horizontal">
                     <Button x:Name="BtnTranslate" Click="BtnTranslate_Click">
                         <TextBlock Text="Traduire" />

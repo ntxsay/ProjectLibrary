@@ -16,11 +16,13 @@ using Microsoft.UI.Xaml.Navigation;
 using Microsoft.Web.WebView2.Core;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
 using Windows.Foundation;
@@ -53,17 +55,7 @@ namespace LibraryWinUI.Views.Windows
             }));
         }
 
-        private void MyWebView2_NavigationStarting(WebView2 sender, Microsoft.Web.WebView2.Core.CoreWebView2NavigationStartingEventArgs args)
-        {
-            isWebPageLoaded = false;
-        }
-
-        private async void MyWebView2_NavigationCompleted(WebView2 sender, Microsoft.Web.WebView2.Core.CoreWebView2NavigationCompletedEventArgs args)
-        {
-            isWebPageLoaded = true;
-            await PrintToPdfAsync();
-        }
-
+        
         //private async void BtnTranslate_Click(object sender, RoutedEventArgs e)
         //{
         //    try
@@ -280,28 +272,8 @@ namespace LibraryWinUI.Views.Windows
             }
         }
 
-        private async Task PrintToPdfAsync()
-        {
-            try
-            {
-                while (!isWebPageLoaded)
-                {
-                    if (isWebPageLoaded)
-                    {
-                        break;
-                    }
 
-                    continue;
-                }
-
-                await MyWebView2.CoreWebView2.PrintToPdfAsync(@$"C:\Users\loicbastaraud\Downloads\{DateTime.Now:yyyyMMddHHmmss}.pdf", null);
-            }
-            catch (Exception)
-            {
-
-                throw;
-            }
-        }
+        BackgroundWorker backgroundworker = new BackgroundWorker();
 
         private async void Btn_AllInOneBG_Click(object sender, RoutedEventArgs e)
         {
@@ -312,7 +284,91 @@ namespace LibraryWinUI.Views.Windows
                     return;
                 }
 
-                await LoadHtml($"https://translate.google.com/translate?sl=en&tl=fr&hl=fr&u={TbxSearch.Text.Trim()}&client=webapp");
+                HtmlWeb hw = new HtmlWeb();
+                HtmlDocument htmlDocument = hw.Load($"https://translate.google.com/translate?sl=en&tl=fr&hl=fr&u={TbxSearch.Text.Trim()}&client=webapp");
+
+                htmlDocument.OptionAutoCloseOnEnd = true;
+                htmlDocument.OptionFixNestedTags = true;
+                htmlDocument.OptionWriteEmptyNodes = true;
+
+                string html = htmlDocument.DocumentNode.OuterHtml;
+                string sUrlDecoded = HttpUtility.HtmlDecode(html);
+
+                await MyWebView2.EnsureCoreWebView2Async();
+                TbxResult.Text = html;
+                MyWebView2.CoreWebView2.NavigateToString(sUrlDecoded);
+
+                using BackgroundWorker worker = new BackgroundWorker()
+                {
+                    WorkerSupportsCancellation = false,
+                    WorkerReportsProgress = false,
+                };
+                worker.DoWork += (s, e) =>
+                {
+                    while (!isWebPageLoaded)
+                    {
+                        if (isWebPageLoaded)
+                        {
+                            break;
+                        }
+
+                        continue;
+                    }
+                };
+
+                worker.RunWorkerCompleted += async (s, e) =>
+                {
+                    string isFullyLoaded = await MyWebView2.ExecuteScriptAsync("document.readyState === 'complete';");
+                    if (isFullyLoaded != null && isFullyLoaded == "true")
+                    {
+                        string scrollToBottom = await MyWebView2.ExecuteScriptAsync("window.scrollTo(0, document.body.scrollHeight);");
+
+                        //window.scrollTo(0, document.body.scrollHeight);
+                        await PrintToPdfAsync();
+                    }
+                        //DispatcherTimer dispatcherTimer = new DispatcherTimer()
+                        //{
+                        //    Interval = new TimeSpan(0, 0, 3),
+                        //};
+
+                        //dispatcherTimer.Tick += (t, f) =>
+                        //{
+                        //    ParentPage.Parameters.MainPage.CloseBusyLoader();
+                        //    dispatcherTimer.Stop();
+                        //    dispatcherTimer = null;
+                        //    MainPage.CallGarbageCollector();
+                        //};
+
+                        //dispatcherTimer.Start();
+                };
+
+                worker.RunWorkerAsync();
+
+                return;
+                
+                var linkedPages = htmlDocument.DocumentNode.Descendants("a")
+                                                  .Where(w => w.HasAttributes)
+                                                  .Select(a => a.GetAttributeValue("href", null))
+                                                  .Where(u => !u.IsStringNullOrEmptyOrWhiteSpace());
+
+                if (linkedPages != null && linkedPages.Any())
+                {
+                    foreach (string link in linkedPages)
+                    {
+                        while (!isWebPageLoaded)
+                        {
+                            if (isWebPageLoaded)
+                            {
+                                break;
+                            }
+
+                            continue;
+                        }
+                        Thread.Sleep(1000);
+                        await LoadHtml($"https://translate.google.com/translate?sl=en&tl=fr&hl=fr&u={link.Trim()}&client=webapp");
+                    }
+                }
+
 
                 //HtmlWeb hw = new HtmlWeb();
                 //HtmlDocument doc = hw.Load($"https://translate.google.com/translate?sl=en&tl=fr&hl=fr&u={TbxSearch.Text.Trim()}&client=webapp");
@@ -354,23 +410,6 @@ namespace LibraryWinUI.Views.Windows
                     await MyWebView2.EnsureCoreWebView2Async();
                     MyWebView2.CoreWebView2.NavigateToString(htmlDocument.DocumentNode.OuterHtml);
 
-                    var linkedPages = htmlDocument.DocumentNode.Descendants("a")
-                                                      .Where(w => w.HasAttributes)
-                                                      .Select(a => a.GetAttributeValue("href", null))
-                                                      .Where(u => !u.IsStringNullOrEmptyOrWhiteSpace());
-
-                    if (linkedPages != null && linkedPages.Any())
-                    {
-                        //foreach (string link in linkedPages)
-                        //{
-                        //    while (!isWebPageLoaded)
-                        //    {
-                        //        continue;
-                        //    }
-
-                        //    MyWebView2.CoreWebView2.Navigate(link);
-                        //}
-                    }
                 }
                 catch (Exception ex)
                 {
@@ -383,6 +422,53 @@ namespace LibraryWinUI.Views.Windows
 
                 throw;
             }
+        }
+
+
+        private async Task PrintToPdfAsync()
+        {
+            try
+            {
+                while (!isWebPageLoaded)
+                {
+                    if (isWebPageLoaded)
+                    {
+                        break;
+                    }
+
+                    continue;
+                }
+
+                CoreWebView2PrintSettings printSettings = MyWebView2.CoreWebView2.Environment.CreatePrintSettings();
+                printSettings.ShouldPrintBackgrounds = true;
+
+                var desktop = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
+                await MyWebView2.CoreWebView2.PrintToPdfAsync(@$"{desktop}\{DateTime.Now:yyyyMMddHHmmss}.pdf", printSettings);
+                isWebPageLoaded = false;
+                await Task.Delay(1000);
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
+
+        private void MyWebView2_NavigationStarting(WebView2 sender, Microsoft.Web.WebView2.Core.CoreWebView2NavigationStartingEventArgs args)
+        {
+            isWebPageLoaded = false;
+        }
+
+        private async void MyWebView2_NavigationCompleted(WebView2 sender, Microsoft.Web.WebView2.Core.CoreWebView2NavigationCompletedEventArgs args)
+        {
+            if (args.IsSuccess)
+            {
+
+            }
+            //document.readyState === 'complete'
+            //string isFullyLoaded = await sender.ExecuteScriptAsync("document.readyState === 'complete';");
+            isWebPageLoaded = true;
         }
     }
 }
