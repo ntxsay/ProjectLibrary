@@ -49,7 +49,7 @@
         </DataTemplate>
         <DataTemplate x:Key="ViewModeListViewTemplate">
             <ScrollViewer x:Name="scrollItems" HorizontalScrollMode="Disabled">
-                <ListView x:Name="ListViewItems" ItemsSource="{Binding }" SelectionMode="Extended" IsItemClickEnabled="True" Padding="4,14" Loaded="ListViewItems_Loaded"
+                <ListView x:Name="ListViewItems" ItemsSource="{Binding }" SelectionMode="Extended" IsItemClickEnabled="True" Padding="4 14 4 50" Loaded="ListViewItems_Loaded"
                              ScrollViewer.VerticalScrollMode="Disabled" IsMultiSelectCheckBoxEnabled="True" SingleSelectionFollowsFocus="True">
                     <ListView.ItemContainerStyle>
                         <Style TargetType="ListViewItem">

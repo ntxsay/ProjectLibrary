@@ -43,7 +43,7 @@ namespace LibraryWinUI.Views.SideBar
         public Guid ItemGuid { get; private set; } = Guid.NewGuid();
 
         internal LibraryVM OriginalViewModel { get; private set; }
-        internal LibraryThumbnailV1 ThumbnailV1 { get; private set; }
+        internal UIElement LibraryItem { get; private set; }
 
         public delegate void CancelModificationEventHandler(LibraryNewEditSideBar sender, ExecuteRequestedEventArgs e);
         public event CancelModificationEventHandler CancelModificationRequested;
@@ -56,19 +56,33 @@ namespace LibraryWinUI.Views.SideBar
             this.InitializeComponent();
         }
 
-        internal void InitializeSideBar(MainCollectionPage parentPage, LibraryThumbnailV1 element, EditMode editMode)
+        internal void InitializeSideBar(MainCollectionPage parentPage, UIElement element, EditMode editMode)
         {
             try
             {
-                if (element == null || element.ViewModel == null && editMode != EditMode.Create)
-                {
-                    throw new Exception("Le modèle de vue ne peut pas être null en mode édition.");
-                }
-
                 ParentPage = parentPage;
-                ThumbnailV1 = element;
-                this.OriginalViewModel = element.ViewModel; //Attention de ne pas casser lien
-                InitializeSideBar(parentPage, element.ViewModel, editMode);
+                LibraryItem = element ?? throw new Exception("Le modèle de vue ne peut pas être null en mode édition.");
+                
+                if (element is LibraryThumbnailV1 libraryThumbnailV1)
+                {
+                    if (libraryThumbnailV1.ViewModel == null && editMode != EditMode.Create)
+                    {
+                        throw new Exception("Le modèle de vue ne peut pas être null en mode édition.");
+                    }
+
+                    this.OriginalViewModel = libraryThumbnailV1.ViewModel; //Attention de ne pas casser lien
+                    InitializeSideBar(parentPage, libraryThumbnailV1.ViewModel, editMode);
+                }
+                else if (element is LibraryListViewV1 libraryListViewV1)
+                {
+                    if (libraryListViewV1.ViewModel == null && editMode != EditMode.Create)
+                    {
+                        throw new Exception("Le modèle de vue ne peut pas être null en mode édition.");
+                    }
+
+                    this.OriginalViewModel = libraryListViewV1.ViewModel; //Attention de ne pas casser lien
+                    InitializeSideBar(parentPage, libraryListViewV1.ViewModel, editMode);
+                }
             }
             catch (Exception ex)
             {

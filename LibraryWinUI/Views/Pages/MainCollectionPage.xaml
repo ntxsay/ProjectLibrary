@@ -4,21 +4,28 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:LibraryWinUI.Views.Pages"
     xmlns:generalVm="using:LibraryWinUI.ViewModels"
-    xmlns:bookVm="using:LibShared.ViewModels.Books.BookVM"
-    xmlns:libraryVm="using:LibShared.ViewModels.Libraries.LibraryVM"
     xmlns:controls="using:CommunityToolkit.WinUI.UI.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d" Margin="0 41 0 0">
     <Page.Resources>
-        
+		<ResourceDictionary>
+			<ResourceDictionary.ThemeDictionaries>
+				<ResourceDictionary x:Key="Light">
+					<SolidColorBrush x:Key="cmdColor" Color="Black"/>
+				</ResourceDictionary>
+				<ResourceDictionary x:Key="Dark">
+					<SolidColorBrush x:Key="cmdColor" Color="White"/>
+				</ResourceDictionary>
+			</ResourceDictionary.ThemeDictionaries>
+		</ResourceDictionary>
     </Page.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
-        <Grid Grid.Row="0" Padding="0 40 0 0">
+        <Grid Grid.Row="0" Padding="0 49 0 0">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
@@ -27,13 +34,19 @@
                 <!--Header Content-->
             </Grid>
             <Grid Grid.Row="1" Padding="0 0 0 0">
-                <SplitView PaneBackground="{ThemeResource SystemControlChromeLowAcrylicElementBrush}" 
+                <SplitView 
                 IsPaneOpen="{x:Bind ViewModelPage.IsSplitViewOpen, Mode=OneWay}" PanePlacement="Right" OpenPaneLength="{x:Bind ViewModelPage.SplitViewWidth, Mode=TwoWay}" CompactPaneLength="88" DisplayMode="Inline">
+                    <!--<SplitView.PaneBackground>
+                        <SolidColorBrush Color="{ThemeResource cmdColor}" Opacity="0.5"/>
+                    </SplitView.PaneBackground>-->
                     <Frame x:Name="FrameContainer" Background="Transparent">
 
                     </Frame>
                     <SplitView.Pane>
-                        <Grid RowSpacing="4">
+                        <Grid RowSpacing="4" BorderThickness="1 0 0 0">
+                            <Grid.Background>
+                        <SolidColorBrush Color="black" Opacity="0.1"/>
+                    </Grid.Background>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto" />
                                 <RowDefinition Height="*" />
@@ -184,17 +197,16 @@
                 </AppBarToggleButton.Icon>
             </AppBarToggleButton>-->
             <AppBarSeparator/>
-            <AppBarButton Icon="View">
+            <!--<AppBarButton Icon="View">
                 <AppBarButton.Flyout>
                     <MenuFlyout x:Name="MenuFlyoutCommandView" Placement="BottomEdgeAlignedRight" Opened="MenuFlyoutCommandView_Opened">
                     </MenuFlyout>
                 </AppBarButton.Flyout>
-            </AppBarButton>
+            </AppBarButton>-->
             <AppBarSeparator/>
             <AppBarButton x:Name="ABBAddItem" Icon="Add" ToolTipService.ToolTip="Ajouter un élément" >
                 <AppBarButton.Flyout>
-                    <MenuFlyout Placement="Bottom" x:Name="MenuFlyoutCommandAdds" Opened="MenuFlyoutCommandAdds_Opened">
-                    </MenuFlyout>
+                    <MenuFlyout Placement="Bottom" x:Name="MenuFlyoutCommandAdds"></MenuFlyout>
                 </AppBarButton.Flyout>
             </AppBarButton>
             <AppBarSeparator/>
@@ -225,5 +237,6 @@
                 </StackPanel>
             </CommandBar.Content>
         </CommandBar>
+
     </Grid>
 </Page>

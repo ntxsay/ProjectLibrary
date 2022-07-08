@@ -148,15 +148,12 @@ namespace LibraryWinUI.Views.UserControls
 
         private async void LibraryThumbnailV1_EditItemRequested(Components.LibraryThumbnailV1 sender, LibraryVM viewModel)
         {
-            try
-            {
-                await this.MainCollectionPage.LibraryNewEditAsync(sender, LibShared.EditMode.Edit);
-            }
-            catch (Exception ex)
-            {
-                Logs.Log(className:nameof(ItemCollectionUC), exception:ex);
-                return;
-            }
+            await this.MainCollectionPage.LibraryNewEditAsync(sender, LibShared.EditMode.Edit);
+        }
+
+        private async void LibraryListViewV1_EditItemRequested(Components.LibraryListViewV1 sender, LibraryVM viewModel)
+        {
+            await this.MainCollectionPage.LibraryNewEditAsync(sender, LibShared.EditMode.Edit);
         }
 
         private void LibraryThumbnailV1_OpenItemRequested(Components.LibraryThumbnailV1 sender, LibraryVM viewModel)
@@ -169,6 +166,8 @@ namespace LibraryWinUI.Views.UserControls
             inputOutputHelpers.window.MainCollectionNavigation(viewModel.Id, typeof(BookVM));
         }
 
+        
+
         private void LibraryThumbnailV1_EditItemRequested_1(Components.LibraryThumbnailV1 sender, LibraryVM viewModel)
         {
 
@@ -179,10 +178,7 @@ namespace LibraryWinUI.Views.UserControls
 
         }
 
-        private void LibraryListViewV1_EditItemRequested(Components.LibraryListViewV1 sender, LibraryVM viewModel)
-        {
-
-        }
+        
 
        
     }

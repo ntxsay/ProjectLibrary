@@ -78,6 +78,7 @@ namespace LibraryWinUI.Views.Pages
                     itemCollectionUC.InitializeCollection(resquestResult.List.GroupItemsBy(GroupBy.None), resquestResult.NbPages, resquestResult.CurrentPage);
                     FrameContainer.Content = itemCollectionUC;
                 }
+                InitializeAddsCmdBarItemsForLibraryCollection();
             }
             catch (Exception ex)
             {
@@ -211,7 +212,7 @@ namespace LibraryWinUI.Views.Pages
             }
             catch (Exception ex)
             {
-                Logs.Log(ex, m);
+                Logs.Log(nameof(MainCollectionPage), exception: ex);
                 return;
             }
         }
@@ -232,6 +233,7 @@ namespace LibraryWinUI.Views.Pages
         #endregion
 
         #region CommandBar Events
+        
         #region Add Commands
         private void MenuFlyoutCommandAdds_Opened(object sender, object e)
         {
@@ -274,11 +276,10 @@ namespace LibraryWinUI.Views.Pages
         #region Actions
 
         #region Library
-        internal async Task LibraryNewEditAsync(LibraryThumbnailV1 element, EditMode editMode = EditMode.Create)
+        internal async Task LibraryNewEditAsync(UIElement element, EditMode editMode = EditMode.Create)
         {
             try
             {
-
                 if (this.PivotRightSideBar.Items.FirstOrDefault(f => f is LibraryNewEditSideBar item && item.UiViewModel.EditMode == editMode) is LibraryNewEditSideBar checkedItem)
                 {
                     var isModificationStateChecked = await checkedItem.CheckModificationsStateAsync();
@@ -350,7 +351,6 @@ namespace LibraryWinUI.Views.Pages
             }
         }
 
-
         private void LibraryNewEditSideBar_ExecuteTaskRequested(LibraryNewEditSideBar sender, LibraryVM originalViewModel, LibraryVM editedViewModel)
         {
             if (editedViewModel != null)
@@ -360,9 +360,16 @@ namespace LibraryWinUI.Views.Pages
                     case EditMode.Create:
                         break;
                     case EditMode.Edit:
-                        if (sender.ThumbnailV1 != null)
+                        if (sender.LibraryItem != null)
                         {
-                            sender.ThumbnailV1.ViewModel = editedViewModel;
+                            if (sender.LibraryItem is LibraryThumbnailV1 libraryThumbnailV1)
+                            {
+                                libraryThumbnailV1.ViewModel = editedViewModel;
+                            }
+                            else if (sender.LibraryItem is LibraryListViewV1 libraryListViewV1)
+                            {
+                                libraryListViewV1.ViewModel = editedViewModel;
+                            }
                         }
                         break;
                     default:

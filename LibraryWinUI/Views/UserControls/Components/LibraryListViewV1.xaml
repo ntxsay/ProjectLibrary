@@ -6,7 +6,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" Margin="0 0"
     mc:Ignorable="d" HorizontalAlignment="Stretch" IsDoubleTapEnabled="True" DoubleTapped="ListViewItem_DoubleTapped" CornerRadius="8" BorderThickness="0 1" BorderBrush="{ThemeResource AppBarItemDisabledForegroundThemeBrush}">
-    <Grid x:Name="GridActions" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Padding="4, 8" BorderThickness="0" ColumnSpacing="10">
+    <Grid x:Name="GridActions" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Padding="0, 8" BorderThickness="0" ColumnSpacing="10">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="40"/>
             <ColumnDefinition Width="1*"/>
