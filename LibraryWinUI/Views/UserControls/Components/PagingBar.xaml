@@ -22,10 +22,10 @@
             <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE76B;" FontSize="16"/>
         </Button>
         <Button Grid.Column="2" CornerRadius="6" Background="{ThemeResource SystemControlChromeLowAcrylicElementBrush}">
-            <TextBlock x:Name="TbkNbPages" TextAlignment="Center" VerticalAlignment="Center" FontSize="16" MinWidth="100">
-                    <Run Text="1" FontWeight="Medium"/>
+            <TextBlock TextAlignment="Center" VerticalAlignment="Center" FontSize="16" MinWidth="100">
+                    <Run Text="{x:Bind ActualPage, Mode=OneWay}" FontWeight="Medium"/>
                     <Run Text="sur" />
-                    <Run Text="20"  FontWeight="Medium"/>
+                    <Run Text="{x:Bind NbPages, Mode=OneWay}"  FontWeight="Medium"/>
             </TextBlock>
             <Button.Flyout>
                 <Flyout>

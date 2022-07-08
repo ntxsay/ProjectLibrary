@@ -1,0 +1,50 @@
+﻿<ListViewItem
+    x:Class="LibraryWinUI.Views.UserControls.Components.LibraryListViewV1"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:LibraryWinUI.Views.UserControls.Components"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" Margin="0 0"
+    mc:Ignorable="d" HorizontalAlignment="Stretch" IsDoubleTapEnabled="True" DoubleTapped="ListViewItem_DoubleTapped" CornerRadius="8" BorderThickness="0 1" BorderBrush="{ThemeResource AppBarItemDisabledForegroundThemeBrush}">
+    <Grid x:Name="GridActions" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Padding="4, 8" BorderThickness="0" ColumnSpacing="10">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="40"/>
+            <ColumnDefinition Width="1*"/>
+            <ColumnDefinition Width="2*"/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+        <TextBlock Grid.Column="0" Text="{x:Bind UiViewModel.Id, Mode=OneWay}" TextWrapping="NoWrap" FontSize="16" VerticalAlignment="Center" ToolTipService.ToolTip="Id"/>
+        <TextBlock Grid.Column="1" Text="{x:Bind UiViewModel.Name, Mode=OneWay}"  FontWeight="SemiBold" TextWrapping="NoWrap" FontSize="16" VerticalAlignment="Center" ToolTipService.ToolTip="Nom de la bibliothèque"/>
+        <TextBlock Grid.Column="2" Text="{x:Bind UiViewModel.Description, Mode=OneWay}" TextWrapping="NoWrap" FontSize="16" VerticalAlignment="Center" ToolTipService.ToolTip="Description de la bibliothèque"/>
+        <TextBlock Grid.Column="3" TextWrapping="NoWrap" FontSize="16" VerticalAlignment="Center" ToolTipService.ToolTip="Nombre de livres dans la bibliothèque">
+            <Run Text="{x:Bind UiViewModel.CountBooks, Mode=OneWay}" />
+            <Run Text="livre(s)" />
+        </TextBlock>
+    </Grid>
+    <ListViewItem.ContextFlyout>
+        <MenuFlyout Placement="BottomEdgeAlignedLeft">
+            <MenuFlyoutItem Text="Première de converture" Click="MFI_Change_Jaquette_Click">
+                <MenuFlyoutItem.Icon>
+                    <FontIcon Glyph="&#xEB9F;"/>
+                </MenuFlyoutItem.Icon>
+            </MenuFlyoutItem>
+            <MenuFlyoutSeparator />
+            <MenuFlyoutItem Text="Exporter la bibliothèque" Click="MFI_Export_Item_Click">
+                <MenuFlyoutItem.Icon>
+                    <FontIcon Glyph="&#xEDE1;"/>
+                </MenuFlyoutItem.Icon>
+            </MenuFlyoutItem>
+            <MenuFlyoutItem Text="Editer la bibliothèque" Click="MFI_Edit_Item_Click">
+                <MenuFlyoutItem.Icon>
+                    <FontIcon Glyph="&#xE70F;"/>
+                </MenuFlyoutItem.Icon>
+            </MenuFlyoutItem>
+            <MenuFlyoutSeparator />
+            <MenuFlyoutItem Text="Supprimer la bibliothèque" Click="MFI_Delete_Item_Click" Foreground="OrangeRed">
+                <MenuFlyoutItem.Icon>
+                    <FontIcon Glyph="&#xE74D;" Foreground="OrangeRed"/>
+                </MenuFlyoutItem.Icon>
+            </MenuFlyoutItem>
+        </MenuFlyout>
+    </ListViewItem.ContextFlyout>
+</ListViewItem>

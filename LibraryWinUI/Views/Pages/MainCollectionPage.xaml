@@ -184,19 +184,19 @@
                 </AppBarToggleButton.Icon>
             </AppBarToggleButton>-->
             <AppBarSeparator/>
-            <!--<AppBarButton Icon="View">
+            <AppBarButton Icon="View">
                 <AppBarButton.Flyout>
                     <MenuFlyout x:Name="MenuFlyoutCommandView" Placement="BottomEdgeAlignedRight" Opened="MenuFlyoutCommandView_Opened">
                     </MenuFlyout>
                 </AppBarButton.Flyout>
             </AppBarButton>
             <AppBarSeparator/>
-            <AppBarButton x:Name="ABBAddItem" Icon="Add" ToolTipService.ToolTip="Ajouter un élément" PointerMoved="ABBAddItem_PointerMoved" PointerExited="ABBAddItem_PointerExited">
+            <AppBarButton x:Name="ABBAddItem" Icon="Add" ToolTipService.ToolTip="Ajouter un élément" >
                 <AppBarButton.Flyout>
                     <MenuFlyout Placement="Bottom" x:Name="MenuFlyoutCommandAdds" Opened="MenuFlyoutCommandAdds_Opened">
                     </MenuFlyout>
                 </AppBarButton.Flyout>
-            </AppBarButton>-->
+            </AppBarButton>
             <AppBarSeparator/>
             <!--<AppBarButton Icon="RepeatAll" LabelPosition="Collapsed" MTUUi:FrameworkElementExtensions.Cursor="Hand" Command="{StaticResource ReloadDataXamlUICommand}"/>-->
             <AppBarSeparator/>

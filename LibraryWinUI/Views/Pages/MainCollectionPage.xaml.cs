@@ -52,7 +52,6 @@ namespace LibraryWinUI.Views.Pages
                 if (type == typeof(LibraryVM))
                 {
 #warning Juste à des fins de tests
-                    await LibraryNewEditAsync(new LibraryVM(), EditMode.Create);
                     await TestGetLibrariesAsync();
                 }
             }
@@ -150,6 +149,127 @@ namespace LibraryWinUI.Views.Pages
             //    return;
             //}
         }
+
+        #region CommandBar Initialize
+        private void InitializeAddsCmdBarItemsForLibraryCollection()
+        {
+            try
+            {
+                MenuFlyoutCommandAdds.Items.Clear();
+
+                MenuFlyoutItem TMFIAddNewItem = new MenuFlyoutItem()
+                {
+                    Text = "Nouvelle bibliothèque",
+                    Icon = new FontIcon
+                    {
+                        FontFamily = new FontFamily("Segoe MDL2 Assets"),
+                        Glyph = "\uE710",
+                    }
+                };
+                TMFIAddNewItem.Click += TMFIAddNewItem_Click;
+
+                MenuFlyoutItem TMFIAddFromFile = new MenuFlyoutItem()
+                {
+                    Text = "Ouvrir un fichier",
+                    IsEnabled = true,
+                    Icon = new FontIcon
+                    {
+                        FontFamily = new FontFamily("Segoe MDL2 Assets"),
+                        Glyph = "\uE8B5",
+                    }
+                };
+                TMFIAddFromFile.Click += TMFIAddFromFile_Click;
+
+                MenuFlyoutItem TMFIAddNewHuman = new MenuFlyoutItem()
+                {
+                    Text = "Ajouter une personne",
+                    Icon = new FontIcon
+                    {
+                        FontFamily = new FontFamily("Segoe MDL2 Assets"),
+                        Glyph = "\uE77b",
+                    }
+                };
+                TMFIAddNewHuman.Click += TMFIAddNewHuman_Click;
+
+                MenuFlyoutItem TMFIAddNewSociety = new MenuFlyoutItem()
+                {
+                    Text = "Ajouter une société",
+                    Icon = new FontIcon
+                    {
+                        FontFamily = new FontFamily("Segoe MDL2 Assets"),
+                        Glyph = "\uE731",
+                    }
+                };
+                TMFIAddNewSociety.Click += MFI_NewSociety_Click;
+
+                MenuFlyoutCommandAdds.Items.Add(TMFIAddNewItem);
+                MenuFlyoutCommandAdds.Items.Add(TMFIAddFromFile);
+                MenuFlyoutCommandAdds.Items.Add(new MenuFlyoutSeparator());
+                MenuFlyoutCommandAdds.Items.Add(TMFIAddNewHuman);
+                MenuFlyoutCommandAdds.Items.Add(TMFIAddNewSociety);
+
+            }
+            catch (Exception ex)
+            {
+                Logs.Log(ex, m);
+                return;
+            }
+        }
+
+        private async void TMFIAddNewItem_Click(object sender, RoutedEventArgs e)
+        {
+            if (TypeOfMainCollection == typeof(LibraryVM))
+            {
+                await LibraryNewEditAsync(new LibraryVM(), EditMode.Create);
+            }
+            else if (TypeOfMainCollection == typeof(BookVM))
+            {
+                
+            }
+        }
+
+        
+        #endregion
+
+        #region CommandBar Events
+        #region Add Commands
+        private void MenuFlyoutCommandAdds_Opened(object sender, object e)
+        {
+
+        }
+
+        private void TMFIAddFromWebsite_Click(object sender, RoutedEventArgs e)
+        {
+
+
+        }
+
+        private void TMFIAddFromFile_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void TMFIAddFromExcelFile_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void TMFIAddNewCollection_Click(object sender, RoutedEventArgs e)
+        {
+            //NewEditCollection(null, EditMode.Create);
+        }
+
+        private void TMFIAddNewHuman_Click(object sender, RoutedEventArgs e)
+        {
+            //this.NewEditContact(EditMode.Create, ContactType.Human, null, null);
+        }
+
+        private void MFI_NewSociety_Click(object sender, RoutedEventArgs e)
+        {
+            //this.NewEditContact(EditMode.Create, ContactType.Society, null, null);
+        }
+        #endregion
+        #endregion
 
         #region Actions
 

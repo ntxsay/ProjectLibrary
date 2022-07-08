@@ -44,10 +44,18 @@
                 </GridView>
             </ScrollViewer>
         </DataTemplate>
-        <DataTemplate x:Key="ListViewLibraryTemplate" x:DataType="libraryVM:LibraryVM">
-            <ScrollViewer x:Name="scrollItems" HorizontalScrollMode="Disabled" Grid.Row="0">
-                <ListView x:Name="ListViewItems" ItemsSource="{Binding }" SelectionMode="Extended" IsItemClickEnabled="False" Padding="4,14"
+        <DataTemplate x:DataType="sharedLibraryVM:LibraryVM" x:Key="ListViewItemLibraryTemplate">
+            <customComponents:LibraryListViewV1 ViewModel="{x:Bind Mode=OneWay}" EditItemRequested="LibraryListViewV1_EditItemRequested" OpenItemRequested="LibraryListViewV1_OpenItemRequested"/>
+        </DataTemplate>
+        <DataTemplate x:Key="ViewModeListViewTemplate">
+            <ScrollViewer x:Name="scrollItems" HorizontalScrollMode="Disabled">
+                <ListView x:Name="ListViewItems" ItemsSource="{Binding }" SelectionMode="Extended" IsItemClickEnabled="True" Padding="4,14" Loaded="ListViewItems_Loaded"
                              ScrollViewer.VerticalScrollMode="Disabled" IsMultiSelectCheckBoxEnabled="True" SingleSelectionFollowsFocus="True">
+                    <ListView.ItemContainerStyle>
+                        <Style TargetType="ListViewItem">
+                            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                        </Style>
+                    </ListView.ItemContainerStyle>
                 </ListView>
             </ScrollViewer>
         </DataTemplate>
@@ -65,7 +73,7 @@
             </Pivot.HeaderTemplate>
         </Pivot>
         <Grid VerticalAlignment="Bottom">
-            <customComponents:PagingBar Margin="15 5 15 10"/>
+            <customComponents:PagingBar TotalPages="{x:Bind UiViewModel.TotalPages, Mode=OneWay}" CurrentPage="{x:Bind UiViewModel.CurrentPage, Mode=OneWay}" Margin="15 5 15 10"/>
         </Grid>
     </Grid>
 

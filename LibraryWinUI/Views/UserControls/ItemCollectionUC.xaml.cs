@@ -35,6 +35,7 @@ namespace LibraryWinUI.Views.UserControls
         internal DataViewMode DataViewMode { get; set; }
         readonly DatatemplateHelpers datatemplateHelpers = new ();
         internal Type TypeOfData { get; private set; }
+        readonly InputOutputHelpers inputOutputHelpers = new();
 
         public ItemCollectionUC()
         {
@@ -47,10 +48,15 @@ namespace LibraryWinUI.Views.UserControls
             this.MainCollectionPage = mainCollectionPage;
         }
 
-        public void InitializeCollection<T>(IEnumerable<IGrouping<string, T>> dataList, int nbPages, int currentPage, DataViewMode dataViewMode = DataViewMode.GridView) where T : class
+        public void InitializeCollection<T>(IEnumerable<IGrouping<string, T>> dataList, int nbPages, int currentPage, DataViewMode dataViewMode = DataViewMode.ListView) where T : class
         {
             DataViewMode = dataViewMode;
             TypeOfData = typeof(T);
+            UiViewModel = new ItemCollectionUCVM()
+            {
+                CurrentPage = currentPage,
+                TotalPages = nbPages,
+            };
 
             switch (dataViewMode)
             {
@@ -60,12 +66,13 @@ namespace LibraryWinUI.Views.UserControls
                     this.PivotItems.ItemTemplate = (DataTemplate)this.Resources["ViewModeGridViewTemplate"];
                     break;
                 case DataViewMode.ListView:
-                    this.PivotItems.ItemTemplate = (DataTemplate)this.Resources["ListViewLibraryTemplate"];
+                    this.PivotItems.ItemTemplate = (DataTemplate)this.Resources["ViewModeListViewTemplate"];
                     break;
                 default:
                     this.PivotItems.ItemTemplate = (DataTemplate)this.Resources["ViewModeGridViewTemplate"];
                     break;
             }
+
             this.DataContext = new ObservableCollection<IGrouping<string, T>>(dataList);
         }
 
@@ -100,7 +107,21 @@ namespace LibraryWinUI.Views.UserControls
                     gridView.ItemTemplate = (DataTemplate)this.Resources["GridViewItemBookTemplate"];
                 }
             }
+        }
 
+        private void ListViewItems_Loaded(object sender, RoutedEventArgs e)
+        {
+            if (sender is ListView listView)
+            {
+                if (TypeOfData == typeof(LibraryVM))
+                {
+                    listView.ItemTemplate = (DataTemplate)this.Resources["ListViewItemLibraryTemplate"];
+                }
+                else if (TypeOfData == typeof(BookVM))
+                {
+                    //listView.ItemTemplate = (DataTemplate)this.Resources["GridViewItemBookTemplate"];
+                }
+            }
         }
 
         private void GridViewItems_KeyDown(object sender, KeyRoutedEventArgs e)
@@ -140,7 +161,11 @@ namespace LibraryWinUI.Views.UserControls
 
         private void LibraryThumbnailV1_OpenItemRequested(Components.LibraryThumbnailV1 sender, LibraryVM viewModel)
         {
-            InputOutputHelpers inputOutputHelpers = new();
+            inputOutputHelpers.window.MainCollectionNavigation(viewModel.Id, typeof(BookVM));
+        }
+
+        private void LibraryListViewV1_OpenItemRequested(Components.LibraryListViewV1 sender, LibraryVM viewModel)
+        {
             inputOutputHelpers.window.MainCollectionNavigation(viewModel.Id, typeof(BookVM));
         }
 
@@ -154,6 +179,11 @@ namespace LibraryWinUI.Views.UserControls
 
         }
 
-        
+        private void LibraryListViewV1_EditItemRequested(Components.LibraryListViewV1 sender, LibraryVM viewModel)
+        {
+
+        }
+
+       
     }
 }

@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net6.0-windows10.0.19041.0</TargetFramework>
@@ -23,6 +23,7 @@
     <None Remove="Views\Pages\MainCollectionPage.xaml" />
     <None Remove="Views\SideBar\LibraryNewEditSideBar.xaml" />
     <None Remove="Views\UserControls\Components\BookThumbnailV1.xaml" />
+    <None Remove="Views\UserControls\Components\LibraryListViewV1.xaml" />
     <None Remove="Views\UserControls\Components\LibraryThumbnailV1.xaml" />
     <None Remove="Views\UserControls\Components\PagingBar.xaml" />
     <None Remove="Views\UserControls\ItemCollectionUC.xaml" />
@@ -72,6 +73,10 @@
   <ItemGroup>
     <Page Update="Views\UserControls\Components\BookThumbnailV1.xaml">
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Update="Views\UserControls\Components\LibraryListViewV1.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
     </Page>
   </ItemGroup>
   <ItemGroup>
