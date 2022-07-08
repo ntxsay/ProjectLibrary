@@ -20,27 +20,44 @@ namespace LibraryWinUI.Views.UserControls.Components
 {
     public sealed partial class PagingBar : UserControl
     {
-        private int _nbPages, _currentPage;
+        private int NbPages { get; set; }
+        private int ActualPage { get; set; }
         public PagingBar()
         {
             this.InitializeComponent();
         }
 
-        public int NbPages
+        public int TotalPages
         {
-            //get { return (LibraryVM)GetValue(OnViewModelChangedProperty); }
-            get => _nbPages;
-            set { SetValue(OnViewModelChangedProperty, value); }
+            get => NbPages;
+            set { SetValue(OnNbPagesChangedProperty, value); }
         }
 
-        public static readonly DependencyProperty OnNbPagesChangedProperty = DependencyProperty.Register(nameof(ViewModel), typeof(LibraryVM),
-                                                                typeof(LibraryThumbnailV1), new PropertyMetadata(null, new PropertyChangedCallback(OnViewModelChanged)));
+        public static readonly DependencyProperty OnNbPagesChangedProperty = DependencyProperty.Register(nameof(TotalPages), typeof(int),
+                                                                typeof(PagingBar), new PropertyMetadata(null, new PropertyChangedCallback(OnNbPagesChanged)));
 
-        private static void OnViewModelChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        private static void OnNbPagesChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            if (d is LibraryThumbnailV1 parent && e.NewValue is LibraryVM viewModel)
+            if (d is PagingBar parent && e.NewValue is int value)
             {
-                parent.UiViewModel.DeepCopy(viewModel);
+                parent.NbPages = value;
+            }
+        }
+
+        public int CurrentPage
+        {
+            get => ActualPage;
+            set { SetValue(OnCurrentPageChangedProperty, value); }
+        }
+
+        public static readonly DependencyProperty OnCurrentPageChangedProperty = DependencyProperty.Register(nameof(CurrentPage), typeof(int),
+                                                                typeof(PagingBar), new PropertyMetadata(null, new PropertyChangedCallback(OnCurrentPageChanged)));
+
+        private static void OnCurrentPageChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is PagingBar parent && e.NewValue is int value)
+            {
+                parent.ActualPage = value;
             }
         }
     }
