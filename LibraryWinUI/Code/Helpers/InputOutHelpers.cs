@@ -28,12 +28,11 @@ namespace LibraryWinUI.Code.Helpers
                 }
 
                 FileOpenPicker openPicker = new ();
-
                 // Retrieve the window handle (HWND) of the current WinUI 3 window.
                 IntPtr hWnd = WindowNative.GetWindowHandle(window);
 
                 // Initialize the folder picker with the window handle (HWND).
-                WinRT.Interop.InitializeWithWindow.Initialize(openPicker, hWnd);
+                InitializeWithWindow.Initialize(openPicker, hWnd);
 
                 openPicker.ViewMode = pickerViewMode;
                 openPicker.SuggestedStartLocation = pickerLocationId;

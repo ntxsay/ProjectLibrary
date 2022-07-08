@@ -76,7 +76,7 @@ namespace LibraryWinUI.Views.Pages
                 if (resquestResult != null)
                 {
                     ItemCollectionUC itemCollectionUC = new (this);
-                    itemCollectionUC.InitializeCollection(resquestResult.List.GroupItemsBy(GroupBy.None));
+                    itemCollectionUC.InitializeCollection(resquestResult.List.GroupItemsBy(GroupBy.None), resquestResult.NbPages, resquestResult.CurrentPage);
                     FrameContainer.Content = itemCollectionUC;
                 }
             }
@@ -96,7 +96,7 @@ namespace LibraryWinUI.Views.Pages
                 if (resquestResult != null)
                 {
                     ItemCollectionUC itemCollectionUC = new(this);
-                    itemCollectionUC.InitializeCollection(resquestResult.List.GroupItemsBy(GroupBy.None));
+                    itemCollectionUC.InitializeCollection(resquestResult.List.GroupItemsBy(GroupBy.None), resquestResult.NbPages, resquestResult.CurrentPage);
                     FrameContainer.Content = itemCollectionUC;
                 }
             }

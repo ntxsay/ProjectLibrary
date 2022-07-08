@@ -1360,6 +1360,46 @@ namespace LibApi.Services.Books
         }
         #endregion
 
+        #region Jaquette
+        public async Task<bool> SaveJaquetteAsync(byte[] fileBytes, string fileName)
+        {
+            try
+            {
+                if (fileBytes == null || fileBytes.Length == 0)
+                {
+                    throw new ArgumentNullException(nameof(fileBytes), "Ce parmètre ne peut pas être null.");
+                }
+
+                if (fileName.IsStringNullOrEmptyOrWhiteSpace())
+                {
+                    throw new ArgumentNullException(nameof(fileName), "Ce parmètre ne peut pas être null ou ne contenir que des espaces blancs.");
+                }
+
+                InputOutput inputOutput = new();
+                return await inputOutput.CopyJaquetteFileAsync(Guid, DefaultFolders.Books, fileBytes, fileName);
+            }
+            catch (Exception ex)
+            {
+                Logs.Log(nameof(Book), exception: ex);
+                return false;
+            }
+        }
+
+        public async Task<byte[]> GetJaquetteBytesAsync()
+        {
+            try
+            {
+                InputOutput inputOutput = new();
+                return await inputOutput.GetJaquetteFileAsync(Guid, DefaultFolders.Books);
+            }
+            catch (Exception ex)
+            {
+                Logs.Log(nameof(Book), exception: ex);
+                return Array.Empty<byte>();
+            }
+        }
+        #endregion
+
         public async Task<bool> AddToCategoryAsync(Category category)
         {
             try

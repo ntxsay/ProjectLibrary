@@ -18,10 +18,10 @@
         <DataTemplate x:DataType="sharedBookVM:BookVM" x:Key="GridViewItemBookTemplate">
             <customComponents:BookThumbnailV1 Shadow="{StaticResource BackgroundGridShadow}" ViewModel="{x:Bind Mode=OneWay}" EditItemRequested="BookThumbnailV1_EditItemRequested" />
         </DataTemplate>
-        <DataTemplate x:Key="GridViewLibraryTemplate" x:DataType="libraryVM:LibraryVM">
+        <DataTemplate x:Key="ViewModeGridViewTemplate">
             <ScrollViewer x:Name="scrollItems" HorizontalScrollMode="Disabled" Grid.Row="0">
                 <GridView x:Name="GridViewItems" ItemsSource="{Binding Mode=OneWay}" SelectionMode="Extended" IsItemClickEnabled="False" Padding="4 14 4 50" Loaded="GridViewItems_Loaded" Unloaded="GridViewItems_Unloaded"
-                             ScrollViewer.VerticalScrollMode="Disabled" IsMultiSelectCheckBoxEnabled="True" SingleSelectionFollowsFocus="True" ItemTemplate="{StaticResource GridViewItemLibraryTemplate}"
+                             ScrollViewer.VerticalScrollMode="Disabled" IsMultiSelectCheckBoxEnabled="True" SingleSelectionFollowsFocus="True"
                           KeyDown="GridViewItems_KeyDown">
                     <GridView.ItemContainerStyle>
                         <Style TargetType="GridViewItem" >
@@ -44,33 +44,6 @@
                 </GridView>
             </ScrollViewer>
         </DataTemplate>
-        <DataTemplate x:Key="GridViewBookTemplate" x:DataType="libraryVM:BookVM">
-            <ScrollViewer x:Name="scrollItems" HorizontalScrollMode="Disabled" Grid.Row="0">
-                <GridView x:Name="GridViewItems" ItemsSource="{Binding Mode=OneWay}" SelectionMode="Extended" IsItemClickEnabled="False" Padding="4 14 4 50" Loaded="GridViewItems_Loaded" Unloaded="GridViewItems_Unloaded"
-                             ScrollViewer.VerticalScrollMode="Disabled" IsMultiSelectCheckBoxEnabled="True" SingleSelectionFollowsFocus="True" ItemTemplate="{StaticResource GridViewItemBookTemplate}"
-                          KeyDown="GridViewItems_KeyDown">
-                    <GridView.ItemContainerStyle>
-                        <Style TargetType="GridViewItem" >
-                            <Setter Property="Margin" Value="7" />
-                        </Style>
-                    </GridView.ItemContainerStyle>
-                    <GridView.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <ItemsWrapGrid  Orientation="Horizontal" HorizontalAlignment="Left"/>
-                        </ItemsPanelTemplate>
-                    </GridView.ItemsPanel>
-                    <GridView.ItemContainerTransitions>
-                        <TransitionCollection>
-                            <EntranceThemeTransition />
-                            <AddDeleteThemeTransition/>
-                            <NavigationThemeTransition/>
-                            <ContentThemeTransition/>
-                        </TransitionCollection>
-                    </GridView.ItemContainerTransitions>
-                </GridView>
-            </ScrollViewer>
-        </DataTemplate>
-
         <DataTemplate x:Key="ListViewLibraryTemplate" x:DataType="libraryVM:LibraryVM">
             <ScrollViewer x:Name="scrollItems" HorizontalScrollMode="Disabled" Grid.Row="0">
                 <ListView x:Name="ListViewItems" ItemsSource="{Binding }" SelectionMode="Extended" IsItemClickEnabled="False" Padding="4,14"
@@ -80,12 +53,8 @@
         </DataTemplate>
     </UserControl.Resources>
     <Grid>
-        <!--<Grid.RowDefinitions>
-            <RowDefinition Height="*" />
-            <RowDefinition Height="Auto" />
-        </Grid.RowDefinitions>-->
         <Pivot x:Name="PivotItems" x:FieldModifier="public" ItemsSource="{Binding Mode=OneWay}" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
-                               SelectedIndex="{x:Bind UiViewModel.SelectedPivotIndex, Mode=OneWay}" PivotItemLoaded="PivotItems_PivotItemLoaded">
+                               SelectedIndex="{x:Bind UiViewModel.SelectedPivotIndex, Mode=OneWay}" PivotItemLoaded="PivotItems_PivotItemLoaded" Loaded="PivotItems_Loaded">
             <Pivot.OpacityTransition>
                 <ScalarTransition />
             </Pivot.OpacityTransition>

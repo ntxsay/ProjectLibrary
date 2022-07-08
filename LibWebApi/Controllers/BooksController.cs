@@ -83,6 +83,18 @@ namespace LibWebApi.Controllers
             }
         }
 
+        [Route("jaquette")]
+        [HttpGet]
+        public async Task<byte[]?> GetJaquetteAsync([FromQuery] long idBook)
+        {
+            using Book? book = await Book.SingleAsync(id:idBook);
+            if (book == null)
+            {
+                return null;
+            }
+
+            return await book.GetJaquetteBytesAsync();
+        }
 
         [Route("single/categorie")]
         [HttpGet]
@@ -97,6 +109,29 @@ namespace LibWebApi.Controllers
 
             using Category? category = await book.GetCategorieAsync();
             return category;
+        }
+
+        [Route("upload/jaquette")]
+        [HttpPost]
+        public async Task<bool> UpdloadJaquette([FromForm] BookUploadRequestVM form)
+        {
+            if (form == null || form.FormFile.Length == 0)
+            {
+                _logger.LogWarning("Le nom de la catégorie ne peut pas être nulle, vide ou ne contenir que des espaces blancs.");
+                return false;
+            }
+
+            using Book? book = await Book.SingleAsync(form.Id);
+            if (book == null)
+            {
+                return false;
+            }
+
+            using MemoryStream ms = new();
+            await form.FormFile.CopyToAsync(ms);
+            byte[] fileBytes = ms.ToArray();
+
+            return await book.SaveJaquetteAsync(fileBytes, form.FormFile.FileName);
         }
 
         [Route("single/categorie/add")]
@@ -126,4 +161,12 @@ namespace LibWebApi.Controllers
             return await book.AddToCategoryAsync(category);
         }
     }
+
+    public class BookUploadRequestVM
+    {
+        public long Id { get; set; }
+        public string Name { get; set; }
+        public IFormFile FormFile { get; set; }
+    }
+
 }

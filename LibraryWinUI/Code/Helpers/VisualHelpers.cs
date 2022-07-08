@@ -45,10 +45,10 @@ namespace LibraryWinUI.Code.Helpers
         {
             try
             {
-                var count = VisualTreeHelper.GetChildrenCount(elementCible);
-                if (count == 0) return null;
+                //int count = VisualTreeHelper.GetChildrenCount(elementCible);
+                //if (count == 0) return null;
 
-                for (int i = 0; i < count; i++)
+                for (int i = 0; i < VisualTreeHelper.GetChildrenCount(elementCible); i++)
                 {
                     DependencyObject child = VisualTreeHelper.GetChild(elementCible, i);
                     if (child != null && child is T t)

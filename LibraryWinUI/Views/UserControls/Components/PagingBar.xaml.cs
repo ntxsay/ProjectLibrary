@@ -20,9 +20,28 @@ namespace LibraryWinUI.Views.UserControls.Components
 {
     public sealed partial class PagingBar : UserControl
     {
+        private int _nbPages, _currentPage;
         public PagingBar()
         {
             this.InitializeComponent();
+        }
+
+        public int NbPages
+        {
+            //get { return (LibraryVM)GetValue(OnViewModelChangedProperty); }
+            get => _nbPages;
+            set { SetValue(OnViewModelChangedProperty, value); }
+        }
+
+        public static readonly DependencyProperty OnNbPagesChangedProperty = DependencyProperty.Register(nameof(ViewModel), typeof(LibraryVM),
+                                                                typeof(LibraryThumbnailV1), new PropertyMetadata(null, new PropertyChangedCallback(OnViewModelChanged)));
+
+        private static void OnViewModelChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is LibraryThumbnailV1 parent && e.NewValue is LibraryVM viewModel)
+            {
+                parent.UiViewModel.DeepCopy(viewModel);
+            }
         }
     }
 }

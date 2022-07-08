@@ -19,6 +19,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 
@@ -32,6 +33,9 @@ namespace LibraryWinUI.Views.UserControls
         internal ItemCollectionUCVM UiViewModel { get; set; } = new();
         internal MainCollectionPage MainCollectionPage { get; private set; }
         internal DataViewMode DataViewMode { get; set; }
+        readonly DatatemplateHelpers datatemplateHelpers = new ();
+        internal Type TypeOfData { get; private set; }
+
         public ItemCollectionUC()
         {
             this.InitializeComponent();
@@ -43,49 +47,59 @@ namespace LibraryWinUI.Views.UserControls
             this.MainCollectionPage = mainCollectionPage;
         }
 
-        public void InitializeCollection<T>(IEnumerable<IGrouping<string, T>> dataList, DataViewMode dataViewMode = DataViewMode.GridView) where T : class
+        public void InitializeCollection<T>(IEnumerable<IGrouping<string, T>> dataList, int nbPages, int currentPage, DataViewMode dataViewMode = DataViewMode.GridView) where T : class
         {
             DataViewMode = dataViewMode;
+            TypeOfData = typeof(T);
 
-            if (typeof(T) == typeof(BookVM))
+            switch (dataViewMode)
             {
-                switch (dataViewMode)
-                {
-                    case DataViewMode.DataGridView:
-                        break;
-                    case DataViewMode.GridView:
-                        this.PivotItems.ItemTemplate = (DataTemplate)this.Resources["GridViewBookTemplate"];
-                        break;
-                    case DataViewMode.ListView:
-                        //this.PivotItems.ItemTemplate = (DataTemplate)this.Resources["ListViewLibraryTemplate"];
-                        break;
-                    default:
-                        this.PivotItems.ItemTemplate = (DataTemplate)this.Resources["GridViewBookTemplate"];
-                        break;
-                }
-            }
-            else if (typeof(T) == typeof(LibraryVM))
-            {
-                switch (dataViewMode)
-                {
-                    case DataViewMode.DataGridView:
-                        break;
-                    case DataViewMode.GridView:
-                        this.PivotItems.ItemTemplate = (DataTemplate)this.Resources["GridViewLibraryTemplate"];
-                        break;
-                    case DataViewMode.ListView:
-                        this.PivotItems.ItemTemplate = (DataTemplate)this.Resources["ListViewLibraryTemplate"];
-                        break;
-                    default:
-                        this.PivotItems.ItemTemplate = (DataTemplate)this.Resources["GridViewLibraryTemplate"];
-                        break;
-                }
+                case DataViewMode.DataGridView:
+                    break;
+                case DataViewMode.GridView:                    
+                    this.PivotItems.ItemTemplate = (DataTemplate)this.Resources["ViewModeGridViewTemplate"];
+                    break;
+                case DataViewMode.ListView:
+                    this.PivotItems.ItemTemplate = (DataTemplate)this.Resources["ListViewLibraryTemplate"];
+                    break;
+                default:
+                    this.PivotItems.ItemTemplate = (DataTemplate)this.Resources["ViewModeGridViewTemplate"];
+                    break;
             }
             this.DataContext = new ObservableCollection<IGrouping<string, T>>(dataList);
         }
 
+
+        private void PivotItems_Loaded(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
         private void PivotItems_PivotItemLoaded(Pivot sender, PivotItemEventArgs args)
         {
+
+        }
+
+        private void GridViewItems_Loaded(object sender, RoutedEventArgs e)
+        {
+            if (sender is GridView gridView)
+            {
+                if (TypeOfData == typeof(LibraryVM))
+                {
+                    gridView.ItemTemplate = (DataTemplate)this.Resources["GridViewItemLibraryTemplate"];
+                }
+                else if (TypeOfData == typeof(BookVM))
+                {
+                    gridView.ItemTemplate = (DataTemplate)this.Resources["GridViewItemBookTemplate"];
+                }
+            }
 
         }
 
@@ -99,10 +113,7 @@ namespace LibraryWinUI.Views.UserControls
 
         }
 
-        private void GridViewItems_Loaded(object sender, RoutedEventArgs e)
-        {
-
-        }
+        
 
         //private void Image_Loaded(object sender, RoutedEventArgs e)
         //{

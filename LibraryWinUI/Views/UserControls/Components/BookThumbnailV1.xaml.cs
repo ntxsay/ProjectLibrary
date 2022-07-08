@@ -1,6 +1,7 @@
 ﻿using AppHelpers;
 using AppHelpers.Extensions;
 using LibraryWinUI.Code.Helpers;
+using LibraryWinUI.Code.WebApi;
 using LibShared.ViewModels.Books;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -64,12 +65,12 @@ namespace LibraryWinUI.Views.UserControls.Components
             {
                 if (sender is Image imageCtrl)
                 {
-                    //LibraryWebApi libApi = new();
-                    //BitmapImage bitmapImage = await libApi.GetJaquetteBitmap(UiViewModel.Id);
-                    //if (bitmapImage != null)
-                    //{
-                    //    ImageThumbnail.Source = bitmapImage;
-                    //}
+                    BookWebApi bookApi = new();
+                    BitmapImage bitmapImage = await bookApi.GetJaquetteBitmap(UiViewModel.Id);
+                    if (bitmapImage != null)
+                    {
+                        ImageThumbnail.Source = bitmapImage;
+                    }
                 }
             }
             catch (Exception ex)
@@ -90,13 +91,13 @@ namespace LibraryWinUI.Views.UserControls.Components
                     return;
                 }
 
-                //LibraryWebApi libApi = new();
-                //bool isSuccess = await libApi.UpdloadJaquette(UiViewModel.Id, file.Path);
-                //if (isSuccess)
-                //{
-                //    BitmapImage bitmapImage = await inputOutputHelpers.BitmapImageFromFileAsync(file);
-                //    ImageThumbnail.Source = bitmapImage;
-                //}
+                BookWebApi bookApi = new();
+                bool isSuccess = await bookApi.UpdloadJaquette(UiViewModel.Id, file.Path);
+                if (isSuccess)
+                {
+                    BitmapImage bitmapImage = await inputOutputHelpers.BitmapImageFromFileAsync(file);
+                    ImageThumbnail.Source = bitmapImage;
+                }
             }
             catch (Exception ex)
             {
